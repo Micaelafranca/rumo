@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Executivo — Plano de Ação | Auditoria OT</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --border: #e2e0d8;
+    --border-strong: #c8c5bb;
+    --text: #1a1916;
+    --text-2: #5a5850;
+    --text-3: #9a9890;
+    --done: #1a6b4a;
+    --done-bg: #e8f5ef;
+    --done-border: #b8dfc8;
+    --doing: #1a4a8a;
+    --doing-bg: #e8eef8;
+    --doing-border: #b8c8e8;
+    --backlog: #5a5850;
+    --backlog-bg: #f0efe8;
+    --backlog-border: #d8d5c8;
+    --todo: #8a5a1a;
+    --todo-bg: #faf0e0;
+    --todo-border: #e8d0a0;
+    --accent: #1a1916;
+    --font: 'DM Sans', sans-serif;
+    --mono: 'DM Mono', monospace;
+  }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* HEADER */
+  .page-header {
+    background: var(--text);
+    color: #fff;
+    padding: 40px 48px 36px;
+    position: relative;
+    overflow: hidden;
+  }
+  .page-header::before {
+    content: 'OT';
+    position: absolute;
+    right: 40px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 140px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.04);
+    letter-spacing: -4px;
+    line-height: 1;
+    pointer-events: none;
+  }
+  .header-tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: rgba(255,255,255,0.5);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .header-title {
+    font-size: 28px;
+    font-weight: 500;
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+  .header-sub {
+    font-size: 13px;
+    color: rgba(255,255,255,0.55);
+  }
+  .header-date {
+    margin-top: 20px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 0.06em;
+  }
+
+  /* NAV TABS */
+  .nav-bar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 48px;
+    display: flex;
+    gap: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .nav-tab {
+    padding: 14px 20px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-3);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s;
+    white-space: nowrap;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    font-family: var(--font);
+  }
+  .nav-tab:hover { color: var(--text-2); }
+  .nav-tab.active { color: var(--text); border-bottom-color: var(--text); }
+
+  /* CONTENT */
+  .content { padding: 36px 48px 60px; max-width: 1200px; }
+
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* KPI CARDS */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  .kpi {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 22px;
+  }
+  .kpi-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-bottom: 8px;
+  }
+  .kpi-val {
+    font-size: 36px;
+    font-weight: 300;
+    letter-spacing: -1px;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .kpi-sub { font-size: 12px; color: var(--text-3); }
+  .kpi-val.c-done { color: var(--done); }
+  .kpi-val.c-doing { color: var(--doing); }
+  .kpi-val.c-backlog { color: var(--backlog); }
+
+  /* SECTION TITLE */
+  .section-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-bottom: 12px;
+  }
+
+  /* CHART GRID */
+  .charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.6fr;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 22px 24px;
+  }
+  .chart-card-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-2);
+    margin-bottom: 16px;
+  }
+  .donut-wrap {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+  .donut-svg { flex-shrink: 0; }
+  .donut-legend { display: flex; flex-direction: column; gap: 10px; }
+  .legend-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+  }
+  .legend-dot {
+    width: 10px; height: 10px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+  .legend-label { color: var(--text-2); flex: 1; }
+  .legend-count { font-weight: 500; color: var(--text); font-family: var(--mono); font-size: 12px; }
+  .legend-pct { font-size: 11px; color: var(--text-3); min-width: 32px; }
+
+  /* PROGRESS TABLE */
+  .prog-table {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 32px;
+  }
+  .prog-table table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .prog-table thead th {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    font-weight: 400;
+  }
+  .prog-table tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+    cursor: pointer;
+  }
+  .prog-table tbody tr:last-child { border-bottom: none; }
+  .prog-table tbody tr:hover { background: #faf9f6; }
+  .prog-table td {
+    padding: 14px 16px;
+    font-size: 13px;
+    vertical-align: middle;
+  }
+  .achado-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-3);
+    margin-bottom: 2px;
+  }
+  .achado-name {
+    font-weight: 500;
+    color: var(--text);
+    font-size: 13px;
+  }
+  .stat-num {
+    font-family: var(--mono);
+    font-size: 13px;
+    text-align: center;
+    font-weight: 500;
+  }
+  .bar-wrap { display: flex; align-items: center; gap: 8px; }
+  .bar-track {
+    flex: 1;
+    height: 6px;
+    background: var(--bg);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .bar-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+  .bar-pct { font-family: var(--mono); font-size: 11px; color: var(--text-3); min-width: 34px; text-align: right; }
+
+  /* BADGE */
+  .badge {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+  }
+  .badge-done { background: var(--done-bg); color: var(--done); border: 1px solid var(--done-border); }
+  .badge-doing { background: var(--doing-bg); color: var(--doing); border: 1px solid var(--doing-border); }
+  .badge-backlog { background: var(--backlog-bg); color: var(--backlog); border: 1px solid var(--backlog-border); }
+  .badge-todo { background: var(--todo-bg); color: var(--todo); border: 1px solid var(--todo-border); }
+
+  /* ACHADO DETAIL VIEW */
+  .achado-filter-bar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+    align-items: center;
+  }
+  .filter-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-3);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-right: 4px;
+  }
+  .filter-btn {
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    font-size: 12px;
+    font-family: var(--font);
+    color: var(--text-2);
+    cursor: pointer;
+    transition: all 0.12s;
+  }
+  .filter-btn:hover { border-color: var(--border-strong); color: var(--text); }
+  .filter-btn.active { background: var(--text); color: #fff; border-color: var(--text); }
+
+  .achado-cards { display: flex; flex-direction: column; gap: 20px; }
+  .achado-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .achado-card-header {
+    padding: 18px 22px 16px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .achado-card-header:hover { background: #faf9f6; }
+  .ach-left { flex: 1; min-width: 0; }
+  .ach-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-bottom: 4px;
+  }
+  .ach-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.3;
+    margin-bottom: 6px;
+  }
+  .ach-desc {
+    font-size: 12px;
+    color: var(--text-3);
+    line-height: 1.5;
+  }
+  .ach-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .ach-stats { display: flex; gap: 12px; align-items: center; }
+  .ach-stat { text-align: center; }
+  .ach-stat-n { font-family: var(--mono); font-size: 18px; font-weight: 400; line-height: 1; }
+  .ach-stat-l { font-size: 10px; color: var(--text-3); margin-top: 2px; }
+  .ach-prog-wrap { display: flex; align-items: center; gap: 6px; }
+  .ach-prog-track { width: 80px; height: 4px; background: var(--bg); border-radius: 4px; overflow: hidden; }
+  .ach-prog-fill { height: 100%; border-radius: 4px; }
+  .ach-prog-pct { font-family: var(--mono); font-size: 11px; color: var(--text-3); }
+  .chevron { font-size: 16px; color: var(--text-3); transition: transform 0.2s; margin-top: 4px; }
+  .achado-card.open .chevron { transform: rotate(180deg); }
+
+  .achado-body {
+    display: none;
+    border-top: 1px solid var(--border);
+  }
+  .achado-card.open .achado-body { display: block; }
+
+  .action-table { width: 100%; border-collapse: collapse; }
+  .action-table thead th {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    padding: 10px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    font-weight: 400;
+  }
+  .action-table tbody tr { border-bottom: 1px solid var(--border); }
+  .action-table tbody tr:last-child { border-bottom: none; }
+  .action-table td {
+    padding: 11px 16px;
+    font-size: 12.5px;
+    vertical-align: middle;
+    color: var(--text);
+  }
+  .action-table td.dim { color: var(--text-3); font-size: 12px; }
+  .action-table td.mono { font-family: var(--mono); font-size: 11.5px; color: var(--text-2); }
+
+  /* FOOTER */
+  .page-footer {
+    text-align: center;
+    padding: 24px 48px;
+    font-size: 11px;
+    color: var(--text-3);
+    border-top: 1px solid var(--border);
+    font-family: var(--mono);
+    letter-spacing: 0.05em;
+  }
+
+  @media print {
+    .nav-bar { display: none; }
+    .view { display: block !important; }
+  }
+
+  @media (max-width: 768px) {
+    .page-header { padding: 28px 20px 24px; }
+    .content { padding: 24px 16px 40px; }
+    .nav-bar { padding: 0 16px; overflow-x: auto; }
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .charts-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="header-tag">Auditoria OT — Visão Executiva</div>
+  <div class="header-title">Plano de Ação — Segurança Cibernética OT</div>
+  <div class="header-sub">Monitoramento consolidado de achados e ações corretivas</div>
+  <div class="header-date">Atualizado em: Maio 2026 &nbsp;·&nbsp; 10 achados &nbsp;·&nbsp; 95 ações</div>
+</div>
+
+<div class="nav-bar">
+  <button class="nav-tab active" onclick="switchView('overview')">Visão Geral</button>
+  <button class="nav-tab" onclick="switchView('detail')">Detalhamento por Achado</button>
+</div>
+
+<div class="content">
+
+  <!-- VIEW: OVERVIEW -->
+  <div id="view-overview" class="view active">
+
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="kpi-label">Total de ações</div>
+        <div class="kpi-val">95</div>
+        <div class="kpi-sub">10 achados mapeados</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Concluídas</div>
+        <div class="kpi-val c-done">35</div>
+        <div class="kpi-sub">37% do total</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Em execução</div>
+        <div class="kpi-val c-doing">18</div>
+        <div class="kpi-sub">19% do total</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Backlog / A fazer</div>
+        <div class="kpi-val c-backlog">42</div>
+        <div class="kpi-sub">44% pendente</div>
+      </div>
+    </div>
+
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-card-title">Distribuição geral de status</div>
+        <div class="donut-wrap">
+          <svg class="donut-svg" width="130" height="130" viewBox="0 0 130 130" role="img" aria-label="Gráfico donut de status">
+            <circle cx="65" cy="65" r="50" fill="none" stroke="#f0efe8" stroke-width="18"/>
+            <!-- Done 37% = 314.16 * 0.37 = 116.2, offset start at 0 -->
+            <circle cx="65" cy="65" r="50" fill="none" stroke="#1a6b4a" stroke-width="18"
+              stroke-dasharray="116.2 197.9" stroke-dashoffset="0" transform="rotate(-90 65 65)"/>
+            <!-- Doing 19% = 59.7 -->
+            <circle cx="65" cy="65" r="50" fill="none" stroke="#1a4a8a" stroke-width="18"
+              stroke-dasharray="59.7 254.5" stroke-dashoffset="-116.2" transform="rotate(-90 65 65)"/>
+            <!-- Backlog 43% = 135.2 -->
+            <circle cx="65" cy="65" r="50" fill="none" stroke="#9a9890" stroke-width="18"
+              stroke-dasharray="134.2 179.8" stroke-dashoffset="-175.9" transform="rotate(-90 65 65)"/>
+            <!-- To Do 1% = 3.1 -->
+            <circle cx="65" cy="65" r="50" fill="none" stroke="#c8a050" stroke-width="18"
+              stroke-dasharray="3.1 311" stroke-dashoffset="-310.1" transform="rotate(-90 65 65)"/>
+            <text x="65" y="61" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="20" font-weight="300" fill="#1a1916">37%</text>
+            <text x="65" y="76" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#9a9890">concluído</text>
+          </svg>
+          <div class="donut-legend">
+            <div class="legend-row">
+              <div class="legend-dot" style="background:#1a6b4a"></div>
+              <span class="legend-label">Done</span>
+              <span class="legend-count">35</span>
+              <span class="legend-pct">37%</span>
+            </div>
+            <div class="legend-row">
+              <div class="legend-dot" style="background:#1a4a8a"></div>
+              <span class="legend-label">Doing</span>
+              <span class="legend-count">18</span>
+              <span class="legend-pct">19%</span>
+            </div>
+            <div class="legend-row">
+              <div class="legend-dot" style="background:#9a9890"></div>
+              <span class="legend-label">Backlog</span>
+              <span class="legend-count">41</span>
+              <span class="legend-pct">43%</span>
+            </div>
+            <div class="legend-row">
+              <div class="legend-dot" style="background:#c8a050"></div>
+              <span class="legend-label">To Do</span>
+              <span class="legend-count">1</span>
+              <span class="legend-pct">1%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-card-title">Progresso por achado</div>
+        <div id="bar-chart-container"></div>
+      </div>
+    </div>
+
+    <div class="section-label">Resumo por achado</div>
+    <div class="prog-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Achado</th>
+            <th style="text-align:center">Total</th>
+            <th style="text-align:center">Done</th>
+            <th style="text-align:center">Doing</th>
+            <th style="text-align:center">Backlog</th>
+            <th style="width:120px">Progresso</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="overview-tbody"></tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- VIEW: DETAIL -->
+  <div id="view-detail" class="view">
+
+    <div class="achado-filter-bar">
+      <span class="filter-label">Filtrar por status:</span>
+      <button class="filter-btn active" onclick="filterAchados('all', this)">Todos</button>
+      <button class="filter-btn" onclick="filterAchados('Done', this)">Done</button>
+      <button class="filter-btn" onclick="filterAchados('Doing', this)">Doing</button>
+      <button class="filter-btn" onclick="filterAchados('Backlog', this)">Backlog</button>
+    </div>
+
+    <div class="achado-cards" id="achado-cards"></div>
+
+  </div>
+
+</div>
+
+<div class="page-footer">Auditoria OT — Plano de Ação · Uso interno · Maio 2026</div>
+
+<script>
+const DATA = {
+  1: { nome: "Inventário e Governança de Ativos OT", desc: "Não foi evidenciado um inventário completo e atualizado dos ativos OT, nem políticas ou procedimentos para governança, ciclo de vida e hardening. O gerenciamento é fragmentado (Nozomi e ServiceNow sem integração), com ambientes legados sem cobertura e configurações realizadas manualmente, sem padronização ou rastreabilidade.", done: 6, doing: 3, backlog: 5, todo: 1, actions: [
+    { what: "1 – Plano Estratégico de Segurança OT (diretrizes claras)", who: "Silvio Hayashi", dataPrev: "26/12/2025", dataReal: "26/12/2025", status: "Done" },
+    { what: "2 – Guia Prático OT (orientações iniciais)", who: "Silvio Hayashi", dataPrev: "26/12/2025", dataReal: "26/12/2025", status: "Done" },
+    { what: "3 – Bridge Docs (Terminais e WaySide)", who: "Silvio Hayashi", dataPrev: "26/11/2025", dataReal: "26/11/2025", status: "Done" },
+    { what: "4 – Escopo conceitual de ativos críticos definido", who: "Patrícia Horta", dataPrev: "26/03/2026", dataReal: "", status: "To Do" },
+    { what: "5 – Procedimento formal de inventário OT", who: "Patrícia Horta", dataPrev: "02/07/2026", dataReal: "", status: "Doing" },
+    { what: "6 – Integração inventário OT ↔ CMDB (ServiceNow)", who: "Bruno Kobzinski", dataPrev: "02/07/2026", dataReal: "", status: "Done" },
+    { what: "7 – Definição clara de quem mantém o inventário vivo", who: "Antonio Neto", dataPrev: "02/07/2026", dataReal: "", status: "Doing" },
+    { what: "8 – Ciclo de vida (entrada, mudança, saída de ativos OT)", who: "Antonio Neto", dataPrev: "02/07/2026", dataReal: "", status: "Backlog" },
+    { what: "9 – Coleta estruturada de dados OT – Sara Regina", who: "Bruno Kobzinski", dataPrev: "", dataReal: "", status: "Done" },
+    { what: "10 – Coleta estruturada de dados OT – IT – Valesca", who: "Bruno Kobzinski", dataPrev: "", dataReal: "", status: "Backlog" },
+    { what: "11 – Coleta estruturada de dados OT – Jennifer", who: "Bruno Kobzinski", dataPrev: "", dataReal: "", status: "Backlog" },
+    { what: "12 – Consolidação e avaliação de suficiência dos dados", who: "Bruno Kobzinski", dataPrev: "", dataReal: "", status: "Backlog" },
+    { what: "13 – Execução do primeiro ciclo e definição da periodicidade", who: "Bruno Kobzinski", dataPrev: "", dataReal: "", status: "Backlog" },
+  ]},
+  2: { nome: "Documentação Formal da Arquitetura e Fluxos de Comunicação OT", desc: "Não foi evidenciada documentação formal da arquitetura da rede OT conforme o Modelo Purdue. Existem diagramas parciais, sem organização em camadas estruturadas, e a segmentação lógica e física, embora implementada, não está consolidada em um modelo arquitetural formal.", done: 4, doing: 11, backlog: 1, todo: 0, actions: [
+    { what: "1 – Bridge Doc Conectividade IT/OT", who: "Silvio Hayashi", dataPrev: "26/12/2025", dataReal: "26/12/2025", status: "Done" },
+    { what: "2 – Bridge Docs Terminais e WaySide", who: "Silvio Hayashi", dataPrev: "26/12/2025", dataReal: "26/12/2025", status: "Done" },
+    { what: "3 – Conceito Purdue bem descrito (Bridge Docs)", who: "Silvio Hayashi", dataPrev: "26/12/2025", dataReal: "26/12/2025", status: "Done" },
+    { what: "4 – Linguagem comum criada (Bridge Docs)", who: "Silvio Hayashi", dataPrev: "26/12/2025", dataReal: "26/12/2025", status: "Done" },
+    { what: "5 – Arquitetura OT corporativa consolidada (visão única)", who: "Arquitetura / Infra (Bruno / Dias)", dataPrev: "17/06/2026", dataReal: "", status: "Doing" },
+    { what: "6 – Padrão oficial de diagrama", who: "Arquitetura / Infra (Bruno / Dias)", dataPrev: "17/06/2026", dataReal: "", status: "Doing" },
+    { what: "7 – Registro oficial de fluxos críticos (quem fala com quem)", who: "Arquitetura / Infra", dataPrev: "17/06/2026", dataReal: "", status: "Backlog" },
+    { what: "8 – Classe A: Hardening pontual de segmentação", who: "Arquitetura / Infra (Dias)", dataPrev: "17/06/2026", dataReal: "", status: "Doing" },
+    { what: "9 – Classe A: Ajustes em controles para redução de superfície de ataque", who: "Arquitetura / Infra (Dias)", dataPrev: "17/06/2026", dataReal: "", status: "Doing" },
+    { what: "10 – Classe A: Ações executáveis sem impacto disruptivo", who: "Arquitetura / Infra (Dias)", dataPrev: "17/06/2026", dataReal: "", status: "Doing" },
+    { what: "11 – Classe B: Ações dependentes de planejamento conjunto Rumo e Claro", who: "Arquitetura / Infra (Dias)", dataPrev: "17/06/2026", dataReal: "", status: "Doing" },
+    { what: "12 – Classe B: Demandam priorização, recursos e coordenação técnica", who: "Arquitetura / Infra (Dias)", dataPrev: "17/06/2026", dataReal: "", status: "Doing" },
+    { what: "13 – Classe B: Cronograma condicionado à governança corporativa", who: "Arquitetura / Infra (Dias)", dataPrev: "17/06/2026", dataReal: "", status: "Doing" },
+    { what: "14 – Classe C: Microsegmentação para licenciamento (TMDS / PTC 2.0)", who: "Arquitetura / Infra (Dias)", dataPrev: "17/06/2026", dataReal: "", status: "Doing" },
+    { what: "15 – Classe C: PoCs técnicas (Guardicore / Illumio) em 2026", who: "Arquitetura / Infra (Dias)", dataPrev: "", dataReal: "", status: "Doing" },
+    { what: "16 – Classe C: Sem compromisso de produção antes de validação", who: "Arquitetura / Infra (Dias)", dataPrev: "17/06/2026", dataReal: "", status: "Doing" },
+  ]},
+  3: { nome: "Metodologia Formal para Análise de Riscos em Ambiente OT", desc: "Não foi evidenciada metodologia formal documentada para análise de impacto e probabilidade de ameaças que exploram vulnerabilidades em ambientes OT. Não existe processo consolidado que conecte descoberta de vulnerabilidades, inteligência de ameaças e classificação de risco.", done: 4, doing: 0, backlog: 5, todo: 0, actions: [
+    { what: "1 – Bridge Doc de Análise de Riscos OT", who: "Silvio Hayashi", dataPrev: "26/12/2025", dataReal: "26/12/2025", status: "Done" },
+    { what: "2 – Criação do Artefato Visual do Ciclo de Análise de Riscos OT", who: "Patrícia Horta", dataPrev: "27/02/2026", dataReal: "", status: "Backlog" },
+    { what: "3 – Comunicação e Alinhamento com áreas envolvidas", who: "Silvio Hayashi", dataPrev: "20/03/2026", dataReal: "", status: "Backlog" },
+    { what: "4 – Registro de Evidências de Aplicação na prática", who: "Silvio Hayashi", dataPrev: "20/03/2026", dataReal: "", status: "Backlog" },
+    { what: "5 – Ciclo documentado e blindado", who: "Silvio Hayashi", dataPrev: "26/12/2025", dataReal: "26/12/2025", status: "Done" },
+    { what: "6 – Anexo A – RACI definido", who: "Silvio Hayashi", dataPrev: "26/12/2025", dataReal: "26/12/2025", status: "Done" },
+    { what: "7 – Linguagem aceita por auditoria", who: "Silvio Hayashi", dataPrev: "26/12/2025", dataReal: "26/12/2025", status: "Done" },
+    { what: "8 – Governança e Ciclo de Revisão", who: "Antonio / Micaela", dataPrev: "", dataReal: "", status: "Backlog" },
+    { what: "9 – Criar 1 registro simples de caso aplicado", who: "—", dataPrev: "", dataReal: "", status: "Backlog" },
+  ]},
+  4: { nome: "Plano de Continuidade e Análise de Impacto no Negócio (BIA) para OT", desc: "Não foi evidenciada a existência de uma Análise de Impactos no Negócio (BIA) voltada para ambientes OT, nem planos específicos de continuidade e recuperação. O BIA atual contempla apenas sistemas críticos sem incluir toda a cadeia operacional.", done: 3, doing: 1, backlog: 10, todo: 0, actions: [
+    { what: "1 – Tema reconhecido no Plano Estratégico", who: "Silvio Hayashi", dataPrev: "26/12/2025", dataReal: "26/12/2025", status: "Done" },
+    { what: "2 – Diretriz explícita formalizada", who: "Silvio Hayashi", dataPrev: "26/12/2025", dataReal: "26/12/2025", status: "Done" },
+    { what: "3 – BIA específico para OT", who: "Continuidade / Resiliência / Riscos", dataPrev: "", dataReal: "", status: "Backlog" },
+    { what: "4 – Visão de cadeia operacional completa", who: "Continuidade / Resiliência / Riscos", dataPrev: "", dataReal: "", status: "Backlog" },
+    { what: "5 – Integração com continuidade corporativa", who: "Continuidade / Resiliência / Riscos", dataPrev: "", dataReal: "", status: "Backlog" },
+    { what: "6 – BridgeDoc – Continuidade e Resiliência em Ambientes OT", who: "Silvio Hayashi", dataPrev: "26/12/2025", dataReal: "26/12/2025", status: "Done" },
+    { what: "7 – Procedimento Incidentes IT", who: "Antonio Neto / Patricia Horta", dataPrev: "02/07/2026", dataReal: "", status: "Doing" },
+    { what: "8 – Formalizar abordagem de BIA OT mínimo viável", who: "Antonio / Micaela", dataPrev: "28/02/2026", dataReal: "", status: "Backlog" },
+    { what: "9 – Consolidar evidências de continuidade operacional do CCO", who: "Patrícia Horta", dataPrev: "", dataReal: "", status: "Backlog" },
+    { what: "10 – Converter evidências do CCO em insumos de BIA", who: "Micaela / Patricia", dataPrev: "", dataReal: "", status: "Backlog" },
+    { what: "11 – Mapear situações de continuidade nos Terminais", who: "Patrícia Horta", dataPrev: "", dataReal: "", status: "Backlog" },
+    { what: "12 – Registrar status de contingência (Wayside, Embarcado, Licenciamento)", who: "Bruno / Micaela", dataPrev: "", dataReal: "", status: "Backlog" },
+    { what: "13 – Reavaliar iniciativas denominadas DRP", who: "Patrícia Horta", dataPrev: "", dataReal: "", status: "Backlog" },
+    { what: "14 – Integrar BIA OT com iniciativas já existentes", who: "Antonio / Micaela", dataPrev: "", dataReal: "", status: "Backlog" },
+  ]},
+  5: { nome: "Plano Estratégico para Segurança Cibernética em OT", desc: "Não foi evidenciado plano estratégico específico para segurança cibernética em ambientes OT. As ações atuais são pontuais e reativas, sem alinhamento a objetivos, metas ou cronograma de longo prazo.", done: 2, doing: 0, backlog: 3, todo: 0, actions: [
+    { what: "1 – Plano Estratégico OT v1.0 publicado", who: "Silvio Hayashi", dataPrev: "26/12/2025", dataReal: "26/12/2025", status: "Done" },
+    { what: "2 – Linguagem alinhada à governança COSAN", who: "Silvio Hayashi", dataPrev: "26/12/2025", dataReal: "26/12/2025", status: "Done" },
+    { what: "3 – Formalização do Plano Estratégico de Segurança Cibernética em OT", who: "Silvio Hayashi", dataPrev: "31/01/2026", dataReal: "", status: "Backlog" },
+    { what: "4 – Consolidação dos Bridge Documents como desdobramento do Plano", who: "—", dataPrev: "31/01/2026", dataReal: "", status: "Backlog" },
+    { what: "5 – Validação do Bowtie do risco de Segmentação IT/OT pelas áreas pares", who: "—", dataPrev: "30/03/2026", dataReal: "", status: "Backlog" },
+  ]},
+  6: { nome: "Governança Regulatória para Ambientes OT", desc: "Não foi evidenciado processo formal para identificar, documentar e monitorar requisitos regulatórios aplicáveis aos ambientes OT. A gestão regulatória ocorre de forma fragmentada, sem integração com áreas técnicas.", done: 2, doing: 0, backlog: 6, todo: 0, actions: [
+    { what: "1 – Referência no Plano Estratégico", who: "Silvio Hayashi", dataPrev: "26/12/2025", dataReal: "26/12/2025", status: "Done" },
+    { what: "2 – Conexão com Política Corporativa de Riscos", who: "Silvio Hayashi", dataPrev: "26/12/2025", dataReal: "26/12/2025", status: "Done" },
+    { what: "3 – Entender expectativa exata da KPMG", who: "—", dataPrev: "", dataReal: "", status: "Backlog" },
+    { what: "4 – Traduzir regulatório OT para realidade Rumo", who: "—", dataPrev: "", dataReal: "", status: "Backlog" },
+    { what: "5 – Formalizar uso do Processo de Gestão de Riscos Corporativos (R7) para OT", who: "—", dataPrev: "30/04/2026", dataReal: "", status: "Backlog" },
+    { what: "6 – Consolidar referência regulatória aplicável como insumo ao processo de riscos", who: "—", dataPrev: "31/05/2026", dataReal: "", status: "Backlog" },
+    { what: "7 – Evidenciar priorização de riscos OT com base em apetite ao risco aprovado", who: "—", dataPrev: "30/06/2026", dataReal: "", status: "Backlog" },
+    { what: "8 – Utilizar Bridge Docs e Bowties como evidência de alinhamento regulatório", who: "—", dataPrev: "31/07/2026", dataReal: "", status: "Backlog" },
+  ]},
+  7: { nome: "Catálogo Formal de Serviços de Tecnologia Operacional (OT)", desc: "Não foi evidenciada documentação formal que represente um catálogo de serviços específico para OT. As solicitações são tratadas por filas centralizadas sem segregação por tema ou especialidade técnica.", done: 3, doing: 2, backlog: 1, todo: 0, actions: [
+    { what: "1 – Diretrizes no Guia Prático", who: "Silvio Hayashi", dataPrev: "26/12/2025", dataReal: "26/12/2025", status: "Done" },
+    { what: "2 – Endereçamento no Plano Estratégico", who: "Silvio Hayashi", dataPrev: "26/12/2025", dataReal: "26/12/2025", status: "Done" },
+    { what: "3 – Conexão com Análise de Riscos", who: "Silvio Hayashi", dataPrev: "26/12/2025", dataReal: "26/12/2025", status: "Done" },
+    { what: "4 – Execução gradual", who: "—", dataPrev: "", dataReal: "", status: "Backlog" },
+    { what: "5 – Integração Nozomi ↔ Vulnerabilidades", who: "—", dataPrev: "", dataReal: "", status: "Doing" },
+    { what: "6 – Procedimento formal", who: "Patrícia Horta", dataPrev: "", dataReal: "", status: "Doing" },
+  ]},
+  8: { nome: "Governança Estruturada e Processo Formal de Melhoria Contínua em OT", desc: "Não foi evidenciada estrutura formal para definição de papéis, responsabilidades e interfaces relacionadas à segurança cibernética em ambientes OT. Revisões são pontuais e reativas, sem metodologias estruturadas ou indicadores.", done: 3, doing: 0, backlog: 2, todo: 0, actions: [
+    { what: "1 – Diretrizes no Guia Prático", who: "Silvio Hayashi", dataPrev: "26/12/2025", dataReal: "26/12/2025", status: "Done" },
+    { what: "2 – Endereçamento no Plano Estratégico", who: "Silvio Hayashi", dataPrev: "26/12/2025", dataReal: "26/12/2025", status: "Done" },
+    { what: "3 – Conexão com Análise de Riscos", who: "Silvio Hayashi", dataPrev: "26/12/2025", dataReal: "26/12/2025", status: "Done" },
+    { what: "4 – Execução gradual", who: "—", dataPrev: "", dataReal: "", status: "Backlog" },
+    { what: "5 – Integração Nozomi ↔ Vulnerabilidades", who: "—", dataPrev: "", dataReal: "", status: "Backlog" },
+  ]},
+  9: { nome: "Programa Estruturado de Conscientização e Treinamento em Cyber OT", desc: "Não foi evidenciado programa formal de conscientização e treinamento voltado especificamente para ambientes OT. Existem apenas treinamentos gerais de RH (onboarding, phishing, DLP) sem abordagem específica para riscos OT.", done: 5, doing: 1, backlog: 6, todo: 0, actions: [
+    { what: "1 – Diretrizes no Guia Prático", who: "Silvio Hayashi", dataPrev: "26/12/2025", dataReal: "26/12/2025", status: "Done" },
+    { what: "2 – Endereçamento no Plano Estratégico", who: "Silvio Hayashi", dataPrev: "26/12/2025", dataReal: "26/12/2025", status: "Done" },
+    { what: "3 – Conexão com Análise de Riscos", who: "Silvio Hayashi", dataPrev: "26/12/2025", dataReal: "26/12/2025", status: "Done" },
+    { what: "4 – Execução gradual", who: "—", dataPrev: "", dataReal: "", status: "Backlog" },
+    { what: "5 – Integração Nozomi ↔ Vulnerabilidades", who: "—", dataPrev: "", dataReal: "", status: "Backlog" },
+    { what: "6 – Governança e Direcionamento Estratégico", who: "—", dataPrev: "", dataReal: "", status: "Done" },
+    { what: "7 – Mapeamento de Público e Necessidades", who: "—", dataPrev: "", dataReal: "", status: "Done" },
+    { what: "8 – Estruturação do Programa (Conscientização)", who: "—", dataPrev: "", dataReal: "", status: "Doing" },
+    { what: "9 – Estruturação do Programa (Capacitação Técnica)", who: "—", dataPrev: "", dataReal: "", status: "Backlog" },
+    { what: "10 – Exercícios Simulados e Preparação", who: "—", dataPrev: "", dataReal: "", status: "Backlog" },
+    { what: "11 – Padronização e Integração", who: "—", dataPrev: "", dataReal: "", status: "Backlog" },
+    { what: "12 – Monitoramento e Melhoria Contínua", who: "—", dataPrev: "", dataReal: "", status: "Backlog" },
+  ]},
+  10: { nome: "Fluxo Formal Integrado entre Nozomi e Gestão de Vulnerabilidades", desc: "Não foi evidenciado fluxo formal que integre a plataforma Nozomi à gestão de vulnerabilidades corporativa. Não há integração completa com o CMDB (ServiceNow), limitando a consolidação do inventário e a correlação automática entre vulnerabilidades e ativos.", done: 3, doing: 0, backlog: 2, todo: 0, actions: [
+    { what: "1 – Diretrizes no Guia Prático", who: "Silvio Hayashi", dataPrev: "26/12/2025", dataReal: "26/12/2025", status: "Done" },
+    { what: "2 – Endereçamento no Plano Estratégico", who: "Silvio Hayashi", dataPrev: "26/12/2025", dataReal: "26/12/2025", status: "Done" },
+    { what: "3 – Conexão com Análise de Riscos", who: "Silvio Hayashi", dataPrev: "26/12/2025", dataReal: "26/12/2025", status: "Done" },
+    { what: "4 – Execução gradual", who: "—", dataPrev: "", dataReal: "", status: "Backlog" },
+    { what: "5 – Integração Nozomi ↔ Vulnerabilidades", who: "—", dataPrev: "", dataReal: "", status: "Backlog" },
+  ]},
+};
+
+function statusBadge(s) {
+  if (s === 'Done') return '<span class="badge badge-done">Done</span>';
+  if (s === 'Doing') return '<span class="badge badge-doing">Doing</span>';
+  if (s === 'To Do') return '<span class="badge badge-todo">To Do</span>';
+  return '<span class="badge badge-backlog">Backlog</span>';
+}
+
+function progColor(pct) {
+  if (pct >= 60) return '#1a6b4a';
+  if (pct >= 30) return '#1a4a8a';
+  return '#9a9890';
+}
+
+function overallStatus(pct) {
+  if (pct >= 60) return '<span class="badge badge-done">No prazo</span>';
+  if (pct >= 30) return '<span class="badge badge-doing">Em andamento</span>';
+  if (pct > 0) return '<span class="badge badge-backlog">Atenção</span>';
+  return '<span class="badge badge-todo">Não iniciado</span>';
+}
+
+// BUILD OVERVIEW TABLE
+const tbody = document.getElementById('overview-tbody');
+Object.entries(DATA).forEach(([id, d]) => {
+  const total = d.done + d.doing + d.backlog + d.todo;
+  const pct = total > 0 ? Math.round((d.done / total) * 100) : 0;
+  const color = progColor(pct);
+  tbody.innerHTML += `<tr onclick="goDetail(${id})">
+    <td>
+      <div class="achado-num">Achado ${id}</div>
+      <div class="achado-name">${d.nome}</div>
+    </td>
+    <td><span class="stat-num" style="color:var(--text-2)">${total}</span></td>
+    <td><span class="stat-num" style="color:var(--done)">${d.done}</span></td>
+    <td><span class="stat-num" style="color:var(--doing)">${d.doing}</span></td>
+    <td><span class="stat-num" style="color:var(--backlog)">${d.backlog}</span></td>
+    <td>
+      <div class="bar-wrap">
+        <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${color}"></div></div>
+        <span class="bar-pct">${pct}%</span>
+      </div>
+    </td>
+    <td>${overallStatus(pct)}</td>
+  </tr>`;
+});
+
+// BUILD BAR CHART
+const barContainer = document.getElementById('bar-chart-container');
+const barData = Object.entries(DATA).map(([id, d]) => ({ id: parseInt(id), d }));
+const maxTotal = Math.max(...barData.map(({ d }) => d.done + d.doing + d.backlog + d.todo));
+
+barContainer.innerHTML = barData.map(({ id, d }) => {
+  const total = d.done + d.doing + d.backlog + d.todo;
+  const doneW = (d.done / maxTotal) * 100;
+  const doingW = (d.doing / maxTotal) * 100;
+  const backlogW = (d.backlog / maxTotal) * 100;
+  return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+    <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);width:22px;flex-shrink:0;text-align:right">A${id}</div>
+    <div style="flex:1;height:14px;display:flex;border-radius:3px;overflow:hidden;background:var(--bg);">
+      <div style="width:${doneW}%;background:#1a6b4a;" title="Done: ${d.done}"></div>
+      <div style="width:${doingW}%;background:#1a4a8a;" title="Doing: ${d.doing}"></div>
+      <div style="width:${backlogW}%;background:#d8d5c8;" title="Backlog: ${d.backlog}"></div>
+    </div>
+    <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);min-width:20px;">${total}</div>
+  </div>`;
+}).join('');
+
+// BUILD DETAIL CARDS
+const cardsContainer = document.getElementById('achado-cards');
+Object.entries(DATA).forEach(([id, d]) => {
+  const total = d.done + d.doing + d.backlog + d.todo;
+  const pct = total > 0 ? Math.round((d.done / total) * 100) : 0;
+  const color = progColor(pct);
+  const actionsHtml = d.actions.map(a => `
+    <tr data-status="${a.status}">
+      <td>${a.what}</td>
+      <td class="dim">${a.who || '—'}</td>
+      <td class="mono">${a.dataPrev || '—'}</td>
+      <td class="mono">${a.dataReal || '—'}</td>
+      <td>${statusBadge(a.status)}</td>
+    </tr>`).join('');
+
+  cardsContainer.innerHTML += `
+  <div class="achado-card" id="card-${id}" data-done="${d.done}" data-doing="${d.doing}" data-backlog="${d.backlog}">
+    <div class="achado-card-header" onclick="toggleCard(${id})">
+      <div class="ach-left">
+        <div class="ach-tag">Achado ${id} de 10</div>
+        <div class="ach-title">${d.nome}</div>
+        <div class="ach-desc">${d.desc}</div>
+      </div>
+      <div class="ach-right">
+        <div class="ach-stats">
+          <div class="ach-stat"><div class="ach-stat-n" style="color:var(--done)">${d.done}</div><div class="ach-stat-l">Done</div></div>
+          <div class="ach-stat"><div class="ach-stat-n" style="color:var(--doing)">${d.doing}</div><div class="ach-stat-l">Doing</div></div>
+          <div class="ach-stat"><div class="ach-stat-n" style="color:var(--backlog)">${d.backlog}</div><div class="ach-stat-l">Backlog</div></div>
+        </div>
+        <div class="ach-prog-wrap">
+          <div class="ach-prog-track"><div class="ach-prog-fill" style="width:${pct}%;background:${color}"></div></div>
+          <span class="ach-prog-pct">${pct}%</span>
+        </div>
+        <span class="chevron">&#8964;</span>
+      </div>
+    </div>
+    <div class="achado-body">
+      <table class="action-table">
+        <thead>
+          <tr>
+            <th style="width:40%">Ação</th>
+            <th style="width:18%">Responsável</th>
+            <th style="width:12%">Prazo previsto</th>
+            <th style="width:12%">Data realizada</th>
+            <th style="width:10%">Status</th>
+          </tr>
+        </thead>
+        <tbody>${actionsHtml}</tbody>
+      </table>
+    </div>
+  </div>`;
+});
+
+function toggleCard(id) {
+  const card = document.getElementById('card-' + id);
+  card.classList.toggle('open');
+}
+
+function switchView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function goDetail(id) {
+  switchView('detail');
+  document.querySelectorAll('.nav-tab')[1].classList.add('active');
+  document.querySelectorAll('.nav-tab')[0].classList.remove('active');
+  setTimeout(() => {
+    const card = document.getElementById('card-' + id);
+    if (!card.classList.contains('open')) card.classList.add('open');
+    card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 50);
+}
+
+function filterAchados(status, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.achado-card').forEach(card => {
+    if (status === 'all') { card.style.display = ''; return; }
+    const rows = card.querySelectorAll('tr[data-status]');
+    const hasStatus = Array.from(rows).some(r => r.dataset.status === status);
+    card.style.display = hasStatus ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>
