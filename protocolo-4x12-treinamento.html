@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Protocolo 4×12 — War Room Training</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0e1a;
+  --surface: #111827;
+  --surface2: #1a2236;
+  --border: rgba(255,255,255,0.08);
+  --border2: rgba(255,255,255,0.15);
+  --blue: #3b82f6;
+  --blue-dim: rgba(59,130,246,0.15);
+  --blue-glow: rgba(59,130,246,0.3);
+  --green: #22c55e;
+  --green-dim: rgba(34,197,94,0.12);
+  --red: #ef4444;
+  --red-dim: rgba(239,68,68,0.12);
+  --amber: #f59e0b;
+  --amber-dim: rgba(245,158,11,0.12);
+  --text: #f1f5f9;
+  --muted: #64748b;
+  --muted2: #94a3b8;
+  --mono: 'JetBrains Mono', monospace;
+  --display: 'Syne', sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;min-height:100vh;background:var(--bg);color:var(--text);font-family:var(--display);overflow-x:hidden}
+
+/* Background grid */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(59,130,246,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,0.04) 1px,transparent 1px);
+  background-size:40px 40px;pointer-events:none;z-index:0
+}
+
+.app{position:relative;z-index:1;max-width:740px;margin:0 auto;padding:24px 20px}
+
+/* SCREENS */
+.screen{display:none}
+.screen.active{display:block}
+
+/* HEADER */
+.header{display:flex;align-items:center;gap:16px;margin-bottom:40px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.logo-mark{width:44px;height:44px;background:var(--blue);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-mark svg{width:22px;height:22px;fill:white}
+.logo-text{font-size:13px;font-family:var(--mono);color:var(--muted);letter-spacing:0.1em;text-transform:uppercase}
+.logo-title{font-size:18px;font-weight:800;letter-spacing:-0.02em}
+.header-score{margin-left:auto;text-align:right}
+.header-score-val{font-size:22px;font-weight:800;color:var(--blue);font-family:var(--mono)}
+.header-score-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px}
+.card-elevated{background:var(--surface2);border-color:var(--border2)}
+
+/* BUTTONS */
+.btn{font-family:var(--display);font-size:14px;font-weight:700;padding:10px 20px;border-radius:8px;cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--text);transition:all 0.15s;letter-spacing:-0.01em}
+.btn:hover{background:var(--surface2);border-color:var(--blue)}
+.btn-primary{background:var(--blue);border-color:var(--blue);color:white}
+.btn-primary:hover{background:#2563eb;border-color:#2563eb}
+.btn-sm{padding:7px 14px;font-size:13px}
+.btn-full{width:100%;justify-content:center;display:flex;align-items:center;gap:8px}
+.btn-success{background:var(--green);border-color:var(--green);color:#052e16}
+.btn-success:hover{background:#16a34a}
+.btn-danger{background:var(--red);border-color:var(--red);color:white}
+
+/* TAGS / BADGES */
+.badge{font-family:var(--mono);font-size:10px;font-weight:500;padding:3px 8px;border-radius:4px;letter-spacing:0.06em;text-transform:uppercase;display:inline-block}
+.badge-blue{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(59,130,246,0.3)}
+.badge-green{background:var(--green-dim);color:var(--green);border:1px solid rgba(34,197,94,0.3)}
+.badge-red{background:var(--red-dim);color:var(--red);border:1px solid rgba(239,68,68,0.3)}
+.badge-amber{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(245,158,11,0.3)}
+
+/* PROGRESS */
+.progress-track{height:4px;background:var(--surface2);border-radius:2px;overflow:hidden;margin-bottom:2px}
+.progress-fill{height:100%;background:var(--blue);border-radius:2px;transition:width 0.4s cubic-bezier(0.4,0,0.2,1)}
+
+/* HOME */
+.home-hero{text-align:center;padding:48px 0 40px}
+.home-hero h1{font-size:clamp(32px,6vw,52px);font-weight:800;letter-spacing:-0.03em;line-height:1.05;margin-bottom:12px}
+.home-hero h1 span{color:var(--blue)}
+.home-hero p{color:var(--muted2);font-size:15px;max-width:420px;margin:0 auto 36px;line-height:1.6;font-family:inherit}
+
+.modules-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:28px}
+.module-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;cursor:pointer;text-align:left;transition:all 0.2s;position:relative;overflow:hidden}
+.module-card::before{content:'';position:absolute;inset:0;background:var(--blue-dim);opacity:0;transition:opacity 0.2s}
+.module-card:hover{border-color:var(--blue);transform:translateY(-2px)}
+.module-card:hover::before{opacity:1}
+.module-card .mc-icon{font-size:28px;margin-bottom:12px;position:relative;z-index:1}
+.module-card .mc-title{font-size:15px;font-weight:700;margin-bottom:4px;position:relative;z-index:1}
+.module-card .mc-desc{font-size:12px;color:var(--muted);line-height:1.4;position:relative;z-index:1;font-family:var(--mono)}
+.module-card .mc-pts{position:absolute;top:14px;right:14px;font-family:var(--mono);font-size:11px;color:var(--amber);z-index:1}
+
+.stats-row{display:flex;gap:12px}
+.stat-box{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center}
+.stat-val{font-size:28px;font-weight:800;color:var(--blue);font-family:var(--mono);line-height:1}
+.stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-top:4px}
+
+/* QUIZ */
+.quiz-header{display:flex;align-items:center;gap:16px;margin-bottom:24px}
+.timer-ring{width:52px;height:52px;flex-shrink:0;position:relative}
+.timer-ring svg{transform:rotate(-90deg)}
+.timer-ring .timer-bg{fill:none;stroke:var(--surface2);stroke-width:4}
+.timer-ring .timer-fill{fill:none;stroke:var(--blue);stroke-width:4;stroke-linecap:round;transition:stroke-dashoffset 1s linear,stroke 0.3s}
+.timer-number{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:15px;font-weight:500}
+
+.q-category{font-family:var(--mono);font-size:11px;color:var(--blue);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px}
+.q-text{font-size:17px;font-weight:700;line-height:1.4;letter-spacing:-0.01em;margin-bottom:20px}
+.q-options{display:grid;gap:8px}
+.q-opt{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:13px 16px;cursor:pointer;font-family:var(--display);font-size:14px;font-weight:500;color:var(--text);text-align:left;transition:all 0.15s;width:100%;display:flex;align-items:center;gap:10px}
+.q-opt:hover{border-color:var(--blue);background:var(--blue-dim)}
+.q-opt.correct{border-color:var(--green);background:var(--green-dim);color:var(--green)}
+.q-opt.wrong{border-color:var(--red);background:var(--red-dim);color:var(--red)}
+.q-opt.disabled{pointer-events:none}
+.opt-letter{width:24px;height:24px;border-radius:6px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:700;flex-shrink:0;color:var(--muted)}
+.q-opt.correct .opt-letter{background:var(--green);color:#052e16}
+.q-opt.wrong .opt-letter{background:var(--red);color:white}
+
+.feedback-box{border-radius:10px;padding:14px 16px;font-size:14px;line-height:1.5;margin-top:12px}
+.feedback-correct{background:var(--green-dim);border:1px solid rgba(34,197,94,0.3);color:#86efac}
+.feedback-wrong{background:var(--red-dim);border:1px solid rgba(239,68,68,0.3);color:#fca5a5}
+
+/* MATCH */
+.match-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.match-pool{display:flex;flex-direction:column;gap:8px}
+.drag-item{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 13px;cursor:grab;font-size:13px;font-weight:500;user-select:none;transition:all 0.2s;line-height:1.3}
+.drag-item:hover{border-color:var(--blue);background:var(--blue-dim)}
+.drag-item.dragging{opacity:0.3;transform:scale(0.97)}
+.drag-item.placed-ok{border-color:var(--green);background:var(--green-dim);color:var(--green);cursor:default}
+.drag-item.placed-bad{border-color:var(--red);background:var(--red-dim);color:var(--red)}
+
+.drop-zones{display:flex;flex-direction:column;gap:8px}
+.drop-row{display:flex;flex-direction:column;gap:4px}
+.drop-label{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em}
+.drop-zone{border:1.5px dashed var(--border2);border-radius:8px;padding:9px 12px;min-height:42px;font-size:13px;transition:all 0.2s;color:var(--muted)}
+.drop-zone.over{border-color:var(--blue);background:var(--blue-dim);color:var(--text)}
+.drop-zone.filled{border-style:solid;border-color:var(--border2);color:var(--text);padding:0}
+
+/* SCENARIO */
+.scenario-alert{background:var(--surface2);border:1px solid var(--border2);border-left:3px solid var(--amber);border-radius:0 10px 10px 0;padding:16px 18px;margin-bottom:20px}
+.scenario-time{font-family:var(--mono);font-size:11px;color:var(--amber);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px}
+.scenario-desc{font-size:14px;line-height:1.6;color:var(--muted2)}
+.artifact-count{display:flex;align-items:center;gap:8px;margin-top:12px}
+.art-dot{width:28px;height:28px;border-radius:6px;border:2px solid;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:700}
+
+.sc-opts{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.sc-opt{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:13px 16px;cursor:pointer;font-size:14px;font-weight:500;text-align:left;color:var(--text);transition:all 0.15s;font-family:var(--display)}
+.sc-opt:hover{border-color:var(--blue);background:var(--blue-dim)}
+.sc-opt.correct{border-color:var(--green);background:var(--green-dim);color:var(--green)}
+.sc-opt.wrong{border-color:var(--red);background:var(--red-dim);color:var(--red)}
+.sc-opt.disabled{pointer-events:none}
+
+/* SPEED */
+.speed-timer-big{font-family:var(--mono);font-size:64px;font-weight:800;color:var(--blue);line-height:1;text-align:center;margin-bottom:4px;transition:color 0.3s}
+.speed-timer-big.urgent{color:var(--red)}
+.speed-desc{font-size:17px;font-weight:700;line-height:1.4;text-align:center;padding:24px;letter-spacing:-0.01em}
+.speed-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.speed-opt{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;font-family:var(--mono);font-size:12px;font-weight:500;color:var(--text);text-align:center;transition:all 0.15s}
+.speed-opt:hover{border-color:var(--blue);background:var(--blue-dim)}
+.speed-opt.correct{border-color:var(--green);background:var(--green-dim);color:var(--green)}
+.speed-opt.wrong{border-color:var(--red);background:var(--red-dim);color:var(--red)}
+.speed-opt.disabled{pointer-events:none}
+
+/* RESULTS */
+.result-hero{text-align:center;padding:40px 0}
+.result-emoji{font-size:72px;margin-bottom:16px;display:block}
+.result-pts{font-size:64px;font-weight:800;color:var(--blue);font-family:var(--mono);line-height:1}
+.result-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:24px 0}
+
+/* ANIMATIONS */
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.fade-in{animation:fadeIn 0.3s ease forwards}
+.shake{animation:shake 0.4s ease}
+.pulse{animation:pulse 0.3s ease}
+
+/* Divider */
+.divider{height:1px;background:var(--border);margin:20px 0}
+
+/* Section title */
+.section-title{font-family:var(--mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:14px}
+
+@media(max-width:520px){
+  .modules-grid{grid-template-columns:1fr}
+  .match-grid{grid-template-columns:1fr}
+  .speed-opts{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="logo-mark">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.25C17.25 22.15 21 17.25 21 12V7L12 2zm-1 13.41L7.59 12 9 10.59 11 12.59l5-5L17.41 9 11 15.41z"/></svg>
+    </div>
+    <div>
+      <div class="logo-text">Rumo · Segurança da Informação</div>
+      <div class="logo-title">Protocolo 4×12</div>
+    </div>
+    <div class="header-score">
+      <div class="header-score-val" id="hdr-score">0</div>
+      <div class="header-score-label">pontos</div>
+    </div>
+  </header>
+
+  <!-- ═══════════════ HOME ═══════════════ -->
+  <div id="home" class="screen active">
+    <div class="home-hero fade-in">
+      <h1>War Room<br><span>Training</span></h1>
+      <p>4 módulos para dominar a resposta a ransomware. Aprenda os 12 artefatos e comprove que sabe agir antes do caos.</p>
+    </div>
+
+    <div class="modules-grid">
+      <button class="module-card" onclick="startModule('quiz')">
+        <div class="mc-icon">⚡</div>
+        <div class="mc-title">Quiz relâmpago</div>
+        <div class="mc-desc">10 perguntas · 15s cada</div>
+        <div class="mc-pts">até 1.000 pts</div>
+      </button>
+      <button class="module-card" onclick="startModule('match')">
+        <div class="mc-icon">🧩</div>
+        <div class="mc-title">Associar artefatos</div>
+        <div class="mc-desc">Arraste para a fase certa</div>
+        <div class="mc-pts">até 300 pts</div>
+      </button>
+      <button class="module-card" onclick="startModule('scenario')">
+        <div class="mc-icon">🚨</div>
+        <div class="mc-title">Simulação de crise</div>
+        <div class="mc-desc">3 cenários · decida agora</div>
+        <div class="mc-pts">até 450 pts</div>
+      </button>
+      <button class="module-card" onclick="startModule('speed')">
+        <div class="mc-icon">🏎️</div>
+        <div class="mc-title">Speed round</div>
+        <div class="mc-desc">Identifique em 5 segundos</div>
+        <div class="mc-pts">até 960 pts</div>
+      </button>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-val" id="home-total">0</div>
+        <div class="stat-label">pontos totais</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val" id="home-modules">0/4</div>
+        <div class="stat-label">módulos completos</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val" id="home-acc">—</div>
+        <div class="stat-label">acertos quiz</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <p style="font-size:12px;color:var(--muted);text-align:center;font-family:var(--mono)">A cada minuto sem contenção, aumenta a superfície de ataque.</p>
+  </div>
+
+  <!-- ═══════════════ QUIZ ═══════════════ -->
+  <div id="quiz" class="screen">
+    <div class="quiz-header">
+      <button class="btn btn-sm" onclick="goHome()">← Menu</button>
+      <div style="flex:1">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+          <span id="qz-prog" style="font-family:var(--mono);font-size:12px;color:var(--muted)">1 / 10</span>
+          <span id="qz-pts" style="font-family:var(--mono);font-size:12px;color:var(--blue)">0 pts</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" id="qz-bar" style="width:10%"></div></div>
+      </div>
+      <div class="timer-ring">
+        <svg width="52" height="52" viewBox="0 0 52 52">
+          <circle class="timer-bg" cx="26" cy="26" r="22"/>
+          <circle class="timer-fill" id="qz-ring" cx="26" cy="26" r="22" stroke-dasharray="138.2" stroke-dashoffset="0"/>
+        </svg>
+        <div class="timer-number" id="qz-time">15</div>
+      </div>
+    </div>
+
+    <div class="card fade-in" id="qz-card" style="margin-bottom:12px">
+      <div class="q-category" id="qz-cat"></div>
+      <div class="q-text" id="qz-text"></div>
+      <div class="q-options" id="qz-opts"></div>
+    </div>
+
+    <div id="qz-feedback" style="display:none" class="feedback-box"></div>
+    <button class="btn btn-primary btn-full" id="qz-next" style="display:none;margin-top:12px" onclick="nextQ()">Próxima pergunta →</button>
+  </div>
+
+  <!-- ═══════════════ MATCH ═══════════════ -->
+  <div id="match" class="screen">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+      <button class="btn btn-sm" onclick="goHome()">← Menu</button>
+      <div>
+        <div style="font-size:16px;font-weight:700">Associar artefatos às fases</div>
+        <div style="font-family:var(--mono);font-size:12px;color:var(--muted)">Arraste · solte · verifique</div>
+      </div>
+    </div>
+    <div class="match-grid" id="match-content"></div>
+    <div style="margin-top:14px;display:flex;gap:8px">
+      <button class="btn btn-primary btn-full" onclick="checkMatch()" id="match-check-btn">Verificar respostas</button>
+      <button class="btn btn-sm" onclick="resetMatch()" id="match-reset-btn">↺ Reset</button>
+    </div>
+    <div id="match-result" style="display:none;margin-top:12px" class="feedback-box"></div>
+  </div>
+
+  <!-- ═══════════════ SCENARIO ═══════════════ -->
+  <div id="scenario" class="screen">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+      <button class="btn btn-sm" onclick="goHome()">← Menu</button>
+      <div>
+        <div style="font-size:16px;font-weight:700">Simulação de crise</div>
+        <div style="font-family:var(--mono);font-size:12px;color:var(--muted)">Você é o Líder de IR. Decida.</div>
+      </div>
+      <div style="margin-left:auto;font-family:var(--mono);font-size:20px;font-weight:700;color:var(--blue)" id="sc-pts">0 pts</div>
+    </div>
+    <div id="scenario-content"></div>
+  </div>
+
+  <!-- ═══════════════ SPEED ═══════════════ -->
+  <div id="speed" class="screen">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+      <button class="btn btn-sm" onclick="goHome()">← Menu</button>
+      <div style="font-size:16px;font-weight:700">Speed round — 5 segundos!</div>
+      <div style="margin-left:auto;font-family:var(--mono);font-size:14px;color:var(--amber)" id="sp-score">0 pts</div>
+    </div>
+    <div style="text-align:center;margin-bottom:8px">
+      <div class="speed-timer-big" id="sp-timer">5</div>
+      <div style="font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.08em">SEGUNDOS</div>
+    </div>
+    <div style="margin-bottom:4px">
+      <div class="progress-track"><div class="progress-fill" id="sp-bar" style="width:100%;background:var(--amber)"></div></div>
+    </div>
+    <div class="card fade-in" style="margin-bottom:14px;min-height:90px;display:flex;align-items:center;justify-content:center">
+      <div class="speed-desc" id="sp-desc"></div>
+    </div>
+    <div class="speed-opts" id="sp-opts"></div>
+    <div id="sp-feedback" style="display:none;margin-top:12px" class="feedback-box"></div>
+  </div>
+
+  <!-- ═══════════════ RESULTS ═══════════════ -->
+  <div id="results" class="screen">
+    <div class="result-hero fade-in">
+      <span class="result-emoji" id="res-emoji">🎯</span>
+      <div id="res-title" style="font-size:24px;font-weight:800;margin-bottom:8px;letter-spacing:-0.02em"></div>
+      <div id="res-mod" style="font-family:var(--mono);font-size:12px;color:var(--muted);margin-bottom:24px"></div>
+      <div class="result-pts" id="res-pts"></div>
+      <div style="font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:4px">pontos ganhos neste módulo</div>
+    </div>
+    <div class="result-grid" id="res-stats"></div>
+    <div id="res-msg" style="font-size:14px;color:var(--muted2);line-height:1.6;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:20px"></div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-primary btn-full" onclick="goHome()">← Voltar ao menu</button>
+      <button class="btn btn-full" id="res-replay" onclick="replayModule()">↺ Jogar novamente</button>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+<script>
+/* ════════════════════════════════════════════
+   STATE
+════════════════════════════════════════════ */
+var state={totalScore:0,modulesDone:0,quizCorrect:0,quizTotal:0,lastModule:''};
+
+/* ════════════════════════════════════════════
+   DATA
+════════════════════════════════════════════ */
+var QUIZ=[
+  {cat:'Regra do Protocolo',q:'Quantos artefatos precisam ser confirmados em até 3 horas para acionar o Protocolo 4×12?',opts:['2 ou mais','3 ou mais','4 ou mais','Todos os 12'],ans:2,exp:'A regra de ouro: 4 de 12 artefatos confirmados em até 3 horas → contenção obrigatória. A contenção precoce é reversível; o dano da espera não.'},
+  {cat:'Cronômetro de Defesa',q:'Qual é o prazo máximo para executar o isolamento (contenção) após os primeiros alertas?',opts:['2 horas','3 horas','4 horas','6 horas'],ans:2,exp:'A janela crítica é de 4h: detecção até 1h → validação até 2h → decisão até 3h → contenção até 4h.'},
+  {cat:'Artefatos — Peso',q:'O Artefato 01 — Disparo de IOC genérico (ransom note, extensão criptografada) — é considerado:',opts:['Sinal fraco, precisa de mais 3 artefatos','Conclusivo: isoladamente já justifica ação imediata','Relevante apenas combinado a outros sinais','Exclusivo para ambientes OT/SCADA'],ans:1,exp:'IOC explícito elimina ambiguidade e exige contenção imediata. É o único artefato que sozinho já justifica ação.'},
+  {cat:'Responsabilidades',q:'Quem executa a contenção física (corte de link, isolamento de VLAN, suspensão de sincronização)?',opts:['SOC / CDC','CISO / Board','NOC / Redes / Telecom','IAM'],ans:2,exp:'O NOC/Redes executa a contenção real. O SOC/CDC detectam e validam. O Líder de IR aciona. O CISO/Board é informado — aprovação executiva é informativa, não impeditiva.'},
+  {cat:'Artefatos — Intenção',q:'Qual artefato indica que o atacante está se preparando para extorsão e quer impedir a recuperação?',opts:['#08 — Port scanning interno','#07 — Atividade anormal de backup/snapshot','#10 — Acesso com conta privilegiada fora do padrão','#04 — Criação súbita de arquivos .lock'],ans:1,exp:'Exclusão ou interrupção anômala de backups é sinal de que o atacante quer maximizar o impacto e tornar a recuperação impossível — preparação clássica para extorsão.'},
+  {cat:'Estratégia Decisória',q:'O protocolo pode ser acionado sem "prova definitiva" de ransomware?',opts:['Não, é necessária certeza forense (dump de memória, análise de malware)','Sim, a correlação de 4 artefatos basta para agir','Apenas com autorização expressa do CISO','Somente após a ransom note ser confirmada em texto claro'],ans:1,exp:'O Protocolo 4×12 substitui a dúvida técnica por indicadores objetivos. A contenção precoce é reversível. A espera por "certeza forense" é o que o atacante precisa para vencer.'},
+  {cat:'Artefatos — DLP',q:'O Artefato 09 — Gatilhos no DLP — eleva a criticidade pois sinaliza risco de:',opts:['Criptografia do sistema operacional','Escalonamento de privilégios de conta','Extorsão dupla: criptografia + vazamento de dados','Queda de serviços de rede críticos'],ans:2,exp:'DLP disparando transferência de dados para recursos externos indica possível exfiltração. Isso configura "dupla extorsão": além de criptografar, o atacante pode vazar os dados.'},
+  {cat:'Problema Organizacional',q:'O principal motivo pelo qual a contenção falha mesmo com detecção rápida é:',opts:['Falta de ferramentas EDR adequadas','Paralisia hierárquica — dependência de aprovações lentas da alta gestão','Ausência de logs centralizados no SIEM','Antivírus desatualizado nos endpoints'],ans:1,exp:'O atacante explora a demora. Ataques de ransomware criptografam o ambiente em minutos; aprovações de C-levels levam horas. O 4×12 existe para eliminar essa paralisia.'},
+  {cat:'Artefatos — Rede',q:'Qual é a fonte de evidência primária do Artefato 11 — Pico de conexões DNS/C2 para domínios recém-criados?',opts:['EDR nos endpoints (CrowdStrike, SentinelOne)','Logs DNS, Proxy, Firewall e SIEM','Infraestrutura de backup (Veeam)','Monitoramento de CPU/RAM dos servidores'],ans:1,exp:'Consultas DNS suspeitas para domínios novos são detectadas via logs DNS, proxy, firewall e SIEM. Indicam que o atacante já tem comando e controle (C2) ativo no ambiente.'},
+  {cat:'Regra de Ouro',q:'O Protocolo 4×12 é, acima de tudo:',opts:['Uma ferramenta de BI para relatórios de segurança','Um modelo decisório para agir rápido com confiança técnica','Um roteiro de recuperação pós-ataque (DRP)','Uma política de patch management e gestão de vulnerabilidades'],ans:1,exp:'Regra de ouro: o 4×12 não é sobre tecnologia. É sobre decidir rápido com confiança técnica. Ritmo, treino e prontidão definem o sucesso da contenção.'}
+];
+
+var MATCH=[
+  {art:'Disparo de IOC genérico (ransom note)',fase:'Fase de impacto'},
+  {art:'Explosão de alertas em endpoints',fase:'Movimento lateral'},
+  {art:'Execução de scripts suspeitos (PowerShell)',fase:'Acesso e persistência'},
+  {art:'Atividade anormal de backup/snapshot',fase:'Prevenção à recuperação'},
+  {art:'Pico de conexões DNS/C2',fase:'Comando e controle'},
+  {art:'Execução em massa de processos agendados',fase:'Propagação automatizada'}
+];
+
+var SCENARIOS=[
+  {title:'Incidente às 02h17 — noturno',time:'02:17 AM · Segunda-feira',
+   desc:'SOC detecta: (1) ransom note encontrada em 3 servidores de arquivo; (2) PowerShell via PsExec em 12 hosts fora do horário normal; (3) Veeam reporta falha em todos os backups da última hora; (4) Nozomi alerta varredura massiva de portas na rede interna.',
+   count:4,correct:0,
+   opts:['Acionar protocolo 4×12 — contenção imediata','Aguardar o CISO acordar para aprovação','Continuar monitorando por mais 1 hora','Solicitar análise forense completa antes de agir'],
+   exp:'4 artefatos confirmados (IOC #01 + Scripts #03 + Backup #07 + Port scan #08) em menos de 3 horas. Gatilho atingido: contenção obrigatória. Cada minuto de espera aumenta a superfície de ataque.'},
+  {title:'Segunda-feira, 09h03 — expediente',time:'09:03 AM · Segunda-feira',
+   desc:'EDR detecta consumo anômalo de CPU em 4 servidores (Artefato #06). DLP alerta transferência de 8GB para IP externo desconhecido (Artefato #09). Analista reporta arquivo ".encrypted" em pasta compartilhada (Artefato #04). Outros sistemas estão normais.',
+   count:3,correct:0,
+   opts:['Acionar o protocolo — 3 artefatos, risco iminente','Aguardar o 4º artefato antes de acionar','Escalar apenas para o CDC, sem acionar contenção','Reiniciar os servidores afetados imediatamente'],
+   exp:'3 artefatos confirmados. Falta 1 para o gatilho formal. Mas com CPU anômalo + DLP/exfiltração + arquivo criptografado, o risco é crítico. Acionar vigilância máxima e preparar contenção é a resposta mais prudente.'},
+  {title:'Sexta, 17h55 — fim de expediente',time:'17:55 PM · Sexta-feira',
+   desc:'SIEM reporta: login de conta Domain Admin de IP estrangeiro incomum (Artefato #10). Isso é tudo — apenas 1 artefato detectado. Sem outros alertas. O dono da conta está de férias no exterior.',
+   count:1,correct:1,
+   opts:['Acionar protocolo 4×12 — isolamento total','Bloquear a conta comprometida e intensificar monitoramento','Ignorar — pode ser VPN do funcionário de férias','Desligar toda a rede corporativa imediatamente'],
+   exp:'Apenas 1 artefato confirmado. O protocolo exige 4. A ação correta é bloquear a conta suspeita, aumentar a vigilância e investigar — mas não acionar contenção total ainda. A contenção desnecessária tem custo operacional real.'}
+];
+
+var SPEED=[
+  {desc:'Arquivo "LEIA-ME-PARA-RECUPERAR-SEUS-DADOS.txt" encontrado em 40 servidores',ans:'#01 — IOC genérico',opts:['#01 — IOC genérico','#04 — Criação de arquivos .lock','#07 — Backup anômalo','#05 — Queda de serviços']},
+  {desc:'PowerShell rodando às 3h em 30 máquinas simultaneamente sem janela de mudança',ans:'#03 — Scripts suspeitos',opts:['#08 — Port scanning','#12 — Processos agendados','#03 — Scripts suspeitos','#10 — Conta privilegiada']},
+  {desc:'8GB enviados para IP externo desconhecido em 10 minutos via protocolo SFTP',ans:'#09 — DLP/exfiltração',opts:['#09 — DLP/exfiltração','#11 — DNS/C2','#06 — CPU/RAM anormal','#02 — Alertas em endpoints']},
+  {desc:'Domain Admin logou às 4h de um país onde a empresa não opera',ans:'#10 — Conta privilegiada',opts:['#10 — Conta privilegiada','#03 — Scripts suspeitos','#01 — IOC genérico','#12 — Processos agendados']},
+  {desc:'CPU de 12 servidores foi a 100% simultaneamente sem janela operacional',ans:'#06 — CPU/RAM anormal',opts:['#05 — Queda de serviços','#06 — CPU/RAM anormal','#02 — Alertas em endpoints','#12 — Processos agendados']},
+  {desc:'Veeam: todas as tarefas de backup falharam na última hora — sem motivo técnico',ans:'#07 — Backup anômalo',opts:['#07 — Backup anômalo','#05 — Queda de serviços','#04 — Criação de arquivos','#09 — DLP/exfiltração']},
+  {desc:'Nozomi detecta scan de 500 hosts internos em 8 minutos — fora do padrão',ans:'#08 — Port scanning',opts:['#11 — DNS/C2','#08 — Port scanning','#02 — Alertas em endpoints','#10 — Conta privilegiada']},
+  {desc:'Consultas DNS para domínio registrado há 2 dias com tráfego codificado em base64',ans:'#11 — DNS/C2',opts:['#08 — Port scanning','#09 — DLP/exfiltração','#11 — DNS/C2','#10 — Conta privilegiada']}
+];
+
+/* ════════════════════════════════════════════
+   NAVIGATION
+════════════════════════════════════════════ */
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});
+  var el=document.getElementById(id);
+  el.classList.add('active');
+  el.querySelectorAll('.fade-in').forEach(function(e){e.style.animation='none';requestAnimationFrame(function(){e.style.animation='';})});
+}
+
+function goHome(){
+  clearAllTimers();
+  updateHome();
+  showScreen('home');
+}
+
+function updateHome(){
+  document.getElementById('hdr-score').textContent=state.totalScore;
+  document.getElementById('home-total').textContent=state.totalScore;
+  document.getElementById('home-modules').textContent=state.modulesDone+'/4';
+  document.getElementById('home-acc').textContent=state.quizTotal>0?Math.round(state.quizCorrect/state.quizTotal*100)+'%':'—';
+}
+
+function startModule(m){
+  state.lastModule=m;
+  clearAllTimers();
+  if(m==='quiz') startQuiz();
+  else if(m==='match') startMatch();
+  else if(m==='scenario') startScenario();
+  else if(m==='speed') startSpeed();
+}
+
+function replayModule(){startModule(state.lastModule);}
+
+var allTimers=[];
+function clearAllTimers(){allTimers.forEach(function(t){clearInterval(t);clearTimeout(t)});allTimers=[];}
+function safeInterval(fn,ms){var t=setInterval(fn,ms);allTimers.push(t);return t;}
+function safeTimeout(fn,ms){var t=setTimeout(fn,ms);allTimers.push(t);return t;}
+
+/* ════════════════════════════════════════════
+   QUIZ
+════════════════════════════════════════════ */
+var qz={idx:0,score:0,correct:0,data:[],timer:null,timeLeft:15,answered:false};
+
+function startQuiz(){
+  qz.idx=0;qz.score=0;qz.correct=0;qz.answered=false;
+  qz.data=QUIZ.slice().sort(function(){return Math.random()-0.5});
+  showScreen('quiz');
+  renderQ();
+}
+
+function renderQ(){
+  if(qz.idx>=qz.data.length){endQuiz();return;}
+  var q=qz.data[qz.idx];
+  qz.answered=false;
+  document.getElementById('qz-cat').textContent=q.cat;
+  document.getElementById('qz-text').textContent=q.q;
+  document.getElementById('qz-prog').textContent=(qz.idx+1)+' / '+qz.data.length;
+  document.getElementById('qz-bar').style.width=((qz.idx+1)/qz.data.length*100)+'%';
+  document.getElementById('qz-pts').textContent=qz.score+' pts';
+  document.getElementById('qz-feedback').style.display='none';
+  document.getElementById('qz-next').style.display='none';
+
+  var opts=document.getElementById('qz-opts');
+  opts.innerHTML='';
+  var letters=['A','B','C','D'];
+  q.opts.forEach(function(o,i){
+    var b=document.createElement('button');
+    b.className='q-opt';
+    b.innerHTML='<span class="opt-letter">'+letters[i]+'</span>'+o;
+    b.onclick=function(){answerQ(i)};
+    opts.appendChild(b);
+  });
+
+  qz.timeLeft=15;
+  updateTimer();
+  clearAllTimers();
+  qz.timer=safeInterval(function(){
+    qz.timeLeft--;
+    updateTimer();
+    if(qz.timeLeft<=0){clearAllTimers();if(!qz.answered)answerQ(-1);}
+  },1000);
+}
+
+function updateTimer(){
+  var t=qz.timeLeft;
+  document.getElementById('qz-time').textContent=t;
+  var circ=document.getElementById('qz-ring');
+  var r=22;var c=2*Math.PI*r;
+  circ.style.strokeDashoffset=c*(1-t/15);
+  circ.style.stroke=t>8?'var(--blue)':t>4?'var(--amber)':'var(--red)';
+}
+
+function answerQ(i){
+  if(qz.answered)return;
+  qz.answered=true;clearAllTimers();
+  var q=qz.data[qz.idx];
+  var opts=document.querySelectorAll('.q-opt');
+  opts.forEach(function(o){o.classList.add('disabled')});
+  opts[q.ans].classList.add('correct');
+  var ok=i===q.ans;
+  if(ok){
+    var pts=qz.timeLeft>10?100:qz.timeLeft>5?70:40;
+    qz.score+=pts;qz.correct++;
+    state.quizCorrect++;
+    showQFeedback(true,'Correto! +'+pts+' pts — '+q.exp);
+  } else {
+    if(i>=0)opts[i].classList.add('wrong');
+    document.getElementById('qz-card').classList.add('shake');
+    safeTimeout(function(){document.getElementById('qz-card').classList.remove('shake')},500);
+    showQFeedback(false,q.exp);
+  }
+  state.quizTotal++;
+  document.getElementById('qz-pts').textContent=qz.score+' pts';
+  document.getElementById('qz-next').style.display='flex';
+}
+
+function showQFeedback(ok,msg){
+  var f=document.getElementById('qz-feedback');
+  f.style.display='block';
+  f.className='feedback-box '+(ok?'feedback-correct':'feedback-wrong');
+  f.textContent=(ok?'✓ ':'✕ ')+msg;
+}
+
+function nextQ(){qz.idx++;renderQ();}
+
+function endQuiz(){
+  clearAllTimers();
+  state.totalScore+=qz.score;
+  state.modulesDone=Math.min(4,state.modulesDone+1);
+  var pct=Math.round(qz.correct/qz.data.length*100);
+  showResult('Quiz relâmpago',qz.score,
+    pct>=90?'🏆':pct>=70?'🎯':pct>=50?'👍':'💪',
+    pct>=90?'Expert em 4×12!':pct>=70?'Bom trabalho!':pct>=50?'Continue praticando!':'Revise os artefatos!',
+    '<strong>'+qz.correct+' de '+qz.data.length+' corretos</strong> ('+pct+'%). '+
+    (pct>=70?'Você demonstra bom conhecimento do protocolo.':'Foco nos 12 artefatos e na regra dos 4×12.')
+  );
+}
+
+/* ════════════════════════════════════════════
+   MATCH
+════════════════════════════════════════════ */
+var dragging=null;
+
+function startMatch(){
+  showScreen('match');
+  renderMatch();
+}
+
+function renderMatch(){
+  var shuffled=MATCH.slice().sort(function(){return Math.random()-0.5});
+  var fases=MATCH.map(function(m){return m.fase});
+
+  var html='<div class="match-pool"><div class="section-title">Artefatos</div><div id="drag-pool">';
+  shuffled.forEach(function(a,i){
+    html+='<div class="drag-item" draggable="true" id="di-'+i+'" data-art="'+a.art+'" ondragstart="dragStart(event)" ondragend="dragEnd(event)">'+a.art+'</div>';
+  });
+  html+='</div></div>';
+
+  html+='<div class="drop-zones"><div class="section-title">Fases do ataque</div>';
+  fases.forEach(function(f){
+    html+='<div class="drop-row"><div class="drop-label">'+f+'</div>';
+    html+='<div class="drop-zone" data-fase="'+f+'" ondragover="dragOver(event)" ondrop="dropArt(event)" ondragleave="dragLeave(event)">Solte aqui</div></div>';
+  });
+  html+='</div>';
+
+  document.getElementById('match-content').innerHTML=html;
+  document.getElementById('match-result').style.display='none';
+  document.getElementById('match-check-btn').style.display='flex';
+}
+
+function resetMatch(){renderMatch();}
+function dragStart(e){dragging=e.target;safeTimeout(function(){e.target.classList.add('dragging')},0);}
+function dragEnd(e){e.target.classList.remove('dragging');}
+function dragOver(e){e.preventDefault();e.currentTarget.classList.add('over');}
+function dragLeave(e){e.currentTarget.classList.remove('over');}
+function dropArt(e){
+  e.preventDefault();
+  var zone=e.currentTarget;
+  zone.classList.remove('over');
+  if(!dragging)return;
+  if(zone.querySelector('.drag-item')){
+    var old=zone.querySelector('.drag-item');
+    document.getElementById('drag-pool').appendChild(old);
+    old.style.display='';
+  }
+  zone.innerHTML='';
+  zone.appendChild(dragging);
+  zone.classList.add('filled');
+  zone.classList.remove('drop-zone');
+  dragging.style.margin='0';
+  dragging=null;
+  // re-add drop events since innerHTML changed
+  zone.ondragover=dragOver;
+  zone.ondrop=dropArt;
+  zone.ondragleave=dragLeave;
+}
+
+function checkMatch(){
+  var score=0;
+  document.querySelectorAll('.drop-zone,.filled').forEach(function(z){
+    var fase=z.dataset.fase;
+    var item=z.querySelector('.drag-item');
+    if(!item)return;
+    var ok=MATCH.find(function(m){return m.art===item.dataset.art&&m.fase===fase});
+    item.classList.remove('dragging');
+    if(ok){score++;item.className='drag-item placed-ok';}
+    else{item.className='drag-item placed-bad';}
+    item.draggable=false;
+  });
+  document.getElementById('match-check-btn').style.display='none';
+  var pts=score*50;
+  state.totalScore+=pts;
+  state.modulesDone=Math.min(4,state.modulesDone+1);
+  var r=document.getElementById('match-result');
+  r.style.display='block';
+  r.className='feedback-box '+(score>=5?'feedback-correct':'feedback-wrong');
+  r.innerHTML='<strong>'+score+' de '+MATCH.length+' corretos</strong> — +'+pts+' pts! '+(score<6?'<br>Verde = correto · Vermelho = fase errada':'🏆 Perfeito!');
+  updateHome();
+}
+
+/* ════════════════════════════════════════════
+   SCENARIO
+════════════════════════════════════════════ */
+var sc={idx:0,score:0};
+
+function startScenario(){
+  sc.idx=0;sc.score=0;
+  showScreen('scenario');
+  renderScenario();
+}
+
+function renderScenario(){
+  if(sc.idx>=SCENARIOS.length){endScenario();return;}
+  var s=SCENARIOS[sc.idx];
+  document.getElementById('sc-pts').textContent=sc.score+' pts';
+
+  var dots='';
+  for(var i=0;i<s.count;i++){
+    var col=i<4?'var(--amber)':'var(--muted)';
+    dots+='<div class="art-dot" style="border-color:'+col+';color:'+col+'">'+String.fromCharCode(65+i)+'</div>';
+  }
+
+  var html='<div class="scenario-alert fade-in">';
+  html+='<div class="scenario-time">⚠ '+s.time+'</div>';
+  html+='<div style="font-size:15px;font-weight:700;margin-bottom:8px">'+s.title+'</div>';
+  html+='<div class="scenario-desc">'+s.desc+'</div>';
+  html+='<div class="artifact-count">'+dots;
+  html+='<span style="font-family:var(--mono);font-size:11px;color:var(--muted)">'+s.count+' artefato'+(s.count>1?'s':'')+' confirmado'+(s.count>1?'s':'')+' / 12</span>';
+  html+='</div></div>';
+
+  html+='<div style="font-size:14px;font-weight:700;margin-bottom:10px">Você é o Líder de IR. O que você faz?</div>';
+  html+='<div class="sc-opts">';
+  s.opts.forEach(function(o,i){
+    html+='<button class="sc-opt" onclick="answerScenario('+i+')">'+o+'</button>';
+  });
+  html+='</div>';
+  html+='<div id="sc-feedback" style="display:none" class="feedback-box"></div>';
+  html+='<button class="btn btn-primary btn-full" id="sc-next" style="display:none;margin-top:12px" onclick="nextScenario()">Próximo cenário →</button>';
+
+  document.getElementById('scenario-content').innerHTML=html;
+}
+
+function answerScenario(i){
+  var s=SCENARIOS[sc.idx];
+  var opts=document.querySelectorAll('.sc-opt');
+  opts.forEach(function(o){o.classList.add('disabled')});
+  var ok=i===s.correct;
+  opts[s.correct].classList.add('correct');
+  if(!ok)opts[i].classList.add('wrong');
+  if(ok)sc.score+=150;
+  var f=document.getElementById('sc-feedback');
+  f.style.display='block';
+  f.className='feedback-box '+(ok?'feedback-correct':'feedback-wrong');
+  f.textContent=(ok?'✓ Decisão correta! +150 pts. ':'✕ ')+s.exp;
+  document.getElementById('sc-next').style.display='flex';
+  document.getElementById('sc-pts').textContent=sc.score+' pts';
+}
+
+function nextScenario(){sc.idx++;renderScenario();}
+
+function endScenario(){
+  state.totalScore+=sc.score;
+  state.modulesDone=Math.min(4,state.modulesDone+1);
+  showResult('Simulação de crise',sc.score,
+    sc.score>=400?'🏆':sc.score>=200?'🎯':'💪',
+    sc.score>=400?'Líder de IR aprovado!':sc.score>=200?'Bom julgamento!':'Revise a regra dos 4 artefatos!',
+    'Em uma crise real, cada segundo conta. '+
+    (sc.score>=400?'Você demonstrou julgamento técnico preciso.':'Pratique os cenários para ganhar confiança na decisão autônoma.')
+  );
+}
+
+/* ════════════════════════════════════════════
+   SPEED
+════════════════════════════════════════════ */
+var sp={idx:0,score:0,data:[],timeLeft:5,answered:false};
+
+function startSpeed(){
+  sp.idx=0;sp.score=0;sp.answered=false;
+  sp.data=SPEED.slice().sort(function(){return Math.random()-0.5});
+  showScreen('speed');
+  renderSpeed();
+}
+
+function renderSpeed(){
+  clearAllTimers();
+  if(sp.idx>=sp.data.length){endSpeed();return;}
+  var s=sp.data[sp.idx];
+  sp.answered=false;
+  document.getElementById('sp-desc').textContent=s.desc;
+  document.getElementById('sp-score').textContent=sp.score+' pts';
+  document.getElementById('sp-feedback').style.display='none';
+
+  var shuffled=s.opts.slice().sort(function(){return Math.random()-0.5});
+  var opts=document.getElementById('sp-opts');
+  opts.innerHTML='';
+  shuffled.forEach(function(o){
+    var b=document.createElement('button');
+    b.className='speed-opt';
+    b.textContent=o;
+    b.onclick=function(){answerSpeed(o,s)};
+    opts.appendChild(b);
+  });
+
+  sp.timeLeft=5;
+  document.getElementById('sp-timer').textContent=5;
+  document.getElementById('sp-timer').classList.remove('urgent');
+  document.getElementById('sp-bar').style.width='100%';
+  document.getElementById('sp-bar').style.transition='none';
+  requestAnimationFrame(function(){
+    document.getElementById('sp-bar').style.transition='width 5s linear';
+    document.getElementById('sp-bar').style.width='0%';
+  });
+
+  safeInterval(function(){
+    sp.timeLeft--;
+    document.getElementById('sp-timer').textContent=sp.timeLeft;
+    if(sp.timeLeft<=2)document.getElementById('sp-timer').classList.add('urgent');
+    if(sp.timeLeft<=0){clearAllTimers();if(!sp.answered)answerSpeed(null,s);}
+  },1000);
+}
+
+function answerSpeed(chosen,s){
+  if(sp.answered)return;
+  sp.answered=true;clearAllTimers();
+  document.querySelectorAll('.speed-opt').forEach(function(b){
+    b.classList.add('disabled');
+    if(b.textContent===s.ans)b.classList.add('correct');
+    else if(b.textContent===chosen)b.classList.add('wrong');
+  });
+  var ok=chosen===s.ans;
+  if(ok){var pts=sp.timeLeft>=3?120:80;sp.score+=pts;}
+  var f=document.getElementById('sp-feedback');
+  f.style.display='block';
+  f.className='feedback-box '+(ok?'feedback-correct':'feedback-wrong');
+  f.textContent=ok?'⚡ Correto! +'+(sp.timeLeft>=3?120:80)+' pts':'✕ Resposta: '+s.ans;
+  safeTimeout(function(){sp.idx++;renderSpeed();},1400);
+}
+
+function endSpeed(){
+  state.totalScore+=sp.score;
+  state.modulesDone=Math.min(4,state.modulesDone+1);
+  showResult('Speed round',sp.score,
+    sp.score>=800?'🏆':sp.score>=500?'🎯':'💪',
+    sp.score>=800?'Reflexo de SOC profissional!':sp.score>=500?'Bom tempo de resposta!':'Memorize os 12 artefatos!',
+    'O tempo médio de criptografia total de um ransomware é de 45 minutos. Reconhecer os sinais rapidamente é essencial.'
+  );
+}
+
+/* ════════════════════════════════════════════
+   RESULTS
+════════════════════════════════════════════ */
+function showResult(mod,pts,emoji,title,msg){
+  document.getElementById('res-emoji').textContent=emoji;
+  document.getElementById('res-title').textContent=title;
+  document.getElementById('res-mod').textContent=mod+' · concluído';
+  document.getElementById('res-pts').textContent='+'+pts;
+  document.getElementById('res-msg').innerHTML=msg;
+  document.getElementById('res-stats').innerHTML=
+    '<div class="stat-box"><div class="stat-val">'+state.totalScore+'</div><div class="stat-label">pontos totais</div></div>'+
+    '<div class="stat-box"><div class="stat-val">'+state.modulesDone+'/4</div><div class="stat-label">módulos completos</div></div>';
+  updateHome();
+  showScreen('results');
+}
+</script>
+</body>
+</html>
