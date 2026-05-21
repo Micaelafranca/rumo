@@ -297,6 +297,28 @@ select.form-input option{background:var(--bg2)}
 .bkd-table tr:last-child td{border-bottom:none;font-weight:800;background:var(--surface);color:var(--text)}
 
 /* SCROLLBAR */
+
+/* PERFIS WORKFLOW */
+.wf-profile-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:14px;transition:all .2s}
+.wf-profile-card:hover{border-color:var(--border2)}
+.wf-profile-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.wf-profile-step{display:flex;align-items:center;gap:8px}
+.wf-step-badge{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0}
+.wf-profile-name{font-size:13px;font-weight:700;color:var(--text)}
+.wf-profile-role{font-size:11px;color:var(--text3);margin-top:1px}
+.member-chip{display:inline-flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:4px 10px;font-size:11px;color:var(--text2);margin:3px}
+.member-chip .av{width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--purple));display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff;flex-shrink:0}
+.member-chip .rm{cursor:pointer;color:var(--text3);font-size:12px;margin-left:2px;line-height:1}
+.member-chip .rm:hover{color:var(--red)}
+.members-wrap{min-height:36px;display:flex;flex-wrap:wrap;align-items:center;gap:2px;padding:6px;background:var(--bg3);border-radius:var(--r);border:1px solid var(--border);margin-top:6px;cursor:text}
+.members-wrap input{border:none;background:transparent;color:var(--text);font-size:11px;outline:none;font-family:inherit;min-width:120px;flex:1;padding:2px 4px}
+.members-wrap input::placeholder{color:var(--text3)}
+.wf-steps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
+.wf-flow-visual{display:flex;align-items:stretch;gap:0;margin-bottom:20px;background:var(--bg3);border-radius:var(--r2);overflow:hidden;border:1px solid var(--border)}
+.wf-flow-step{flex:1;padding:14px 12px;text-align:center;position:relative;transition:background .15s}
+.wf-flow-step:hover{background:var(--surface)}
+.wf-flow-step:not(:last-child)::after{content:'→';position:absolute;right:-10px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:14px;z-index:1}
+.wf-flow-step.active-step{background:rgba(59,130,246,.08);border-bottom:2px solid var(--accent)}
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
@@ -394,7 +416,7 @@ canvas{display:block}
   <div class="topbar">
     <span class="pg-title">Dashboard Executivo</span><span class="pg-sub">IER Corporativo — Rumo Logística</span>
     <div class="tb-right">
-      <span class="badge bg-green">● Online</span>
+      <span class="badge bg-amber" id="sp-status">● Conectando...</span>
       <button class="btn btn-ghost btn-sm" onclick="goTo('avaliar',navItem('avaliar'))">+ Novo Risco</button>
       <button class="btn btn-primary btn-sm">⬇ Exportar PDF</button>
     </div>
@@ -527,7 +549,7 @@ canvas{display:block}
     <span class="pg-title" id="detalhe-title">Detalhe do Risco</span>
     <div class="tb-right">
       <button class="btn btn-ghost btn-sm" onclick="openModal('m-editar-risco')">✏ Editar Risco</button>
-      <button class="btn btn-primary btn-sm" onclick="openModal('m-plano')">+ Novo Plano de Ação</button>
+      <button class="btn btn-primary btn-sm" onclick="abrirNovoPlano(currentRiscoId)">+ Novo Plano de Ação</button>
     </div>
   </div>
   <div class="content">
@@ -613,31 +635,199 @@ canvas{display:block}
 
 <!-- ════════ OUTRAS VIEWS ════════ -->
 <div id="v-relatorios" class="view">
-  <div class="topbar"><span class="pg-title">Relatórios</span></div>
-  <div class="content"><div class="grid2">
-    <div class="card" style="cursor:pointer" onclick="alert('Gerando PDF...')"><div class="card-body" style="text-align:center;padding:28px"><div style="font-size:32px;margin-bottom:8px">📊</div><div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px">Dashboard Executivo PDF</div><div style="font-size:11px;color:var(--text3);margin-bottom:12px">Relatório completo para o comitê executivo</div><button class="btn btn-primary btn-sm">⬇ Gerar PDF</button></div></div>
-    <div class="card" style="cursor:pointer"><div class="card-body" style="text-align:center;padding:28px"><div style="font-size:32px;margin-bottom:8px">📋</div><div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px">Planilha de Riscos Excel</div><div style="font-size:11px;color:var(--text3);margin-bottom:12px">Todos os riscos, IER e planos em .xlsx</div><button class="btn btn-ghost btn-sm">⬇ Exportar Excel</button></div></div>
-  </div></div>
+  <div class="topbar"><span class="pg-title">Relatórios</span><span class="pg-sub">Exportação de dados e relatórios executivos</span></div>
+  <div class="content">
+    <div class="grid2">
+      <!-- PDF -->
+      <div class="card" style="cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor=''">
+        <div class="card-body" style="text-align:center;padding:32px">
+          <div style="font-size:40px;margin-bottom:12px">📊</div>
+          <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px">Dashboard Executivo PDF</div>
+          <div style="font-size:12px;color:var(--text3);margin-bottom:18px;line-height:1.5">Relatório completo com todos os indicadores para apresentação ao comitê executivo</div>
+          <button class="btn btn-primary" onclick="gerarPDF()">⬇ Gerar PDF</button>
+        </div>
+      </div>
+      <!-- Excel -->
+      <div class="card" style="cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='var(--green)'" onmouseout="this.style.borderColor=''">
+        <div class="card-body" style="text-align:center;padding:32px">
+          <div style="font-size:40px;margin-bottom:12px">📋</div>
+          <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px">Planilha de Riscos Excel</div>
+          <div style="font-size:12px;color:var(--text3);margin-bottom:18px;line-height:1.5">Exportação completa de todos os riscos, IER calculado e planos de ação em formato .xlsx</div>
+          <button class="btn btn-ghost" onclick="exportarExcel()">⬇ Exportar Excel</button>
+        </div>
+      </div>
+    </div>
+    <!-- Preview da tabela de riscos -->
+    <div class="card" style="margin-top:4px">
+      <div class="card-hd"><span class="card-title">👁 Preview — Dados que serão exportados</span><span class="badge bg-blue" id="export-count">0 riscos</span></div>
+      <div style="overflow-x:auto">
+        <table class="rtable" id="export-preview-table">
+          <thead><tr><th>ID</th><th>Título</th><th>Categoria</th><th>Área</th><th>IER</th><th>Pts</th><th>Status</th><th>Responsável</th><th>Nº Planos</th></tr></thead>
+          <tbody id="export-preview-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </div>
 <div id="v-workflow" class="view">
-  <div class="topbar"><span class="pg-title">Workflow de Aprovação</span></div>
-  <div class="content"><div class="card"><div class="card-body"><div style="display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;margin-bottom:18px">
-    <div class="wf-step" style="border-color:rgba(59,130,246,.25)"><div style="font-size:22px;margin-bottom:5px">📝</div><div style="font-size:12px;font-weight:700;color:var(--text)">Cadastro</div><div style="font-size:10px;color:var(--text3)">Área responsável</div></div>
-    <div style="color:var(--text3);align-self:center;font-size:16px">→</div>
-    <div class="wf-step" style="border-color:rgba(245,158,11,.25)"><div style="font-size:22px;margin-bottom:5px">🔍</div><div style="font-size:12px;font-weight:700;color:var(--text)">Análise IER</div><div style="font-size:10px;color:var(--text3)">Especialista CyberSec</div></div>
-    <div style="color:var(--text3);align-self:center;font-size:16px">→</div>
-    <div class="wf-step" style="border-color:rgba(245,158,11,.25)"><div style="font-size:22px;margin-bottom:5px">✅</div><div style="font-size:12px;font-weight:700;color:var(--text)">Aprovação</div><div style="font-size:10px;color:var(--text3)">Gerência CyberSec</div></div>
-    <div style="color:var(--text3);align-self:center;font-size:16px">→</div>
-    <div class="wf-step" style="border-color:rgba(34,197,94,.25)"><div style="font-size:22px;margin-bottom:5px">🎯</div><div style="font-size:12px;font-weight:700;color:var(--text)">Comitê</div><div style="font-size:10px;color:var(--text3)">Risco Corporativo</div></div>
-    <div style="color:var(--text3);align-self:center;font-size:16px">→</div>
-    <div class="wf-step" style="border-color:rgba(168,85,247,.25)"><div style="font-size:22px;margin-bottom:5px">📊</div><div style="font-size:12px;font-weight:700;color:var(--text)">Monitoramento</div><div style="font-size:10px;color:var(--text3)">Contínuo</div></div>
-  </div></div></div></div>
+  <div class="topbar"><span class="pg-title">Workflow de Aprovação</span>
+    <div class="tb-right"><button class="btn btn-primary btn-sm" onclick="goTo('perfis',navItem('perfis'))">👥 Gerenciar Perfis</button></div>
+  </div>
+  <div class="content">
+    <!-- FLUXO VISUAL -->
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-hd"><span class="card-title">🔄 Fluxo de Aprovação de Riscos</span></div>
+      <div class="card-body">
+        <div class="wf-flow-visual">
+          <div class="wf-flow-step active-step">
+            <div style="font-size:22px;margin-bottom:6px">📝</div>
+            <div style="font-size:12px;font-weight:700;color:var(--text)">1. Cadastro</div>
+            <div style="font-size:10px;color:var(--text3);margin-top:3px">Área responsável</div>
+            <div style="margin-top:8px" id="wf-members-cadastro"></div>
+          </div>
+          <div class="wf-flow-step">
+            <div style="font-size:22px;margin-bottom:6px">🔍</div>
+            <div style="font-size:12px;font-weight:700;color:var(--text)">2. Análise IER</div>
+            <div style="font-size:10px;color:var(--text3);margin-top:3px">Especialista CyberSec</div>
+            <div style="margin-top:8px" id="wf-members-analise"></div>
+          </div>
+          <div class="wf-flow-step">
+            <div style="font-size:22px;margin-bottom:6px">✅</div>
+            <div style="font-size:12px;font-weight:700;color:var(--text)">3. Aprovação</div>
+            <div style="font-size:10px;color:var(--text3);margin-top:3px">Gerência CyberSec</div>
+            <div style="margin-top:8px" id="wf-members-aprovacao"></div>
+          </div>
+          <div class="wf-flow-step">
+            <div style="font-size:22px;margin-bottom:6px">📊</div>
+            <div style="font-size:12px;font-weight:700;color:var(--text)">4. Monitoramento</div>
+            <div style="font-size:10px;color:var(--text3);margin-top:3px">Contínuo</div>
+            <div style="margin-top:8px" id="wf-members-monitoramento"></div>
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:4px">
+          <button class="btn btn-ghost btn-sm" onclick="goTo('perfis',navItem('perfis'))">✏ Editar membros de cada etapa →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PENDÊNCIAS -->
+    <div class="card">
+      <div class="card-hd"><span class="card-title">⏳ Pendências de Aprovação</span><span class="badge bg-amber" id="wf-pend-count">0 pendentes</span></div>
+      <div class="card-body" id="workflow-pendencias"><div style="text-align:center;padding:20px;color:var(--text3)">Carregando...</div></div>
+    </div>
+  </div>
 </div>
 <div id="v-auditoria" class="view">
   <div class="topbar"><span class="pg-title">Auditoria</span></div>
   <div class="content"><div class="card"><div class="card-body"><div id="audit-log"></div></div></div></div>
 </div>
 
+
+<!-- PERFIS DE ACESSO -->
+<div id="v-perfis" class="view">
+  <div class="topbar">
+    <span class="pg-title">Perfis de Acesso</span><span class="pg-sub">Gestão de membros por etapa do workflow</span>
+    <div class="tb-right">
+      <button class="btn btn-primary btn-sm" onclick="salvarPerfis()">💾 Salvar Perfis</button>
+    </div>
+  </div>
+  <div class="content">
+    <!-- INFO -->
+    <div style="background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.2);border-radius:var(--r);padding:12px 16px;margin-bottom:18px;display:flex;align-items:center;gap:10px">
+      <span style="font-size:16px">💡</span>
+      <span style="font-size:12px;color:var(--text2)">Vincule as pessoas responsáveis por cada etapa do workflow. Digite o nome e pressione <strong style="color:var(--text)">Enter</strong> para adicionar.</span>
+    </div>
+
+    <div class="wf-steps-grid">
+      <!-- CADASTRO -->
+      <div class="wf-profile-card">
+        <div class="wf-profile-hd">
+          <div class="wf-profile-step">
+            <div class="wf-step-badge" style="background:#3b82f6">1</div>
+            <div>
+              <div class="wf-profile-name">📝 Cadastro</div>
+              <div class="wf-profile-role">Responsáveis pelo cadastro de riscos</div>
+            </div>
+          </div>
+          <span class="badge bg-blue" id="cnt-cadastro">0 membros</span>
+        </div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:6px">Áreas que podem cadastrar novos riscos no sistema:</div>
+        <div class="members-wrap" id="wrap-cadastro" onclick="focusInput('inp-cadastro')">
+          <input id="inp-cadastro" placeholder="Nome ou e-mail... pressione Enter" onkeydown="addMember(event,'cadastro')">
+        </div>
+        <div style="font-size:10px;color:var(--text3);margin-top:6px">💬 Permissões: Criar e editar riscos próprios</div>
+      </div>
+
+      <!-- ANÁLISE IER -->
+      <div class="wf-profile-card">
+        <div class="wf-profile-hd">
+          <div class="wf-profile-step">
+            <div class="wf-step-badge" style="background:#f59e0b">2</div>
+            <div>
+              <div class="wf-profile-name">🔍 Análise IER</div>
+              <div class="wf-profile-role">Especialistas em avaliação de risco</div>
+            </div>
+          </div>
+          <span class="badge bg-amber" id="cnt-analise">0 membros</span>
+        </div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:6px">Responsáveis por analisar e pontuar o IER dos riscos:</div>
+        <div class="members-wrap" id="wrap-analise" onclick="focusInput('inp-analise')">
+          <input id="inp-analise" placeholder="Nome ou e-mail... pressione Enter" onkeydown="addMember(event,'analise')">
+        </div>
+        <div style="font-size:10px;color:var(--text3);margin-top:6px">💬 Permissões: Avaliar IER, ajustar critérios</div>
+      </div>
+
+      <!-- APROVAÇÃO -->
+      <div class="wf-profile-card">
+        <div class="wf-profile-hd">
+          <div class="wf-profile-step">
+            <div class="wf-step-badge" style="background:#22c55e">3</div>
+            <div>
+              <div class="wf-profile-name">✅ Aprovação</div>
+              <div class="wf-profile-role">Gerência de CyberSec</div>
+            </div>
+          </div>
+          <span class="badge bg-green" id="cnt-aprovacao">0 membros</span>
+        </div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:6px">Gerentes com poder de aprovação final de riscos e planos:</div>
+        <div class="members-wrap" id="wrap-aprovacao" onclick="focusInput('inp-aprovacao')">
+          <input id="inp-aprovacao" placeholder="Nome ou e-mail... pressione Enter" onkeydown="addMember(event,'aprovacao')">
+        </div>
+        <div style="font-size:10px;color:var(--text3);margin-top:6px">💬 Permissões: Aprovar/rejeitar riscos e planos</div>
+      </div>
+    </div>
+
+    <!-- MONITORAMENTO — full width -->
+    <div class="wf-profile-card" style="margin-bottom:16px">
+      <div class="wf-profile-hd">
+        <div class="wf-profile-step">
+          <div class="wf-step-badge" style="background:#a855f7">4</div>
+          <div>
+            <div class="wf-profile-name">📊 Monitoramento</div>
+            <div class="wf-profile-role">Acompanhamento contínuo da evolução dos riscos</div>
+          </div>
+        </div>
+        <span class="badge bg-purple" id="cnt-monitoramento">0 membros</span>
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:6px">Todos os que devem acompanhar o dashboard e receber alertas de evolução:</div>
+      <div class="members-wrap" id="wrap-monitoramento" onclick="focusInput('inp-monitoramento')">
+        <input id="inp-monitoramento" placeholder="Nome ou e-mail... pressione Enter" onkeydown="addMember(event,'monitoramento')">
+      </div>
+      <div style="font-size:10px;color:var(--text3);margin-top:6px">💬 Permissões: Visualizar dashboards, exportar relatórios</div>
+    </div>
+
+    <!-- TABELA RESUMO -->
+    <div class="card">
+      <div class="card-hd"><span class="card-title">👥 Resumo de Membros por Etapa</span></div>
+      <div class="card-body" style="padding:0">
+        <table class="rtable">
+          <thead><tr><th>Membro</th><th>Etapa</th><th>Permissões</th><th>Ações</th></tr></thead>
+          <tbody id="perfis-tabela"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
 </div><!-- /main -->
 </div><!-- /app -->
 
@@ -664,42 +854,65 @@ canvas{display:block}
 <!-- PLANO 5W2H -->
 <div class="overlay" id="m-plano">
   <div class="modal">
-    <div class="modal-hd"><div><div class="modal-title">Novo Plano de Ação — 5W2H</div><div class="modal-sub" id="m-plano-sub">Vinculado ao risco selecionado</div></div><button class="close-btn" onclick="closeModal('m-plano')">✕</button></div>
+    <div class="modal-hd">
+      <div>
+        <div class="modal-title" id="m-plano-title">Novo Plano de Ação — 5W2H</div>
+        <div class="modal-sub">Metodologia estruturada de gestão de ações</div>
+      </div>
+      <button class="close-btn" onclick="closeModal('m-plano')">✕</button>
+    </div>
     <div class="modal-body">
+      <input type="hidden" id="m-plano-id">
       <div class="form-row" style="margin-bottom:14px">
-        <div class="form-group" style="margin:0"><label class="form-label">Risco vinculado</label><select class="form-input" id="m-plano-risco"><option value="RSK-001">RSK-001 — Ransomware em infraestrutura ferroviária</option><option value="RSK-002">RSK-002 — Acesso privilegiado sem MFA</option><option value="RSK-003">RSK-003 — Vazamento de dados de clientes</option><option value="RSK-007">RSK-007 — Phishing avançado contra diretores</option><option value="RSK-008">RSK-008 — Ausência de DRP logístico</option></select></div>
-        <div class="form-group" style="margin:0"><label class="form-label">Prioridade</label><select class="form-input"><option>🔴 Crítica</option><option>🟠 Alta</option><option>🟡 Média</option><option>🟢 Baixa</option></select></div>
+        <div class="form-group" style="margin:0">
+          <label class="form-label">Risco vinculado *</label>
+          <select class="form-input" id="m-plano-risco" onchange="updateRiscoScoresInModal()"></select>
+        </div>
+        <div class="form-group" style="margin:0">
+          <label class="form-label">Prioridade</label>
+          <select class="form-input" id="m-plano-prior">
+            <option>🔴 Crítica</option><option>🟠 Alta</option><option selected>🟡 Média</option><option>🟢 Baixa</option>
+          </select>
+        </div>
       </div>
       <div class="w2h-grid">
-        <div class="w2h-item"><span class="w2h-tag">WHAT</span><div class="w2h-lbl">O que será feito?</div><textarea class="w2h-inp" rows="2" placeholder="Ação a ser executada..."></textarea></div>
-        <div class="w2h-item"><span class="w2h-tag">WHY</span><div class="w2h-lbl">Por que é necessário?</div><textarea class="w2h-inp" rows="2" placeholder="Justificativa e objetivo..."></textarea></div>
-        <div class="w2h-item"><span class="w2h-tag">WHERE</span><div class="w2h-lbl">Onde será executado?</div><textarea class="w2h-inp" rows="2" placeholder="Local, sistema ou área..."></textarea></div>
-        <div class="w2h-item"><span class="w2h-tag">WHEN</span><div class="w2h-lbl">Início e conclusão</div><input class="w2h-inp" type="date" style="margin-bottom:6px"><input class="w2h-inp" type="date"></div>
-        <div class="w2h-item"><span class="w2h-tag">WHO</span><div class="w2h-lbl">Quem é o responsável?</div><input class="w2h-inp" placeholder="Nome / equipe..."></div>
-        <div class="w2h-item"><span class="w2h-tag">HOW</span><div class="w2h-lbl">Como será feito?</div><textarea class="w2h-inp" rows="2" placeholder="Metodologia e passos..."></textarea></div>
+        <div class="w2h-item"><span class="w2h-tag">WHAT</span><div class="w2h-lbl">O que será feito?</div><textarea class="w2h-inp" id="m-p-what" rows="2" placeholder="Ação a ser executada..."></textarea></div>
+        <div class="w2h-item"><span class="w2h-tag">WHY</span><div class="w2h-lbl">Por que é necessário?</div><textarea class="w2h-inp" id="m-p-why" rows="2" placeholder="Justificativa e objetivo..."></textarea></div>
+        <div class="w2h-item"><span class="w2h-tag">WHERE</span><div class="w2h-lbl">Onde será executado?</div><textarea class="w2h-inp" id="m-p-where" rows="2" placeholder="Local, sistema ou área..."></textarea></div>
+        <div class="w2h-item"><span class="w2h-tag">WHEN</span><div class="w2h-lbl">Início e conclusão</div><input class="w2h-inp" id="m-p-inicio" type="date" style="margin-bottom:6px"><input class="w2h-inp" id="m-p-fim" type="date"></div>
+        <div class="w2h-item"><span class="w2h-tag">WHO</span><div class="w2h-lbl">Quem é o responsável?</div><input class="w2h-inp" id="m-p-who" placeholder="Nome / equipe..."></div>
+        <div class="w2h-item"><span class="w2h-tag">HOW</span><div class="w2h-lbl">Como será feito?</div><textarea class="w2h-inp" id="m-p-how" rows="2" placeholder="Metodologia e passos..."></textarea></div>
       </div>
-      <div class="w2h-item" style="margin-top:8px"><span class="w2h-tag">HOW MUCH</span><div class="w2h-lbl">Custo estimado</div><input class="w2h-inp" placeholder="R$ — Estimativa de investimento..."></div>
-      
-      <div class="divider"></div>
-      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;display:flex;align-items:center;gap:8px">
-        📉 Redução de IER por Critério
-        <span style="font-size:11px;color:var(--text3);font-weight:400">Indique a nota atual e a nota alvo após a execução do plano</span>
+      <div class="w2h-item" style="margin-top:8px">
+        <span class="w2h-tag">HOW MUCH</span><div class="w2h-lbl">Custo estimado</div>
+        <input class="w2h-inp" id="m-p-custo" placeholder="R$ — Estimativa...">
       </div>
+      <div class="form-row" style="margin-top:12px">
+        <div class="form-group" style="margin:0">
+          <label class="form-label">Status</label>
+          <select class="form-input" id="m-p-status">
+            <option>Iniciado</option><option>Em andamento</option><option>Concluindo</option><option>Concluído</option><option>Atrasado</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin:0">
+          <label class="form-label">% de Avanço</label>
+          <input class="form-input" id="m-p-pct" type="number" min="0" max="100" placeholder="0 a 100" value="0">
+        </div>
+      </div>
+      <div style="height:1px;background:var(--border);margin:14px 0"></div>
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px">📉 Redução de IER por Critério — <span style="font-weight:400;color:var(--text3);font-size:11px">informe a nota alvo após execução</span></div>
       <div class="red-inp-grid" id="reduction-inputs"></div>
-      <div style="margin-top:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
-        <div style="text-align:center"><div style="font-size:10px;color:var(--text3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.4px">Redução Planejada Total</div><div style="font-size:22px;font-weight:800;font-family:'DM Mono',monospace;color:var(--accent3)" id="plan-total-pts">0 pts</div></div>
-        <div style="text-align:center"><div style="font-size:10px;color:var(--text3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.4px">IER Atual do Risco</div><div style="font-size:22px;font-weight:800;font-family:'DM Mono',monospace;color:#f87171" id="plan-ier-atual">—</div></div>
-        <div style="text-align:center"><div style="font-size:10px;color:var(--text3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.4px">IER Residual Esperado</div><div style="font-size:22px;font-weight:800;font-family:'DM Mono',monospace;color:#4ade80" id="plan-ier-residual">—</div></div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px">
+        <div style="text-align:center"><div style="font-size:10px;color:var(--text3);margin-bottom:3px;text-transform:uppercase">Redução Planejada</div><div style="font-size:22px;font-weight:800;font-family:'DM Mono',monospace;color:var(--accent3)" id="plan-total-pts">0 pts</div></div>
+        <div style="text-align:center"><div style="font-size:10px;color:var(--text3);margin-bottom:3px;text-transform:uppercase">IER Atual</div><div style="font-size:22px;font-weight:800;font-family:'DM Mono',monospace;color:#f87171" id="plan-ier-atual">—</div></div>
+        <div style="text-align:center"><div style="font-size:10px;color:var(--text3);margin-bottom:3px;text-transform:uppercase">IER Residual</div><div style="font-size:22px;font-weight:800;font-family:'DM Mono',monospace;color:#4ade80" id="plan-ier-residual">—</div></div>
       </div>
-
-      <div class="divider"></div>
-      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px">✅ Atualização de Execução (realizado)</div>
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px">✅ Atualização Realizado</div>
       <div class="red-inp-grid" id="realized-inputs"></div>
-
-      <div class="divider"></div>
+      <div style="height:1px;background:var(--border);margin:14px 0"></div>
       <div style="display:flex;gap:10px;justify-content:flex-end">
         <button class="btn btn-ghost" onclick="closeModal('m-plano')">Cancelar</button>
-        <button class="btn btn-primary" onclick="savePlano()">Salvar Plano de Ação</button>
+        <button class="btn btn-primary" id="m-plano-save-btn" onclick="savePlanoModal()">💾 Salvar Plano de Ação</button>
       </div>
     </div>
   </div>
@@ -708,6 +921,38 @@ canvas{display:block}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
 'use strict';
+
+// ── UTILIDADES ───────────────────────────────────────────────────────────────
+function showToast(msg, type='success'){
+  const el = document.createElement('div');
+  el.style.cssText = 'position:fixed;bottom:24px;right:24px;background:'+(type==='error'?'#1d2538':'#1d2538')+';border:1px solid '+(type==='error'?'rgba(239,68,68,.3)':'rgba(34,197,94,.3)')+';border-radius:12px;padding:12px 18px;font-size:13px;color:#e4eaf6;z-index:99999;display:flex;align-items:center;gap:10px;box-shadow:0 8px 32px rgba(0,0,0,.4);max-width:340px;font-family:DM Sans,system-ui,sans-serif;animation:toastIn .3s ease';
+  el.innerHTML = '<span>'+(type==='error'?'❌':'✅')+'</span><span style="flex:1">'+msg+'</span>';
+  document.body.appendChild(el);
+  setTimeout(()=>{ el.style.opacity='0'; el.style.transform='translateY(10px)'; el.style.transition='all .3s'; setTimeout(()=>el.remove(),300); }, 4000);
+}
+
+function showLoading(txt){
+  const el = document.getElementById('loading-overlay');
+  const tEl = document.getElementById('loading-txt');
+  if(tEl) tEl.textContent = txt||'Carregando...';
+  if(el) el.classList.add('show');
+}
+
+function hideLoading(){
+  const el = document.getElementById('loading-overlay');
+  if(el) el.classList.remove('show');
+}
+
+function updateBadges(){
+  const br = document.getElementById('badge-riscos');
+  if(br) br.textContent = RISCOS.length;
+  let ativos = 0;
+  RISCOS.forEach(r=>r.planos.forEach(p=>{ if(p.status!=='Concluído') ativos++; }));
+  const bp = document.getElementById('badge-planos');
+  if(bp) bp.textContent = ativos;
+}
+
+
 
 // ── DATA ──────────────────────────────────────────────────────────────────────
 const CRITERIOS = [
@@ -786,12 +1031,30 @@ function goTo(view, el){
   const t = document.getElementById('v-'+view);
   if(t) t.classList.add('active');
   if(el) el.classList.add('active');
-  const h = {dashboard:initDashboard, riscos:renderAllRisks, avaliar:()=>renderCriterios(), planos:renderPlanosGeral, analytics:renderAnalytics, auditoria:renderAuditoria};
+  const h = {dashboard:initDashboard, riscos:renderAllRisks, avaliar:()=>renderCriterios(), planos:renderPlanosGeral, analytics:renderAnalytics, auditoria:renderAuditoria, workflow:renderWorkflow, perfis:renderPerfis, relatorios:renderExportPreview};
   if(h[view]) setTimeout(h[view],60);
 }
 
-function openModal(id){ document.getElementById(id).classList.add('show'); if(id==='m-plano') initPlanoModal(); }
-function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+function openModal(id){
+  const _om=document.getElementById(id);
+  if(_om){ 
+    _om.classList.add('show');
+    // Always populate risco select when opening plano modal
+    if(id==='m-plano'){
+      setTimeout(()=>{
+        const sel=document.getElementById('m-plano-risco');
+        if(sel && sel.options.length===0){
+          sel.innerHTML=RISCOS.map(r=>`<option value="${r.id}">${r.id} — ${r.title.substring(0,50)}</option>`).join('');
+        }
+      },30);
+    }
+  }
+  else { console.warn('Modal not found: '+id); }
+}
+function closeModal(id){
+  const _cm=document.getElementById(id);
+  if(_cm) _cm.classList.remove('show');
+}
 document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('show')}));
 
 function catClass(c){ return {Cyber:'cyber',Operacional:'op',Compliance:'comp',Infra:'infra',Continuidade:'cont',Processos:'proc'}[c]||'op'; }
@@ -807,7 +1070,7 @@ function openRisco(id){
   if(!r) return;
 
   goTo('risco-detalhe', null);
-  document.getElementById('detalhe-title').textContent = r.id + ' — ' + r.title;
+  const _z2001=document.getElementById('detalhe-title');if(_z2001)_z2001.textContent=r.id + ' — ' + r.title;
 
   const ier = calcIerFromScores(r.scores);
   const pts = Math.round(ier*100);
@@ -989,7 +1252,7 @@ function openRisco(id){
     <div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
         <span style="font-size:14px;font-weight:700;color:var(--text)">📋 Planos de Ação (${r.planos.length})</span>
-        <button class="btn btn-primary btn-sm" onclick="openModal('m-plano');document.getElementById('m-plano-risco').value='${r.id}'">+ Novo Plano para este Risco</button>
+        <button class="btn btn-primary btn-sm" onclick="abrirNovoPlano('${r.id}')">+ Novo Plano para este Risco</button>
       </div>
       ${planosHTML}
     </div>
@@ -1142,24 +1405,46 @@ function renderTopRisks(){
 
 function renderAllRisks(){
   const el=document.getElementById('all-risks-body'); if(!el) return;
-  el.innerHTML=RISCOS.map(r=>`
+  const fCat=document.getElementById('filter-cat')?.value||'';
+  const fSearch=document.getElementById('search-risco')?.value?.toLowerCase()||'';
+  let list=[...RISCOS].filter(r=>{
+    if(fCat&&r.cat!==fCat) return false;
+    if(fSearch&&!r.title.toLowerCase().includes(fSearch)&&!r.id.toLowerCase().includes(fSearch)) return false;
+    return true;
+  }).sort((a,b)=>b.ier-a.ier);
+  const _el1=document.getElementById('cnt-critico');if(_el1)_el1.textContent=RISCOS.filter(r=>r.ier>=8).length;
+  const _el2=document.getElementById('cnt-alto');if(_el2)_el2.textContent=RISCOS.filter(r=>r.ier>=6&&r.ier<8).length;
+  const _el3=document.getElementById('cnt-medio');if(_el3)_el3.textContent=RISCOS.filter(r=>r.ier>=4&&r.ier<6).length;
+  const _el4=document.getElementById('cnt-baixo');if(_el4)_el4.textContent=RISCOS.filter(r=>r.ier<4).length;
+  const _el5=document.getElementById('cnt-total');if(_el5)_el5.textContent=RISCOS.length;
+  const _el6=document.getElementById('riscos-count-label');if(_el6)_el6.textContent=`Riscos Cadastrados (${list.length})`;
+  el.innerHTML=list.length?list.map(r=>`
     <tr onclick="openRisco('${r.id}')">
       <td style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text3)">${r.id}</td>
-      <td style="font-size:12px;font-weight:500;color:var(--text);max-width:240px">${r.title}</td>
+      <td style="font-size:12px;font-weight:500;color:var(--text);max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.title}</td>
       <td><span class="cat cat-${catClass(r.cat)}">${r.cat}</span></td>
       <td style="font-size:12px;color:var(--text2)">${r.area}</td>
-      <td style="text-align:center"><span class="ier-chip ${ierClass(r.ier)}">${r.ier.toFixed(1)}</span></td>
+      <td style="text-align:center"><span class="ier-chip ${ierClass(r.ier)}">${formatIER(r.ier)}</span></td>
       <td style="text-align:center;font-family:'DM Mono',monospace;font-weight:700;font-size:12px">${Math.round(r.ier*100)}</td>
       <td style="font-size:12px;color:var(--text2)">${r.resp}</td>
       <td><span class="badge ${statusBadge(r.status)}">${r.status}</span></td>
-      <td><button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();openRisco('${r.id}')">Ver Detalhe</button></td>
-    </tr>`).join('');
+      <td style="display:flex;gap:4px;flex-wrap:nowrap">
+        <button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();openRisco('${r.id}')" title="Ver detalhes">👁</button>
+        <button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();abrirEditRisco('${r.id}')" title="Editar risco">✏</button>
+        <button class="btn btn-danger btn-xs" onclick="event.stopPropagation();confirmarDeleteRisco('${r.id}')" title="Excluir risco">🗑</button>
+      </td>
+    </tr>`).join(''):'<tr><td colspan="9" style="text-align:center;padding:20px;color:var(--text3)">Nenhum risco encontrado</td></tr>';
 }
 
 function renderAreaRank(){
   const el=document.getElementById('area-rank'); if(!el) return;
-  const areas=[{n:'TI / CyberSec',s:892,p:100,c:'#3b82f6'},{n:'Operações Ferrov.',s:743,p:83,c:'#a855f7'},{n:'Logística',s:612,p:69,c:'#14b8a6'},{n:'Jurídico / Compliance',s:540,p:61,c:'#f59e0b'},{n:'RH',s:380,p:43,c:'#22c55e'}];
-  el.innerHTML=areas.map((a,i)=>`<div class="mb-row"><span style="font-size:10px;color:var(--text3);min-width:12px;font-family:'DM Mono',monospace">${i+1}</span><span class="mb-lbl">${a.n}</span><div class="mb-track"><div class="mb-fill" style="width:${a.p}%;background:${a.c}"></div></div><span class="mb-val">${a.s}</span></div>`).join('');
+  // Compute dynamically from RISCOS data
+  const am={};
+  RISCOS.forEach(r=>{ am[r.area]=(am[r.area]||0)+Math.round(r.ier*100); });
+  const colors=['#3b82f6','#a855f7','#14b8a6','#f59e0b','#22c55e'];
+  const areas=Object.entries(am).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const max=areas[0]?areas[0][1]:1;
+  el.innerHTML=areas.length?areas.map(([n,s],i)=>`<div class="mb-row"><span style="font-size:10px;color:var(--text3);min-width:12px;font-family:'DM Mono',monospace">${i+1}</span><span class="mb-lbl">${n}</span><div class="mb-track"><div class="mb-fill" style="width:${Math.round(s/max*100)}%;background:${colors[i]}"></div></div><span class="mb-val">${s}</span></div>`).join(''):'<div style="color:var(--text3);font-size:12px;text-align:center;padding:12px">Sem dados</div>';
 }
 
 function renderHeatmap(){
@@ -1249,7 +1534,67 @@ function renderRadar(){
 }
 
 function resetIER(){ Object.keys(ierScores).forEach(k=>ierScores[k]=5); criteriosRendered=false; document.getElementById('criterios-container').innerHTML=''; renderCriterios(); }
-function saveIER(){ alert(`✅ Avaliação salva!\n\nRisco: ${document.getElementById('risk-title').value||'Sem título'}\nIER: ${document.getElementById('ier-big').textContent}\nPontos: ${document.getElementById('ier-pts').textContent} pts\n\nEncaminhado para aprovação.`); }
+function saveIER(){
+  const titleEl = document.getElementById('risk-title');
+  const title = titleEl ? titleEl.value.trim() : '';
+  if(!title){ showToast('Informe o título do risco antes de salvar.','error'); if(titleEl) titleEl.focus(); return; }
+
+  const catEl   = document.getElementById('risk-cat');
+  const areaEl  = document.getElementById('risk-area');
+  const respEl  = document.getElementById('risk-resp');
+  const descEl  = document.getElementById('risk-desc');
+  const sistEl  = document.getElementById('risk-sistema');
+
+  const cat   = catEl  ? catEl.value  : 'Cyber';
+  const area  = areaEl ? areaEl.value : 'TI/CyberSec';
+  const resp  = respEl ? respEl.value : '';
+  const desc  = descEl ? descEl.value : '';
+  const sist  = sistEl ? sistEl.value : '';
+
+  const scores = {...ierScores};
+  const ier    = calcIerFromScores(scores);
+  const status = ier>=8?'Crítico':ier>=6?'Alto':ier>=4?'Médio':'Baixo';
+
+  // If editing existing risco
+  if(window._editRiscoId){
+    const r = RISCOS.find(x=>x.id===window._editRiscoId);
+    if(r){
+      r.title=title; r.cat=cat; r.area=area; r.resp=resp;
+      r.desc=desc; r.sistema=sist; r.scores=scores; r.ier=ier; r.status=status;
+      window._editRiscoId=null;
+      showToast('Risco atualizado com sucesso!');
+      // Reset button label
+      const btn = document.querySelector('#v-avaliar .btn-primary');
+      if(btn){ btn.textContent='💾 Salvar Avaliação'; btn.onclick=saveIER; }
+      const pg = document.querySelector('#v-avaliar .pg-title');
+      if(pg) pg.textContent='Avaliação de IER';
+    }
+  } else {
+    // Create new risco
+    const newNum  = RISCOS.length + 1;
+    const newId   = 'RSK-' + String(newNum).padStart(3,'0');
+    const novoRisco = {
+      id: newId, title, cat, area, resp, desc, sistema: sist,
+      ier, scores, status, planos: [], _wfEtapa: 'cadastro'
+    };
+    RISCOS.push(novoRisco);
+    showToast('✅ Risco ' + newId + ' salvo com sucesso! IER: ' + formatIER(ier) + ' (' + Math.round(ier*100) + ' pts)');
+  }
+
+  // Refresh other views
+  updateBadges();
+  initDashboard();
+
+  // Clear form and go to risks list
+  resetIER();
+  const tf=document.getElementById('risk-title'); if(tf) tf.value='';
+  const rf=document.getElementById('risk-resp');  if(rf) rf.value='';
+  const df=document.getElementById('risk-desc');  if(df) df.value='';
+  const sf=document.getElementById('risk-sistema'); if(sf) sf.value='';
+
+  goTo('riscos', document.querySelector('.nav-item[onclick*="riscos"]'));
+  setTimeout(renderAllRisks, 100);
+}
 
 // ── PLANO MODAL ──────────────────────────────────────────────────────────────
 function initPlanoModal(){
@@ -1306,11 +1651,11 @@ function initPlanoModal(){
 }
 
 function updateRiscoScoresInModal(){
-  const selId=document.getElementById('m-plano-risco').value;
+  const selId=document.getElementById('m-plano-risco')?.value;
   const r=RISCOS.find(x=>x.id===selId);
   if(!r) return;
   const ier=calcIerFromScores(r.scores);
-  document.getElementById('plan-ier-atual').textContent=formatIER(ier);
+  const _el7=document.getElementById('plan-ier-atual');if(_el7)_el7.textContent=formatIER(ier);
   CRITERIOS.forEach(c=>{
     const a1=document.getElementById(`rp-atual-${c.id}`); if(a1) a1.value=r.scores[c.id];
     const alvo=document.getElementById(`rp-alvo-${c.id}`); if(alvo) alvo.value='';
@@ -1319,12 +1664,12 @@ function updateRiscoScoresInModal(){
     const dp=document.getElementById(`rp-delta-${c.id}`); if(dp){dp.textContent='—';dp.className='ier-delta zero';}
     const dr=document.getElementById(`rr-delta-${c.id}`); if(dr){dr.textContent='—';dr.className='ier-delta zero';}
   });
-  document.getElementById('plan-total-pts').textContent='0 pts';
-  document.getElementById('plan-ier-residual').textContent='—';
+  const _el8=document.getElementById('plan-total-pts');if(_el8)_el8.textContent='0 pts';
+  const _el9=document.getElementById('plan-ier-residual');if(_el9)_el9.textContent='—';
 }
 
 function calcPlanTotal(){
-  const selId=document.getElementById('m-plano-risco').value;
+  const selId=document.getElementById('m-plano-risco')?.value;
   const r=RISCOS.find(x=>x.id===selId);
   if(!r) return;
   let totalPlanPts=0;
@@ -1360,9 +1705,9 @@ function calcPlanTotal(){
     }
   });
 
-  document.getElementById('plan-total-pts').textContent=totalPlanPts+' pts';
+  const _el10=document.getElementById('plan-total-pts');if(_el10)_el10.textContent=totalPlanPts+' pts';
   const ierResidual=calcIerFromScores(newScores);
-  document.getElementById('plan-ier-residual').textContent=formatIER(ierResidual);
+  const _el11=document.getElementById('plan-ier-residual');if(_el11)_el11.textContent=formatIER(ierResidual);
 }
 
 function savePlano(){ closeModal('m-plano'); alert('✅ Plano de Ação salvo com sucesso!\nEncaminhado para aprovação da Gerência de CyberSec.'); }
@@ -1370,54 +1715,157 @@ function savePlano(){ closeModal('m-plano'); alert('✅ Plano de Ação salvo co
 // ── PLANOS GERAL ─────────────────────────────────────────────────────────────
 function renderPlanosGeral(){
   const el=document.getElementById('planos-list'); if(!el) return;
+
+  // KPI counts — all planos across all riscos
   const allPlanos=[];
-  RISCOS.forEach(r=>r.planos.forEach(p=>allPlanos.push({...p,risco:r})));
-  el.innerHTML=allPlanos.map(p=>{
-    let planPts=0,realPts=0;
-    CRITERIOS.forEach(c=>{
-      const pd=p.reducao_plan[c.id]||0; const rd=p.reducao_real[c.id]||0;
-      if(pd>0) planPts+=Math.round((p.risco.scores[c.id]-Math.max(0,p.risco.scores[c.id]-pd))*c.peso*100);
-      if(rd>0) realPts+=Math.round((p.risco.scores[c.id]-Math.max(0,p.risco.scores[c.id]-rd))*c.peso*100);
-    });
-    const sBadge={Concluído:'bg-green',Concluindo:'bg-teal','Em andamento':'bg-blue',Iniciado:'bg-purple',Atrasado:'bg-red'}[p.status]||'bg-blue';
-    const fillColor=p.pct===100?'linear-gradient(90deg,#16a34a,#22c55e)':p.pct>=70?'linear-gradient(90deg,#d97706,#f59e0b)':'linear-gradient(90deg,#2563eb,#3b82f6)';
-    return `<div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;margin-bottom:12px">
-      <div style="padding:11px 15px;background:var(--bg3);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
-        <div style="display:flex;align-items:center;gap:10px;min-width:0">
-          <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text3)">${p.id}</span>
-          <span style="font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.titulo}</span>
-          <span class="badge bg-blue" style="font-size:9px;flex-shrink:0">${p.risco.id}</span>
+  RISCOS.forEach(r=>(r.planos||[]).forEach(p=>allPlanos.push({...p,risco:r})));
+  const concl=allPlanos.filter(p=>p.status==='Concluído').length;
+  const andm=allPlanos.filter(p=>p.status==='Em andamento').length;
+  const atr=allPlanos.filter(p=>p.status==='Atrasado').length;
+  const e1=document.getElementById('pl-concluido'); if(e1) e1.textContent=concl;
+  const e2=document.getElementById('pl-andamento'); if(e2) e2.textContent=andm;
+  const e3=document.getElementById('pl-atrasado');  if(e3) e3.textContent=atr;
+  const e4=document.getElementById('pl-total');     if(e4) e4.textContent=allPlanos.length;
+
+  // Filter only riscos that have planos OR show all riscos
+  const riscosComPlanos = RISCOS.filter(r=>(r.planos||[]).length>0);
+  const riscosSemPlanos = RISCOS.filter(r=>!(r.planos||[]).length);
+
+  if(!RISCOS.length){
+    el.innerHTML=`<div style="text-align:center;padding:40px;color:var(--text3)">Nenhum risco cadastrado. <button class="btn btn-primary btn-sm" style="margin-top:12px" onclick="goTo('avaliar',navItem('avaliar'))">+ Cadastrar Risco</button></div>`;
+    return;
+  }
+
+  el.innerHTML = `
+    ${riscosComPlanos.map(r=>{
+      const ierVal = r.ier||calcIerFromScores(r.scores||{IMP:5,FACIL:5,PROB:5,CTRL:5,TEMPO:5,ORG:5});
+      let tPlan=0,tReal=0;
+      (r.planos||[]).forEach(p=>{
+        CRITERIOS.forEach(c=>{
+          const pd=p.reducao_plan[c.id]||0, rd=p.reducao_real[c.id]||0;
+          if(pd>0) tPlan+=Math.round((r.scores[c.id]-Math.max(0,r.scores[c.id]-pd))*c.peso*100);
+          if(rd>0) tReal+=Math.round((r.scores[c.id]-Math.max(0,r.scores[c.id]-rd))*c.peso*100);
+        });
+      });
+      const nPlanos=(r.planos||[]).length;
+      const concluidos=(r.planos||[]).filter(p=>p.status==='Concluído').length;
+      const pctGeral=nPlanos>0?Math.round((r.planos||[]).reduce((s,p)=>s+(p.pct||0),0)/nPlanos):0;
+      const ierCl=ierVal>=8?'ic-c':ierVal>=6?'ic-h':ierVal>=4?'ic-m':'ic-l';
+      return `
+      <div class="card" style="margin-bottom:10px;overflow:visible">
+        <!-- RISCO HEADER — clicável -->
+        <div style="padding:13px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none;transition:background .15s;border-radius:var(--r2)"
+             onclick="togglePlanoRisco('pr-${r.id}')"
+             onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background=''">
+          <!-- Chevron -->
+          <div id="chev-${r.id}" style="font-size:12px;color:var(--text3);transition:transform .2s;flex-shrink:0">▶</div>
+          <!-- ID -->
+          <span style="font-family:'DM Mono',monospace;font-size:11px;font-weight:700;color:var(--text3);flex-shrink:0;min-width:58px">${r.id}</span>
+          <!-- Title -->
+          <span style="font-size:13px;font-weight:700;color:var(--text);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.title}</span>
+          <!-- IER chip -->
+          <span class="ier-chip ${ierCl}" style="font-size:12px;flex-shrink:0">${formatIER(ierVal)}</span>
+          <!-- Cat -->
+          <span class="cat cat-${catClass(r.cat)}" style="flex-shrink:0">${r.cat}</span>
+          <!-- Stats -->
+          <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
+            <span style="font-size:11px;color:var(--text3)">${concluidos}/${nPlanos} concluídos</span>
+            <div style="width:80px;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden">
+              <div style="height:100%;width:${pctGeral}%;background:${pctGeral===100?'#22c55e':'#3b82f6'};border-radius:3px"></div>
+            </div>
+            <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--accent3)">${tPlan} pts</span>
+            <span class="badge ${statusBadge(r.status)}" style="font-size:10px">${r.status}</span>
+            <button class="btn btn-primary btn-xs" onclick="event.stopPropagation();abrirNovoPlano('${r.id}')" title="Novo plano para este risco">+ Plano</button>
+            <button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();openRisco('${r.id}')" title="Ver detalhe do risco">👁</button>
+          </div>
         </div>
-        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
-          <span class="badge ${sBadge}">${p.status}</span><span style="font-size:11px;color:var(--text3)">${p.prior}</span>
-          <button class="btn btn-ghost btn-xs" onclick="openRisco('${p.risco.id}')">Ver Risco</button>
+
+        <!-- PLANOS — colapsável -->
+        <div id="pr-${r.id}" style="display:none;border-top:1px solid var(--border)">
+          ${(r.planos||[]).map(p=>{
+            let pp=0,rp=0;
+            CRITERIOS.forEach(c=>{
+              const pd=p.reducao_plan[c.id]||0, rd=p.reducao_real[c.id]||0;
+              if(pd>0) pp+=Math.round((r.scores[c.id]-Math.max(0,r.scores[c.id]-pd))*c.peso*100);
+              if(rd>0) rp+=Math.round((r.scores[c.id]-Math.max(0,r.scores[c.id]-rd))*c.peso*100);
+            });
+            const sb={Concluído:'bg-green',Concluindo:'bg-teal','Em andamento':'bg-blue',Iniciado:'bg-purple',Atrasado:'bg-red'}[p.status]||'bg-blue';
+            const fc=p.pct===100?'linear-gradient(90deg,#16a34a,#22c55e)':p.pct>=70?'linear-gradient(90deg,#d97706,#f59e0b)':'linear-gradient(90deg,#2563eb,#3b82f6)';
+            return `
+            <div style="padding:12px 16px;border-bottom:1px solid rgba(40,48,80,.3);background:var(--bg3);transition:background .15s" onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background='var(--bg3)'">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+                <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);flex-shrink:0">${p.id}</span>
+                <span style="font-size:12px;font-weight:700;color:var(--text);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.titulo||p.what||'—'}</span>
+                <span class="badge ${sb}">${p.status}</span>
+                <span style="font-size:11px;color:var(--text3)">${p.prior||''}</span>
+                <button class="btn btn-ghost btn-xs" onclick="abrirEditPlanoGeral('${r.id}','${p.id}')">✏ Editar</button>
+                <button class="btn btn-danger btn-xs" onclick="confirmarDeletePlanoGeral('${r.id}','${p.id}',this.dataset.titulo)" data-titulo="${(p.titulo||p.what||'').substring(0,40)}">🗑</button>
+              </div>
+              <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1.4fr;gap:10px;align-items:center">
+                <div>
+                  ${p.what?`<div style="font-size:11px;color:var(--text2);margin-bottom:3px"><strong style="color:var(--text3);font-size:9px;text-transform:uppercase;letter-spacing:.5px">WHAT </strong>${p.what.substring(0,100)}${p.what.length>100?'...':''}</div>`:''}
+                  <div style="font-size:10px;color:var(--text3)">👤 ${p.who||p.resp||'—'} &nbsp;|&nbsp; 📅 ${p.inicio||'—'} → ${p.fim||'—'}</div>
+                </div>
+                <div style="text-align:center;background:var(--surface);border-radius:var(--r);padding:8px">
+                  <div style="font-size:9px;color:var(--text3);text-transform:uppercase;margin-bottom:2px">IER Plan.</div>
+                  <div style="font-size:16px;font-weight:800;font-family:'DM Mono',monospace;color:var(--accent3)">${pp} pts</div>
+                </div>
+                <div style="text-align:center;background:var(--surface);border-radius:var(--r);padding:8px">
+                  <div style="font-size:9px;color:var(--text3);text-transform:uppercase;margin-bottom:2px">IER Realiz.</div>
+                  <div style="font-size:16px;font-weight:800;font-family:'DM Mono',monospace;color:${rp>0?'#4ade80':'var(--text3)'}">${rp>0?rp+' pts':'—'}</div>
+                </div>
+                <div style="text-align:center;background:var(--surface);border-radius:var(--r);padding:8px">
+                  <div style="font-size:9px;color:var(--text3);text-transform:uppercase;margin-bottom:2px">Efetividade</div>
+                  <div style="font-size:16px;font-weight:800;font-family:'DM Mono',monospace;color:${pp>0&&rp/pp>=.7?'#4ade80':'var(--amber)'}">${pp>0?Math.round(rp/pp*100):0}%</div>
+                </div>
+                <div>
+                  <div style="font-size:10px;color:var(--text3);font-weight:700;margin-bottom:4px">Avanço: ${p.pct||0}%</div>
+                  <div class="prog-bar2"><div class="prog-fill2" style="width:${p.pct||0}%;background:${fc}"></div></div>
+                </div>
+              </div>
+            </div>`;
+          }).join('')}
+          <div style="padding:10px 16px;display:flex;justify-content:flex-end;gap:8px;background:var(--bg3)">
+            <button class="btn btn-primary btn-sm" onclick="abrirNovoPlano('${r.id}')">+ Novo Plano de Ação</button>
+            <button class="btn btn-ghost btn-sm" onclick="openRisco('${r.id}')">Ver Detalhe Completo →</button>
+          </div>
         </div>
+      </div>`;
+    }).join('')}
+
+    ${riscosSemPlanos.length ? `
+    <div style="margin-top:8px">
+      <div style="font-size:11px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;padding:0 4px">
+        ⚠ Riscos sem plano de ação (${riscosSemPlanos.length})
       </div>
-      <div style="padding:14px 15px">
-        <div style="display:grid;grid-template-columns:2.5fr 1fr 1fr 1.5fr;gap:14px;align-items:center">
-          <div>
-            <div style="font-size:11px;color:var(--text2);line-height:1.5;margin-bottom:5px">${p.what}</div>
-            <div style="font-size:10px;color:var(--text3)">👤 ${p.who} &nbsp;|&nbsp; 📅 ${p.inicio} → ${p.fim}</div>
-          </div>
-          <div style="text-align:center;background:var(--surface);border-radius:var(--r);padding:9px">
-            <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">IER Plan.</div>
-            <div style="font-size:18px;font-weight:800;font-family:'DM Mono',monospace;color:var(--accent3)">${planPts} pts</div>
-          </div>
-          <div style="text-align:center;background:var(--surface);border-radius:var(--r);padding:9px">
-            <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">IER Realiz.</div>
-            <div style="font-size:18px;font-weight:800;font-family:'DM Mono',monospace;color:${realPts>0?'#4ade80':'var(--text3)'}">${realPts>0?realPts+' pts':'—'}</div>
-          </div>
-          <div>
-            <div style="font-size:10px;color:var(--text3);font-weight:700;margin-bottom:4px">Avanço: ${p.pct}%</div>
-            <div class="prog-bar2"><div class="prog-fill2" style="width:${p.pct}%;background:${fillColor}"></div></div>
-          </div>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
+      ${riscosSemPlanos.map(r=>{
+        const ierVal=r.ier||calcIerFromScores(r.scores||{IMP:5,FACIL:5,PROB:5,CTRL:5,TEMPO:5,ORG:5});
+        const ierCl=ierVal>=8?'ic-c':ierVal>=6?'ic-h':ierVal>=4?'ic-m':'ic-l';
+        return `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg2);border:1px dashed var(--border);border-radius:var(--r);margin-bottom:6px">
+          <span class="ier-chip ${ierCl}" style="font-size:11px;flex-shrink:0">${formatIER(ierVal)}</span>
+          <span class="cat cat-${catClass(r.cat)}" style="flex-shrink:0">${r.cat}</span>
+          <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);flex-shrink:0">${r.id}</span>
+          <span style="font-size:12px;color:var(--text2);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.title}</span>
+          <span class="badge bg-amber" style="font-size:10px;flex-shrink:0">⚠ Sem plano</span>
+          <button class="btn btn-primary btn-xs" onclick="abrirNovoPlano('${r.id}')">+ Criar Plano</button>
+        </div>`;
+      }).join('')}
+    </div>` : ''}
+  `;
 }
 
-// ── ANALYTICS ────────────────────────────────────────────────────────────────
+function togglePlanoRisco(elId){
+  const el = document.getElementById(elId);
+  if(!el) return;
+  const isOpen = el.style.display !== 'none';
+  el.style.display = isOpen ? 'none' : 'block';
+  // Rotate chevron
+  const riscoId = elId.replace('pr-','');
+  const chev = document.getElementById('chev-'+riscoId);
+  if(chev) chev.style.transform = isOpen ? '' : 'rotate(90deg)';
+}
+
+
 function renderAnalytics(){
   const fc=document.getElementById('forecastChart');
   if(fc){destroyChart('forecast');charts.forecast=new Chart(fc,{type:'line',data:{labels:['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'],datasets:[{label:'Realizado',data:[35,72,110,158,200,280,340,423,null,null,null,null],borderColor:'#4ade80',tension:.4,pointRadius:4,fill:false,borderWidth:2,pointBackgroundColor:'#4ade80'},{label:'Forecast IA',data:[null,null,null,null,null,null,null,423,470,528,608,660],borderColor:'#fbbf24',borderDash:[5,3],tension:.4,pointRadius:3,fill:false,borderWidth:1.5},{label:'Meta',data:[null,null,null,null,null,null,null,null,null,null,null,1000],borderColor:'rgba(239,68,68,.4)',borderDash:[2,5],fill:false,pointRadius:0,borderWidth:1}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:GC.tip},scales:{x:{ticks:GC.tick,grid:{color:GC.grid}},y:{ticks:{...GC.tick,callback:v=>v+' pts'},grid:{color:GC.grid},beginAtZero:true}}}});}
@@ -1441,8 +1889,937 @@ function renderAuditoria(){
   </div>`).join('');
 }
 
+
+// ── SHAREPOINT REST API (cookie auth — não precisa de App Registration) ─────
+const SP_SITE = 'https://rumolog.sharepoint.com/sites/GRCGovernanaRiscoeConformidade';
+const SP_LIST_RISCOS = 'Riscos_IER';
+const SP_LIST_PLANOS = 'Planos_Acao';
+let _digest = null;
+
+async function spDigest(){
+  if(_digest) return _digest;
+  const r = await fetch(SP_SITE+'/_api/contextinfo',{method:'POST',credentials:'include',headers:{'Accept':'application/json;odata=verbose','Content-Type':'application/json;odata=verbose'}});
+  if(!r.ok) throw new Error('Não foi possível conectar ao SharePoint. Acesse pelo link do Office 365.');
+  const d = await r.json();
+  _digest = d.d.GetContextWebInformation.FormDigestValue;
+  setTimeout(()=>_digest=null, 25*60*1000);
+  return _digest;
+}
+
+async function spGet(list){
+  const url = SP_SITE+`/_api/web/lists/getbytitle('${list}')/items?$top=500&$orderby=Id%20desc`;
+  const r = await fetch(url,{credentials:'include',headers:{'Accept':'application/json;odata=verbose'}});
+  if(!r.ok) throw new Error('Erro ao ler lista '+list+': '+r.status);
+  return (await r.json()).d.results;
+}
+
+async function spPost(list, fields){
+  const digest = await spDigest();
+  // detecta o tipo automaticamente baseado no nome da lista
+  const type = list === SP_LIST_RISCOS ? 'SP.Data.Riscos_x005f0IERListItem' : 'SP.Data.Planos_x005f0AcaoListItem';
+  const r = await fetch(SP_SITE+`/_api/web/lists/getbytitle('${list}')/items`,{
+    method:'POST', credentials:'include',
+    headers:{'Accept':'application/json;odata=verbose','Content-Type':'application/json;odata=verbose','X-RequestDigest':digest},
+    body: JSON.stringify({'__metadata':{'type': type}, ...fields})
+  });
+  if(!r.ok){ const e=await r.text(); throw new Error('Erro ao criar: '+r.status+' '+e.substring(0,200)); }
+  return (await r.json()).d;
+}
+
+async function spPatch(list, id, fields){
+  const digest = await spDigest();
+  const type = list === SP_LIST_RISCOS ? 'SP.Data.Riscos_x005f0IERListItem' : 'SP.Data.Planos_x005f0AcaoListItem';
+  const r = await fetch(SP_SITE+`/_api/web/lists/getbytitle('${list}')/items(${id})`,{
+    method:'POST', credentials:'include',
+    headers:{'Accept':'application/json;odata=verbose','Content-Type':'application/json;odata=verbose','X-RequestDigest':digest,'X-HTTP-Method':'MERGE','IF-MATCH':'*'},
+    body: JSON.stringify({'__metadata':{'type': type}, ...fields})
+  });
+  if(!r.ok && r.status !== 204){ const e=await r.text(); throw new Error('Erro ao atualizar: '+r.status+' '+e.substring(0,200)); }
+}
+
+async function spDelete(list, id){
+  const digest = await spDigest();
+  const r = await fetch(SP_SITE+`/_api/web/lists/getbytitle('${list}')/items(${id})`,{
+    method:'POST', credentials:'include',
+    headers:{'Accept':'application/json;odata=verbose','X-RequestDigest':digest,'X-HTTP-Method':'DELETE','IF-MATCH':'*'}
+  });
+  if(!r.ok && r.status !== 200 && r.status !== 204){ throw new Error('Erro ao excluir: '+r.status); }
+}
+
+function parseRiscoSP(item){
+  let scores={IMP:5,FACIL:5,PROB:5,CTRL:5,TEMPO:5,ORG:5};
+  try{ if(item.Scores_JSON) scores=JSON.parse(item.Scores_JSON); }catch(e){}
+  const r={id:String(item.Id),rskId:item.RiscoID||('RSK-'+String(item.Id).padStart(3,'0')),title:item.Title||'',cat:item.Categoria||'Cyber',area:item.Area||'',resp:item.Responsavel||'',status:item.Status||'Alto',desc:item.Descricao||'',sistema:item.Sistema||'',scores};
+  Object.defineProperty(r,'ier',{get(){return CRITERIOS.reduce((s,c)=>s+this.scores[c.id]*c.peso,0)}});
+  Object.defineProperty(r,'pts',{get(){return Math.round(this.ier*100)}});
+  return r;
+}
+
+function parsePlanoSP(item){
+  let rP={IMP:0,FACIL:0,PROB:0,CTRL:0,TEMPO:0,ORG:0},rR={...rP};
+  try{ if(item.ReducaoPlan_JSON) rP=JSON.parse(item.ReducaoPlan_JSON); }catch(e){}
+  try{ if(item.ReducaoReal_JSON) rR=JSON.parse(item.ReducaoReal_JSON); }catch(e){}
+  return {id:String(item.Id),planoId:item.PlanoID||('PA-'+String(item.Id).padStart(3,'0')),riscoSpId:String(item.RiscoSpId||''),titulo:item.Title||'',prior:item.Prioridade||'🟡 Média',status:item.StatusPlano||'Iniciado',resp:item.Responsavel||'',inicio:item.DataInicio||'',fim:item.DataFim||'',pct:parseInt(item.Avanco)||0,custo:item.Custo||'',what:item.What||'',why:item.Why||'',where:item.Where||'',who:item.Who||'',how:item.How||'',reducao_plan:rP,reducao_real:rR};
+}
+
+async function loadFromSharePoint(){
+  showLoading('Conectando ao SharePoint GRC...');
+  try{
+    const [ri,pi] = await Promise.all([spGet(SP_LIST_RISCOS), spGet(SP_LIST_PLANOS)]);
+    allRiscos = ri.map(parseRiscoSP);
+    allPlanos = pi.map(parsePlanoSP);
+    const badge = document.getElementById('sp-status');
+    if(badge){badge.textContent='● SharePoint Online';badge.className='badge bg-green';}
+    updateBadges(); initDashboard(); hideLoading();
+  }catch(e){
+    hideLoading();
+    const badge=document.getElementById('sp-status');
+    if(badge){badge.textContent='⚠ Offline — modo demo';badge.className='badge bg-amber';}
+    showToast('SharePoint: '+e.message, 'error');
+    // mantém dados mock do sistema original
+    updateBadges(); initDashboard();
+  }
+}
+
+
+
+// ── HELPERS PLANO MODAL ───────────────────────────────────────────────────────
+function buildRiscoSelect(selectedId){
+  const sel=document.getElementById('m-plano-risco'); if(!sel) return;
+  sel.innerHTML=RISCOS.map(r=>`<option value="${r.id}" ${r.id===selectedId?'selected':''}>${r.id} — ${r.title.substring(0,50)}</option>`).join('');
+  updateRiscoScoresInModal();
+}
+
+function buildRedInputs(riscoId, planVals, realVals){
+  planVals=planVals||{}; realVals=realVals||{};
+  const r=RISCOS.find(x=>x.id===riscoId)||RISCOS[0];
+  const sc=r?r.scores:{IMP:5,FACIL:5,PROB:5,CTRL:5,TEMPO:5,ORG:5};
+  const pEl=document.getElementById('plan-ier-atual'); if(pEl&&r) pEl.textContent=formatIER(calcIerFromScores(sc));
+  const planEl=document.getElementById('reduction-inputs');
+  const realEl=document.getElementById('realized-inputs');
+  if(!planEl||!realEl) return;
+  planEl.innerHTML=CRITERIOS.map(c=>{
+    const alvo=planVals[c.id]>0?Math.max(0,sc[c.id]-planVals[c.id]):'';
+    return `<div class="red-inp-card" id="ri-plan-${c.id}">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span class="red-inp-id">${c.id}</span><span style="font-size:9px;color:var(--text3)">×${Math.round(c.peso*100)}%</span></div>
+      <div style="font-size:10px;color:var(--text3);margin-bottom:6px">${c.name}</div>
+      <div style="display:flex;gap:5px;align-items:center">
+        <div style="flex:1"><div style="font-size:9px;color:var(--text3);text-align:center;margin-bottom:2px">Atual</div><input type="number" class="red-inp-num" value="${sc[c.id]}" readonly style="background:var(--bg3);color:var(--text3)"></div>
+        <div style="color:var(--text3);font-size:12px">→</div>
+        <div style="flex:1"><div style="font-size:9px;color:var(--text3);text-align:center;margin-bottom:2px">Nota alvo</div><input type="number" class="red-inp-num" id="rp-alvo-${c.id}" min="0" max="10" value="${alvo}" placeholder="—" oninput="calcPlanTotal()"></div>
+      </div>
+      <div class="ier-delta zero" id="rp-delta-${c.id}">${planVals[c.id]>0?'▼ −'+planVals[c.id]+' nota':'—'}</div>
+    </div>`;
+  }).join('');
+  realEl.innerHTML=CRITERIOS.map(c=>{
+    const alvo=realVals[c.id]>0?Math.max(0,sc[c.id]-realVals[c.id]):'';
+    return `<div class="red-inp-card" id="ri-real-${c.id}">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span class="red-inp-id">${c.id}</span><span style="font-size:9px;color:var(--text3)">×${Math.round(c.peso*100)}%</span></div>
+      <div style="font-size:10px;color:var(--text3);margin-bottom:6px">${c.name}</div>
+      <div style="display:flex;gap:5px;align-items:center">
+        <div style="flex:1"><div style="font-size:9px;color:var(--text3);text-align:center;margin-bottom:2px">Atual</div><input type="number" class="red-inp-num" value="${sc[c.id]}" readonly style="background:var(--bg3);color:var(--text3)"></div>
+        <div style="color:var(--text3);font-size:12px">→</div>
+        <div style="flex:1"><div style="font-size:9px;color:var(--text3);text-align:center;margin-bottom:2px">Nota realizada</div><input type="number" class="red-inp-num" id="rr-alvo-${c.id}" min="0" max="10" value="${alvo}" placeholder="—" oninput="calcPlanTotal()"></div>
+      </div>
+      <div class="ier-delta zero" id="rr-delta-${c.id}">${realVals[c.id]>0?'▼ −'+realVals[c.id]+' nota':'—'}</div>
+    </div>`;
+  }).join('');
+  calcPlanTotal();
+}
+
+function updateRiscoScoresInModal(){
+  const id=document.getElementById('m-plano-risco')?.value; if(!id) return;
+  buildRedInputs(id,{},{});
+}
+
+function abrirNovoPlano(riscoId){
+  // Open modal first so elements exist in DOM
+  openModal('m-plano');
+  // Then populate after modal is visible
+  setTimeout(()=>{
+    const mt=document.getElementById('m-plano-title'); if(mt) mt.textContent='Novo Plano de Ação — 5W2H';
+    const mi=document.getElementById('m-plano-id'); if(mi) mi.value='';
+    ['m-p-what','m-p-why','m-p-where','m-p-who','m-p-how','m-p-custo','m-p-inicio','m-p-fim'].forEach(id=>{
+      const e=document.getElementById(id); if(e) e.value='';
+    });
+    const pct=document.getElementById('m-p-pct'); if(pct) pct.value='0';
+    const st=document.getElementById('m-p-status'); if(st) st.value='Iniciado';
+    const pr=document.getElementById('m-plano-prior'); if(pr) pr.value='🟡 Média';
+    const saveBtn=document.getElementById('m-plano-save-btn');
+    if(saveBtn){saveBtn.textContent='💾 Salvar Plano de Ação';saveBtn.onclick=savePlanoModal;}
+    // Populate risco select with all RISCOS
+    const sel=document.getElementById('m-plano-risco');
+    if(sel){
+      sel.innerHTML=RISCOS.map(r=>`<option value="${r.id}" ${r.id===riscoId?'selected':''}>${r.id} — ${r.title.substring(0,50)}</option>`).join('');
+    }
+    buildRedInputs(riscoId||RISCOS[0]?.id||'',{},{});
+  },80);
+}
+
+function savePlanoModal(){
+  const riscoId=document.getElementById('m-plano-risco')?.value;
+  const planoId=document.getElementById('m-plano-id')?.value;
+  const what=(document.getElementById('m-p-what')?.value||'').trim();
+  if(!what){showToast('Preencha o campo WHAT','error');return;}
+  if(!riscoId){showToast('Selecione um risco','error');return;}
+  const r=RISCOS.find(x=>x.id===riscoId); if(!r) return;
+  const planVals={},realVals={};
+  CRITERIOS.forEach(c=>{
+    const av=document.getElementById('rp-alvo-'+c.id);
+    const ar=document.getElementById('rr-alvo-'+c.id);
+    planVals[c.id]=av&&av.value!==''?Math.max(0,r.scores[c.id]-(+av.value)):0;
+    realVals[c.id]=ar&&ar.value!==''?Math.max(0,r.scores[c.id]-(+ar.value)):0;
+  });
+  const novoPlano={
+    id:'PA-'+(r.planos.length+1).toString().padStart(3,'0'),
+    titulo:what,
+    prior:document.getElementById('m-plano-prior')?.value||'🟡 Média',
+    status:document.getElementById('m-p-status')?.value||'Iniciado',
+    resp:document.getElementById('m-p-who')?.value||'',
+    inicio:document.getElementById('m-p-inicio')?.value||'',
+    fim:document.getElementById('m-p-fim')?.value||'',
+    pct:parseInt(document.getElementById('m-p-pct')?.value)||0,
+    custo:document.getElementById('m-p-custo')?.value||'',
+    what,
+    why:document.getElementById('m-p-why')?.value||'',
+    where:document.getElementById('m-p-where')?.value||'',
+    who:document.getElementById('m-p-who')?.value||'',
+    how:document.getElementById('m-p-how')?.value||'',
+    reducao_plan:planVals,
+    reducao_real:realVals,
+  };
+  if(planoId){
+    // editing existing
+    const idx=r.planos.findIndex(p=>p.id===planoId);
+    if(idx>-1){r.planos[idx]={...r.planos[idx],...novoPlano,id:planoId};}
+  } else {
+    r.planos.push(novoPlano);
+  }
+  closeModal('m-plano');
+  showToast(planoId?'Plano atualizado!':'Plano criado com sucesso!');
+  renderPlanosGeral();
+  if(currentRiscoId===riscoId) openRisco(riscoId);
+  const saveBtn=document.getElementById('m-plano-save-btn');
+  if(saveBtn){saveBtn.textContent='💾 Salvar Plano';saveBtn.onclick=savePlanoModal;}
+}
+
+
+function saveRiscoModal(){
+  const spId = document.getElementById('m-risco-id')?.value||'';
+  const titulo = (document.getElementById('m-r-titulo')?.value||'').trim();
+  if(!titulo){ showToast('Informe o título do risco','error'); return; }
+  if(spId){
+    // Edit existing
+    const r = RISCOS.find(x=>x.id===spId);
+    if(r){
+      r.title = titulo;
+      r.cat = document.getElementById('m-r-cat')?.value||r.cat;
+      r.area = document.getElementById('m-r-area')?.value||r.area;
+      r.sistema = document.getElementById('m-r-sistema')?.value||r.sistema;
+      r.desc = document.getElementById('m-r-desc')?.value||r.desc;
+      r.resp = document.getElementById('m-r-resp')?.value||r.resp;
+      r.status = document.getElementById('m-r-status')?.value||r.status;
+      r.ier = parseFloat(document.getElementById('m-r-ier')?.value)||r.ier;
+    }
+  } else {
+    // New risco
+    const newId = 'RSK-' + String(RISCOS.length+1).padStart(3,'0');
+    const cat = document.getElementById('m-r-cat')?.value||'Cyber';
+    const area = document.getElementById('m-r-area')?.value||'TI/CyberSec';
+    const scores = {IMP:5,FACIL:5,PROB:5,CTRL:5,TEMPO:5,ORG:5};
+    RISCOS.push({
+      id: newId, title: titulo, cat, area,
+      resp: document.getElementById('m-r-resp')?.value||'',
+      status: document.getElementById('m-r-status')?.value||'Alto',
+      desc: document.getElementById('m-r-desc')?.value||'',
+      sistema: document.getElementById('m-r-sistema')?.value||'',
+      ier: calcIerFromScores(scores), scores, planos:[],
+    });
+  }
+  closeModal('m-risco');
+  showToast(spId ? 'Risco atualizado com sucesso!' : 'Risco cadastrado com sucesso!');
+  updateBadges(); renderAllRisks(); initDashboard();
+}
+
+function abrirEditRiscoModal(riscoId){
+  const r = RISCOS.find(x=>x.id===riscoId); if(!r) return;
+  const mid = document.getElementById('m-risco-id'); if(mid) mid.value = riscoId;
+  const mt = document.getElementById('m-risco-title'); if(mt) mt.textContent = 'Editar Risco — '+riscoId;
+  const tf = document.getElementById('m-r-titulo'); if(tf) tf.value = r.title;
+  const cf = document.getElementById('m-r-cat'); if(cf) cf.value = r.cat;
+  const af = document.getElementById('m-r-area'); if(af) af.value = r.area;
+  const sf = document.getElementById('m-r-sistema'); if(sf) sf.value = r.sistema||'';
+  const df = document.getElementById('m-r-desc'); if(df) df.value = r.desc||'';
+  const rf = document.getElementById('m-r-resp'); if(rf) rf.value = r.resp||'';
+  const stf = document.getElementById('m-r-status'); if(stf) stf.value = r.status||'Alto';
+  openModal('m-risco');
+}
+// ── EDIT / DELETE RISCOS ─────────────────────────────────────────────────────
+function abrirEditRisco(riscoId){
+  const r = RISCOS.find(x=>x.id===riscoId); if(!r) return;
+  // Populate the avaliar form with existing data and set edit mode
+  const _et=document.getElementById('risk-title');if(_et)_et.value=r.title;
+  const _ec=document.getElementById('risk-cat');if(_ec)_ec.value=r.cat;
+  const _ea=document.getElementById('risk-area');if(_ea)_ea.value=r.area;
+  const _er=document.getElementById('risk-resp');if(_er)_er.value=r.resp;
+  const _ed=document.getElementById('risk-desc');if(_ed)_ed.value=r.desc||'';
+  const _es=document.getElementById('risk-sistema');if(_es)_es.value=r.sistema||'';
+  // Set scores
+  Object.keys(r.scores).forEach(k=>{ ierScores[k]=r.scores[k]; });
+  criteriosRendered = false;
+  goTo('avaliar', navItem('avaliar'));
+  // Mark as edit mode
+  window._editRiscoId = riscoId;
+  setTimeout(()=>{
+    const btn = document.querySelector('#v-avaliar .btn-primary');
+    if(btn){ btn.textContent = '💾 Atualizar Risco'; btn.onclick = atualizarRisco; }
+    const title = document.querySelector('#v-avaliar .pg-title');
+    if(title) title.textContent = 'Editar Risco — '+r.id;
+  }, 100);
+}
+
+function atualizarRisco(){
+  const id = window._editRiscoId; if(!id) return saveRisco();
+  const title = document.getElementById('risk-title').value.trim();
+  if(!title){ showToast('Informe o título do risco','error'); return; }
+  const r = RISCOS.find(x=>x.id===id); if(!r) return;
+  // Update in-memory
+  r.title = title;
+  r.cat = document.getElementById('risk-cat')?.value;
+  r.area = document.getElementById('risk-area')?.value;
+  r.resp = document.getElementById('risk-resp')?.value;
+  r.desc = document.getElementById('risk-desc')?.value;
+  r.sistema = document.getElementById('risk-sistema')?.value;
+  r.scores = {...ierScores};
+  window._editRiscoId = null;
+  showToast('Risco atualizado com sucesso!');
+  updateBadges();
+  goTo('riscos', navItem('riscos'));
+  renderAllRisks();
+}
+
+function confirmarDeleteRisco(riscoId){
+  const r = RISCOS.find(x=>x.id===riscoId); if(!r) return;
+  const _z2002=document.getElementById('confirm-title');if(_z2002)_z2002.textContent='Excluir ' + r.id + '?';
+  const _z2003=document.getElementById('confirm-sub');if(_z2003)_z2003.textContent='"'+r.title+'" — Todos os planos vinculados também serão excluídos. Esta ação não pode ser desfeita.';
+  const _cob1=document.getElementById('confirm-ok-btn');if(_cob1)_cob1.onclick=()=>deleteRisco(riscoId);
+  openModal('confirm-overlay');
+}
+
+function deleteRisco(riscoId){
+  const idx = RISCOS.findIndex(x=>x.id===riscoId);
+  if(idx > -1){ RISCOS.splice(idx, 1); }
+  closeModal('confirm-overlay');
+  showToast('Risco excluído com sucesso!');
+  updateBadges(); initDashboard(); renderAllRisks();
+  // if we were on detalhe, go back
+  if(document.getElementById('v-risco-detalhe').classList.contains('active')){
+    goTo('riscos', navItem('riscos'));
+  }
+}
+
+// ── EDIT / DELETE PLANOS (from planos list) ──────────────────────────────────
+function abrirEditPlanoGeral(riscoId, planoId){
+  const r = RISCOS.find(x=>x.id===riscoId); if(!r) return;
+  const p = r.planos.find(x=>x.id===planoId); if(!p) return;
+  currentRiscoId = riscoId;
+  window._editPlanoId = planoId;
+  openModal('m-plano');
+  setTimeout(()=>{
+    // populate risco select
+    const sel=document.getElementById('m-plano-risco');
+    if(sel) sel.innerHTML=RISCOS.map(rx=>`<option value="${rx.id}" ${rx.id===riscoId?'selected':''}>${rx.id} — ${rx.title.substring(0,50)}</option>`).join('');
+    const _pw=document.getElementById('m-p-what');if(_pw)_pw.value=p.what||'';
+    const _pwy=document.getElementById('m-p-why');if(_pwy)_pwy.value=p.why||'';
+    const _pwr=document.getElementById('m-p-where');if(_pwr)_pwr.value=p.where||'';
+    const _pwh=document.getElementById('m-p-who');if(_pwh)_pwh.value=p.who||'';
+    const _phw=document.getElementById('m-p-how');if(_phw)_phw.value=p.how||'';
+    const _pcu=document.getElementById('m-p-custo');if(_pcu)_pcu.value=p.custo||'';
+    const _pin=document.getElementById('m-p-inicio');if(_pin)_pin.value=p.inicio||'';
+    const _pfm=document.getElementById('m-p-fim');if(_pfm)_pfm.value=p.fim||'';
+    const _pst=document.getElementById('m-p-status');if(_pst)_pst.value=p.status||'Iniciado';
+    const _ppc=document.getElementById('m-p-pct');if(_ppc)_ppc.value=p.pct||0;
+    const _ppr=document.getElementById('m-plano-prior');if(_ppr)_ppr.value=p.prior||'🟡 Média';
+    buildRedInputs(riscoId, p.reducao_plan, p.reducao_real);
+    const _z2004=document.getElementById('m-plano-title');if(_z2004)_z2004.textContent='Editar Plano — '+p.id;
+    const saveBtn = document.getElementById('m-plano-save-btn');
+    if(saveBtn){ saveBtn.textContent = '💾 Atualizar Plano'; saveBtn.onclick = atualizarPlanoModal; }
+  }, 60);
+  openModal('m-plano');
+}
+
+function atualizarPlanoModal(){
+  const riscoId = document.getElementById('m-plano-risco')?.value;
+  const planoId = window._editPlanoId;
+  const r = RISCOS.find(x=>x.id===riscoId); if(!r) return;
+  const p = r.planos.find(x=>x.id===planoId); if(!p) return;
+  const planVals={}, realVals={};
+  CRITERIOS.forEach(c=>{
+    const av=document.getElementById('rp-alvo-'+c.id);
+    const ar=document.getElementById('rr-alvo-'+c.id);
+    planVals[c.id]=av&&av.value!==''?Math.max(0,r.scores[c.id]-(+av.value)):0;
+    realVals[c.id]=ar&&ar.value!==''?Math.max(0,r.scores[c.id]-(+ar.value)):0;
+  });
+  p.what = document.getElementById('m-p-what')?.value;
+  p.why = document.getElementById('m-p-why')?.value;
+  p.where = document.getElementById('m-p-where')?.value;
+  p.who = document.getElementById('m-p-who')?.value;
+  p.how = document.getElementById('m-p-how')?.value;
+  p.custo = document.getElementById('m-p-custo')?.value;
+  p.inicio = document.getElementById('m-p-inicio')?.value;
+  p.fim = document.getElementById('m-p-fim')?.value;
+  p.status = document.getElementById('m-p-status')?.value;
+  p.pct = parseInt(document.getElementById('m-p-pct')?.value)||0;
+  p.prior = document.getElementById('m-plano-prior')?.value;
+  p.titulo = p.what;
+  p.reducao_plan = planVals;
+  p.reducao_real = realVals;
+  window._editPlanoId = null;
+  closeModal('m-plano');
+  showToast('Plano atualizado com sucesso!');
+  renderPlanosGeral();
+  // reset save button
+  const saveBtn = document.getElementById('m-plano-save-btn');
+  if(saveBtn){ saveBtn.textContent = '💾 Salvar Plano'; saveBtn.onclick = savePlanoModal; }
+}
+
+function confirmarDeletePlanoGeral(riscoId, planoId, titulo){
+  const _z2005=document.getElementById('confirm-title');if(_z2005)_z2005.textContent='Excluir plano?';
+  const _z2006=document.getElementById('confirm-sub');if(_z2006)_z2006.textContent='"'+(titulo||planoId)+'" — Esta ação não pode ser desfeita.';
+  const _cob2=document.getElementById('confirm-ok-btn');if(_cob2)_cob2.onclick=()=>deletePlanoGeral(riscoId,planoId);
+  openModal('confirm-overlay');
+}
+
+function deletePlanoGeral(riscoId, planoId){
+  const r = RISCOS.find(x=>x.id===riscoId); if(!r) return;
+  const idx = r.planos.findIndex(x=>x.id===planoId);
+  if(idx > -1){ r.planos.splice(idx, 1); }
+  closeModal('confirm-overlay');
+  showToast('Plano excluído com sucesso!');
+  renderPlanosGeral();
+}
+
+// ── PERFIS DE ACESSO ─────────────────────────────────────────────────────────
+const PERFIS = {
+  cadastro: ['Equipe TI/CyberSec', 'Gestores de Área'],
+  analise: ['Ana Lima — CyberSec', 'Carlos Mota — CyberSec'],
+  aprovacao: ['Gerência CyberSec'],
+  monitoramento: ['Gerência CyberSec', 'Diretoria TI'],
+};
+
+const PERFIL_LABELS = {
+  cadastro: { label: 'Cadastro', cor: '#3b82f6', badge: 'bg-blue' },
+  analise:  { label: 'Análise IER', cor: '#f59e0b', badge: 'bg-amber' },
+  aprovacao:{ label: 'Aprovação', cor: '#22c55e', badge: 'bg-green' },
+  monitoramento:{ label: 'Monitoramento', cor: '#a855f7', badge: 'bg-purple' },
+};
+
+function renderPerfis(){
+  Object.keys(PERFIS).forEach(etapa => {
+    renderMembersWrap(etapa);
+    atualizarContador(etapa);
+  });
+  renderPerfisTabela();
+  renderWorkflowMembers();
+}
+
+function renderMembersWrap(etapa){
+  const wrap = document.getElementById('wrap-'+etapa); if(!wrap) return;
+  // Remove existing chips (keep input)
+  const input = document.getElementById('inp-'+etapa);
+  wrap.innerHTML = '';
+  PERFIS[etapa].forEach(name=>{
+    const chip = document.createElement('span');
+    chip.className = 'member-chip';
+    chip.innerHTML = `<span class="av">${name.charAt(0).toUpperCase()}</span>${name}<span class="rm" onclick="removeMember('${etapa}','${name.replace(/'/g,"\\'")}')">×</span>`;
+    wrap.appendChild(chip);
+  });
+  wrap.appendChild(input||createInput(etapa));
+}
+
+function createInput(etapa){
+  const inp = document.createElement('input');
+  inp.id = 'inp-'+etapa;
+  inp.placeholder = 'Nome ou e-mail... pressione Enter';
+  inp.onkeydown = (e)=>addMember(e, etapa);
+  return inp;
+}
+
+function focusInput(id){ const el=document.getElementById(id); if(el) el.focus(); }
+
+function addMember(event, etapa){
+  if(event.key !== 'Enter' && event.keyCode !== 13) return;
+  event.preventDefault();
+  const input = document.getElementById('inp-'+etapa);
+  const val = input ? input.value.trim() : '';
+  if(!val) return;
+  if(!PERFIS[etapa].includes(val)) PERFIS[etapa].push(val);
+  if(input) input.value = '';
+  renderMembersWrap(etapa);
+  atualizarContador(etapa);
+  renderPerfisTabela();
+  renderWorkflowMembers();
+}
+
+function removeMember(etapa, name){
+  PERFIS[etapa] = PERFIS[etapa].filter(x=>x!==name);
+  renderMembersWrap(etapa);
+  atualizarContador(etapa);
+  renderPerfisTabela();
+  renderWorkflowMembers();
+}
+
+function atualizarContador(etapa){
+  const el = document.getElementById('cnt-'+etapa);
+  if(el) el.textContent = PERFIS[etapa].length + ' membro'+(PERFIS[etapa].length!==1?'s':'');
+}
+
+function renderPerfisTabela(){
+  const tbody = document.getElementById('perfis-tabela'); if(!tbody) return;
+  const rows = [];
+  Object.entries(PERFIS).forEach(([etapa, members])=>{
+    const info = PERFIL_LABELS[etapa];
+    members.forEach(name=>{
+      rows.push(`<tr>
+        <td style="font-size:12px;font-weight:500;color:var(--text);display:flex;align-items:center;gap:8px">
+          <div style="width:26px;height:26px;border-radius:50%;background:${info.cor};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0">${name.charAt(0).toUpperCase()}</div>
+          ${name}
+        </td>
+        <td><span class="badge ${info.badge}">${info.label}</span></td>
+        <td style="font-size:11px;color:var(--text3)">${etapa==='cadastro'?'Criar e editar riscos próprios':etapa==='analise'?'Avaliar IER, ajustar critérios':etapa==='aprovacao'?'Aprovar/rejeitar riscos e planos':'Visualizar dashboards, exportar'}</td>
+        <td><button class="btn btn-danger btn-xs" onclick="removeMember('${etapa}','${name.replace(/'/g,"\\'")}')">🗑 Remover</button></td>
+      </tr>`);
+    });
+  });
+  tbody.innerHTML = rows.length ? rows.join('') : '<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text3)">Nenhum membro cadastrado</td></tr>';
+}
+
+function renderWorkflowMembers(){
+  Object.keys(PERFIS).forEach(etapa=>{
+    const el = document.getElementById('wf-members-'+etapa); if(!el) return;
+    const info = PERFIL_LABELS[etapa];
+    if(!PERFIS[etapa].length){ el.innerHTML=''; return; }
+    el.innerHTML = PERFIS[etapa].map(name=>`
+      <div style="display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.07);border-radius:12px;padding:2px 8px;margin:2px;font-size:10px;color:var(--text2)">
+        <div style="width:14px;height:14px;border-radius:50%;background:${info.cor};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff">${name.charAt(0).toUpperCase()}</div>
+        ${name.split(' ')[0]}
+      </div>`).join('');
+  });
+  // Update pending count
+  const pend = RISCOS.filter(r=>r.ier>=6).length;
+  const cntEl = document.getElementById('wf-pend-count');
+  if(cntEl) cntEl.textContent = pend + ' pendente'+(pend!==1?'s':'');
+}
+
+function salvarPerfis(){
+  showToast('Perfis salvos com sucesso! ✅');
+  renderWorkflowMembers();
+}
+
+// ── WORKFLOW PENDENCIAS ───────────────────────────────────────────────────────
+function getEtapaRisco(r){
+  const planos = r.planos||[];
+  if(!r._wfEtapa) r._wfEtapa = 'cadastro';
+  return r._wfEtapa;
+}
+
+function avancarEtapa(riscoId){
+  const r = RISCOS.find(x=>x.id===riscoId); if(!r) return;
+  const ordem = ['cadastro','analise','aprovacao','monitoramento'];
+  const idx = ordem.indexOf(r._wfEtapa||'cadastro');
+  if(idx < ordem.length-1){
+    r._wfEtapa = ordem[idx+1];
+    showToast('✅ Risco '+riscoId+' avançado para: '+PERFIL_LABELS[r._wfEtapa].label);
+    renderWorkflow();
+  } else {
+    showToast('Este risco já está na etapa final: Monitoramento');
+  }
+}
+
+function voltarEtapa(riscoId){
+  const r = RISCOS.find(x=>x.id===riscoId); if(!r) return;
+  const ordem = ['cadastro','analise','aprovacao','monitoramento'];
+  const idx = ordem.indexOf(r._wfEtapa||'cadastro');
+  if(idx > 0){
+    r._wfEtapa = ordem[idx-1];
+    showToast('↩ Risco '+riscoId+' retornado para: '+PERFIL_LABELS[r._wfEtapa].label);
+    renderWorkflow();
+  }
+}
+
+function renderWorkflow(){
+  try {
+  renderWorkflowMembers();
+  const el = document.getElementById('workflow-pendencias'); if(!el) return;
+
+  // Todos os riscos com IER >= 4 entram no workflow
+  const todos = RISCOS.filter(r=>r.ier>=4);
+  const pend = todos.filter(r=>(r._wfEtapa||'cadastro')!=='monitoramento').length;
+  const cntEl = document.getElementById('wf-pend-count');
+  if(cntEl) cntEl.textContent = pend + ' pendente'+(pend!==1?'s':'');
+
+  const ordem = ['cadastro','analise','aprovacao','monitoramento'];
+  const etapaInfo = {
+    cadastro:     {label:'1. Cadastro',      badge:'bg-blue',   cor:'#3b82f6', icon:'📝'},
+    analise:      {label:'2. Análise IER',   badge:'bg-amber',  cor:'#f59e0b', icon:'🔍'},
+    aprovacao:    {label:'3. Aprovação',     badge:'bg-green',  cor:'#22c55e', icon:'✅'},
+    monitoramento:{label:'4. Monitoramento', badge:'bg-purple', cor:'#a855f7', icon:'📊'},
+  };
+
+  if(!todos.length){
+    el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text3)"><div style="font-size:32px;margin-bottom:10px">✅</div><div>Nenhum risco no workflow ainda. Cadastre riscos na Gestão de Riscos.</div></div>';
+    return;
+  }
+
+  // Group by etapa
+  const grupos = {};
+  ordem.forEach(e=>grupos[e]=[]);
+  todos.forEach(r=>{ const e=r._wfEtapa||'cadastro'; grupos[e]=grupos[e]||[]; grupos[e].push(r); });
+
+  el.innerHTML = ordem.map(etapa=>{
+    const info = etapaInfo[etapa];
+    const riscos = grupos[etapa]||[];
+    if(!riscos.length) return `
+      <div style="margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <div style="width:28px;height:28px;border-radius:50%;background:${info.cor}22;border:1px solid ${info.cor}44;display:flex;align-items:center;justify-content:center;font-size:13px">${info.icon}</div>
+          <span style="font-size:12px;font-weight:700;color:var(--text2)">${info.label}</span>
+          <span class="badge ${info.badge}" style="font-size:10px">0 riscos</span>
+        </div>
+        <div style="padding:10px 14px;background:var(--bg3);border-radius:var(--r);border:1px dashed var(--border);font-size:12px;color:var(--text3)">Nenhum risco nesta etapa</div>
+      </div>`;
+
+    return `
+      <div style="margin-bottom:16px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <div style="width:28px;height:28px;border-radius:50%;background:${info.cor};display:flex;align-items:center;justify-content:center;font-size:13px">${info.icon}</div>
+          <span style="font-size:13px;font-weight:700;color:var(--text)">${info.label}</span>
+          <span class="badge ${info.badge}">${riscos.length} risco${riscos.length!==1?'s':''}</span>
+          ${etapa!=='monitoramento'?`<span style="font-size:10px;color:var(--text3);margin-left:4px">Responsáveis: ${(PERFIS[etapa]||[]).join(', ')||'—'}</span>`:''}
+        </div>
+        ${riscos.map(r=>{
+          const isLast = etapa==='monitoramento';
+          const isFirst = etapa==='cadastro';
+          const temPlano = (r.planos||[]).length > 0;
+          const ierVal = r.ier||calcIerFromScores(r.scores||{IMP:5,FACIL:5,PROB:5,CTRL:5,TEMPO:5,ORG:5});
+          return `<div style="display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--surface);border-radius:var(--r);margin-bottom:6px;border:1px solid ${info.cor}33;transition:all .2s" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='var(--surface)'">
+            <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);flex-shrink:0;min-width:60px">${r.id}</span>
+            <span style="font-size:12px;font-weight:500;color:var(--text);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.title}</span>
+            <span class="ier-chip ${ierClass(ierVal)}" style="font-size:11px;flex-shrink:0">${formatIER(ierVal)}</span>
+            <span style="font-size:11px;color:var(--text3);flex-shrink:0">${r.resp||'—'}</span>
+            ${!temPlano && etapa!=='monitoramento' ? `<span class="badge bg-amber" style="font-size:9px;flex-shrink:0">⚠ Sem plano</span>` : ''}
+            <button class="btn btn-ghost btn-xs" onclick="openRisco('${r.id}')" style="flex-shrink:0">👁 Ver</button>
+            ${!temPlano ? `<button class="btn btn-ghost btn-xs" onclick="abrirNovoPlano('${r.id}')" style="flex-shrink:0">+ Plano</button>` : ''}
+            ${!isFirst ? `<button class="btn btn-ghost btn-xs" onclick="voltarEtapa('${r.id}')" style="flex-shrink:0;color:var(--amber)" title="Retornar etapa">↩</button>` : ''}
+            ${!isLast ? `<button class="btn btn-primary btn-xs" onclick="avancarEtapa('${r.id}')" style="flex-shrink:0" title="Avançar para próxima etapa">Avançar →</button>` : `<span class="badge bg-purple" style="font-size:10px">✅ Concluído</span>`}
+          </div>`;
+        }).join('')}
+      </div>`;
+  }).join('');
+
+  } catch(err) {
+    console.error('renderWorkflow error:', err);
+    const el2 = document.getElementById('workflow-pendencias');
+    if(el2) el2.innerHTML = '<div style="padding:20px;color:#f87171;text-align:center">❌ Erro ao carregar workflow: '+err.message+'</div>';
+  }
+}
+
+
+// ── EXPORTAÇÃO ────────────────────────────────────────────────────────────────
+function renderExportPreview(){
+  const tbody = document.getElementById('export-preview-body');
+  const cnt = document.getElementById('export-count');
+  if(!tbody) return;
+  if(cnt) cnt.textContent = RISCOS.length + ' riscos';
+  tbody.innerHTML = RISCOS.map(r => {
+    const ierVal = typeof r.ier === 'number' ? r.ier : calcIerFromScores(r.scores||{IMP:5,FACIL:5,PROB:5,CTRL:5,TEMPO:5,ORG:5});
+    return `<tr>
+      <td style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text3)">${r.id}</td>
+      <td style="font-size:12px;color:var(--text);max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.title}</td>
+      <td><span class="cat cat-${catClass(r.cat)}">${r.cat}</span></td>
+      <td style="font-size:12px;color:var(--text2)">${r.area}</td>
+      <td style="text-align:center"><span class="ier-chip ${ierClass(ierVal)}">${formatIER(ierVal)}</span></td>
+      <td style="text-align:center;font-family:'DM Mono',monospace;font-weight:700;font-size:12px">${Math.round(ierVal*100)}</td>
+      <td><span class="badge ${statusBadge(r.status)}">${r.status}</span></td>
+      <td style="font-size:12px;color:var(--text2)">${r.resp||'—'}</td>
+      <td style="text-align:center;font-size:12px;color:var(--text2)">${(r.planos||[]).length}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="9" style="text-align:center;padding:20px;color:var(--text3)">Nenhum risco cadastrado</td></tr>';
+}
+
+function gerarPDF(){
+  const ierMedio = RISCOS.length ? (RISCOS.reduce((s,r)=>s+r.ier,0)/RISCOS.length).toFixed(2) : '0.00';
+  const criticos = RISCOS.filter(r=>r.ier>=8).length;
+  const totalPlanos = RISCOS.reduce((s,r)=>s+(r.planos||[]).length,0);
+  let totalPlan=0, totalReal=0;
+  RISCOS.forEach(r=>{
+    (r.planos||[]).forEach(p=>{
+      CRITERIOS.forEach(c=>{
+        const sc=r.scores||{IMP:5,FACIL:5,PROB:5,CTRL:5,TEMPO:5,ORG:5};
+        const pd=p.reducao_plan[c.id]||0, rd=p.reducao_real[c.id]||0;
+        if(pd>0) totalPlan+=Math.round((sc[c.id]-Math.max(0,sc[c.id]-pd))*c.peso*100);
+        if(rd>0) totalReal+=Math.round((sc[c.id]-Math.max(0,sc[c.id]-rd))*c.peso*100);
+      });
+    });
+  });
+
+  const riscoRows = RISCOS.map(r=>{
+    const iv=r.ier||calcIerFromScores(r.scores||{IMP:5,FACIL:5,PROB:5,CTRL:5,TEMPO:5,ORG:5});
+    const cor=iv>=8?'#dc2626':iv>=6?'#d97706':'#16a34a';
+    return `<tr><td>${r.id}</td><td>${r.title}</td><td>${r.cat}</td><td>${r.area}</td>
+      <td style="color:${cor};font-weight:800;text-align:center">${formatIER(iv)}</td>
+      <td style="text-align:center;font-weight:700">${Math.round(iv*100)}</td>
+      <td style="color:${cor};font-weight:700">${r.status}</td>
+      <td>${r.resp||'—'}</td></tr>`;
+  }).join('');
+
+  const planosRows = [];
+  RISCOS.forEach(r=>{
+    (r.planos||[]).forEach(p=>{
+      let pp=0,rp=0;
+      CRITERIOS.forEach(c=>{
+        const sc=r.scores||{}; const pd=p.reducao_plan[c.id]||0, rd=p.reducao_real[c.id]||0;
+        if(pd>0) pp+=Math.round(((sc[c.id]||5)-Math.max(0,(sc[c.id]||5)-pd))*c.peso*100);
+        if(rd>0) rp+=Math.round(((sc[c.id]||5)-Math.max(0,(sc[c.id]||5)-rd))*c.peso*100);
+      });
+      planosRows.push(`<tr><td>${p.id}</td><td>${r.id}</td><td>${p.titulo||p.what||'—'}</td>
+        <td>${p.status}</td><td>${p.resp||p.who||'—'}</td>
+        <td style="color:#2563eb;font-weight:700;text-align:center">${pp} pts</td>
+        <td style="color:#16a34a;font-weight:700;text-align:center">${rp>0?rp+' pts':'—'}</td>
+        <td style="text-align:center">${p.pct||0}%</td></tr>`);
+    });
+  });
+
+  const pct=Math.min(100,Math.round(totalReal/10));
+  const dataHoje=new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+
+  const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
+<title>Relatório IER — Rumo Logística</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',Arial,sans-serif;color:#1e293b;background:#fff;padding:32px}
+.header{background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 100%);color:#fff;padding:28px 32px;border-radius:12px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center}
+.header h1{font-size:20px;font-weight:800;letter-spacing:-0.5px}
+.header p{font-size:12px;opacity:.7;margin-top:4px}
+.logo{font-size:24px;font-weight:900;background:#e8322a;padding:8px 14px;border-radius:8px}
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px}
+.kpi{border:1px solid #e2e8f0;border-radius:10px;padding:14px;text-align:center;background:#f8fafc}
+.kpi-v{font-size:24px;font-weight:800;font-family:monospace;line-height:1}
+.kpi-l{font-size:9px;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
+.meta{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px 18px;margin-bottom:20px}
+.meta-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.meta-bar{height:10px;background:#dcfce7;border-radius:5px;overflow:hidden}
+.meta-fill{height:100%;background:linear-gradient(90deg,#16a34a,#22c55e);border-radius:5px}
+h2{font-size:13px;font-weight:700;color:#1e293b;margin:20px 0 8px;padding-bottom:5px;border-bottom:2px solid #e8322a}
+table{width:100%;border-collapse:collapse;margin-bottom:4px;font-size:11px}
+th{background:#f1f5f9;padding:7px 10px;text-align:left;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid #e2e8f0}
+td{padding:7px 10px;border-bottom:1px solid #f1f5f9;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#f8fafc}
+.footer{text-align:center;font-size:10px;color:#94a3b8;margin-top:28px;padding-top:14px;border-top:1px solid #e2e8f0}
+@media print{@page{margin:15mm}body{padding:0}.header{border-radius:0}}
+</style></head><body>
+<div class="header">
+  <div><h1>📊 Relatório Executivo — Gestão de IER</h1><p>Rumo Logística · Gerência de CyberSegurança e Governança · ${dataHoje}</p></div>
+  <div class="logo">RL</div>
+</div>
+<div class="kpis">
+  <div class="kpi"><div class="kpi-v">${RISCOS.length}</div><div class="kpi-l">Total Riscos</div></div>
+  <div class="kpi"><div class="kpi-v" style="color:#dc2626">${criticos}</div><div class="kpi-l">Críticos ≥ 8</div></div>
+  <div class="kpi"><div class="kpi-v" style="color:#d97706">${ierMedio.replace('.',',')}</div><div class="kpi-l">IER Médio</div></div>
+  <div class="kpi"><div class="kpi-v" style="color:#2563eb">${totalPlanos}</div><div class="kpi-l">Planos de Ação</div></div>
+  <div class="kpi"><div class="kpi-v" style="color:#16a34a">${totalReal}</div><div class="kpi-l">Pts IER Reduzidos</div></div>
+</div>
+<div class="meta">
+  <div class="meta-row"><strong style="font-size:12px">🎯 Meta 2026 — Redução de 1.000 pontos de IER</strong><strong style="color:#16a34a">${totalReal} / 1.000 pts · ${pct}%</strong></div>
+  <div class="meta-bar"><div class="meta-fill" style="width:${pct}%"></div></div>
+</div>
+<h2>⚠ Riscos Cadastrados (${RISCOS.length})</h2>
+<table><thead><tr><th>ID</th><th>Título</th><th>Categoria</th><th>Área</th><th>IER</th><th>Pts</th><th>Status</th><th>Responsável</th></tr></thead>
+<tbody>${riscoRows||'<tr><td colspan="8" style="text-align:center;color:#94a3b8;padding:16px">Nenhum risco cadastrado</td></tr>'}</tbody></table>
+<h2>📋 Planos de Ação (${planosRows.length})</h2>
+<table><thead><tr><th>ID Plano</th><th>ID Risco</th><th>Título</th><th>Status</th><th>Responsável</th><th>IER Plan.</th><th>IER Real.</th><th>Avanço</th></tr></thead>
+<tbody>${planosRows.join('')||'<tr><td colspan="8" style="text-align:center;color:#94a3b8;padding:16px">Nenhum plano cadastrado</td></tr>'}</tbody></table>
+<div class="footer">Relatório gerado em ${new Date().toLocaleString('pt-BR')} · Sistema de Gestão IER · Rumo Logística · Confidencial</div>
+</body></html>`;
+
+  // Download as HTML file (opens in browser, printable as PDF)
+  // Show in modal for print
+  const existing = document.getElementById('pdf-preview-overlay');
+  if(existing) existing.remove();
+  const overlay = document.createElement('div');
+  overlay.id = 'pdf-preview-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(5,8,16,.92);backdrop-filter:blur(4px);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px';
+  overlay.innerHTML = `
+    <div style="background:#0e1118;border:1px solid #283050;border-radius:20px;width:900px;max-width:100%;max-height:92vh;overflow:hidden;display:flex;flex-direction:column;animation:mIn .2s ease">
+      <div style="padding:16px 22px;border-bottom:1px solid #283050;display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
+        <div>
+          <div style="font-size:14px;font-weight:700;color:#e4eaf6">📊 Relatório Executivo IER</div>
+          <div style="font-size:11px;color:#627090;margin-top:2px">Clique em Imprimir para salvar como PDF (Ctrl+P)</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button onclick="document.getElementById('pdf-iframe').contentWindow.print()" style="padding:7px 14px;background:#3b82f6;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">🖨 Imprimir / Salvar PDF</button>
+          <button onclick="document.getElementById('pdf-preview-overlay').remove()" style="width:29px;height:29px;background:#1d2538;border:1px solid #283050;border-radius:7px;cursor:pointer;color:#96a4be;font-size:15px;display:flex;align-items:center;justify-content:center">✕</button>
+        </div>
+      </div>
+      <div style="flex:1;overflow:hidden;padding:0">
+        <iframe id="pdf-iframe" style="width:100%;height:600px;border:none;background:#fff"></iframe>
+      </div>
+    </div>`;
+  overlay.addEventListener('click', e=>{ if(e.target===overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+  // Write HTML into iframe
+  const iframe = document.getElementById('pdf-iframe');
+  iframe.contentDocument.open();
+  iframe.contentDocument.write(html);
+  iframe.contentDocument.close();
+}
+
+
+
+function exportarExcel(){
+  // Build CSV text and show in a copyable textarea
+  const rows = [
+    ['ID','Título','Categoria','Área','IER','Pontos','Status','Responsável','Sistema','Nº Planos','IMP','FACIL','PROB','CTRL','TEMPO','ORG']
+  ];
+  RISCOS.forEach(r=>{
+    const iv=r.ier||calcIerFromScores(r.scores||{IMP:5,FACIL:5,PROB:5,CTRL:5,TEMPO:5,ORG:5});
+    const sc=r.scores||{IMP:5,FACIL:5,PROB:5,CTRL:5,TEMPO:5,ORG:5};
+    rows.push([r.id,r.title,r.cat,r.area,formatIER(iv),Math.round(iv*100),r.status,r.resp||'',r.sistema||'',(r.planos||[]).length,sc.IMP,sc.FACIL,sc.PROB,sc.CTRL,sc.TEMPO,sc.ORG]);
+  });
+  rows.push([]);
+  rows.push(['--- PLANOS DE AÇÃO ---']);
+  rows.push(['ID Plano','ID Risco','Título','Status','Responsável','Início','Fim','Avanço%','IER Plan(pts)','IER Real(pts)']);
+  RISCOS.forEach(r=>{
+    (r.planos||[]).forEach(p=>{
+      let pp=0,rp=0;
+      CRITERIOS.forEach(c=>{
+        const sc=r.scores||{}; const pd=p.reducao_plan[c.id]||0,rd=p.reducao_real[c.id]||0;
+        if(pd>0)pp+=Math.round(((sc[c.id]||5)-Math.max(0,(sc[c.id]||5)-pd))*c.peso*100);
+        if(rd>0)rp+=Math.round(((sc[c.id]||5)-Math.max(0,(sc[c.id]||5)-rd))*c.peso*100);
+      });
+      rows.push([p.id,r.id,(p.titulo||p.what||'').substring(0,80),p.status,(p.resp||p.who||''),p.inicio||'',p.fim||'',p.pct||0,pp,rp]);
+    });
+  });
+  const csv = rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(';')).join('\n');
+  mostrarExportModal('📋 Dados para Excel', csv, 'Copie o texto abaixo e cole numa planilha Excel em branco. Use separador ";" ao importar.', 'csv');
+}
+
+function mostrarExportModal(titulo, texto, instrucao, tipo){
+  // Remove existing if any
+  const existing = document.getElementById('export-modal-overlay');
+  if(existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'export-modal-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(5,8,16,.88);backdrop-filter:blur(4px);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px';
+  overlay.innerHTML = `
+    <div style="background:#0e1118;border:1px solid #283050;border-radius:20px;width:800px;max-width:100%;max-height:88vh;overflow:hidden;display:flex;flex-direction:column;animation:mIn .2s ease">
+      <div style="padding:18px 22px;border-bottom:1px solid #283050;display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
+        <div>
+          <div style="font-size:14px;font-weight:700;color:#e4eaf6">${titulo}</div>
+          <div style="font-size:11px;color:#627090;margin-top:2px">${instrucao}</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button onclick="copiarExport()" style="padding:7px 14px;background:#3b82f6;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">📋 Copiar tudo</button>
+          <button onclick="document.getElementById('export-modal-overlay').remove()" style="width:29px;height:29px;background:#1d2538;border:1px solid #283050;border-radius:7px;cursor:pointer;color:#96a4be;font-size:15px;display:flex;align-items:center;justify-content:center;font-family:inherit">✕</button>
+        </div>
+      </div>
+      <div style="padding:16px;flex:1;overflow:auto">
+        <textarea id="export-textarea" style="width:100%;height:400px;background:#141923;border:1px solid #283050;border-radius:8px;color:#e4eaf6;font-family:'DM Mono',monospace;font-size:11px;padding:12px;resize:none;outline:none;line-height:1.6">${texto.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</textarea>
+      </div>
+      <div style="padding:12px 22px;border-top:1px solid #283050;display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
+        <span style="font-size:11px;color:#627090">💡 Cole no Excel → Dados → Texto para Colunas → Delimitado → Ponto e vírgula</span>
+        <span id="copy-feedback" style="font-size:11px;color:#4ade80;display:none">✅ Copiado!</span>
+      </div>
+    </div>`;
+  overlay.addEventListener('click', e=>{ if(e.target===overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+}
+
+function copiarExport(){
+  const ta = document.getElementById('export-textarea');
+  if(!ta) return;
+  ta.select();
+  ta.setSelectionRange(0,999999);
+  try {
+    navigator.clipboard.writeText(ta.value).then(()=>{
+      const fb = document.getElementById('copy-feedback');
+      if(fb){ fb.style.display='block'; setTimeout(()=>fb.style.display='none',2500); }
+    }).catch(()=>{
+      document.execCommand('copy');
+      const fb = document.getElementById('copy-feedback');
+      if(fb){ fb.style.display='block'; setTimeout(()=>fb.style.display='none',2500); }
+    });
+  } catch(e){ document.execCommand('copy'); }
+}
+
 // ── INIT ─────────────────────────────────────────────────────────────────────
-window.addEventListener('DOMContentLoaded',()=>{ setTimeout(initDashboard,100); });
+window.addEventListener('DOMContentLoaded',()=>{
+  // Initialize workflow stage for all riscos
+  RISCOS.forEach(r=>{ if(!r._wfEtapa) r._wfEtapa = 'cadastro'; });
+  setTimeout(initDashboard,100);
+});
 </script>
+
+<!-- MODAL: CONFIRMAÇÃO DE EXCLUSÃO -->
+<div class="overlay" id="confirm-overlay">
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r3);padding:28px;text-align:center;max-width:400px;width:100%;animation:mIn .2s ease">
+    <div style="font-size:36px;margin-bottom:12px" id="confirm-icon">🗑</div>
+    <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px" id="confirm-title">Confirmar exclusão</div>
+    <div style="font-size:12px;color:var(--text3);line-height:1.6;margin-bottom:22px" id="confirm-sub">Esta ação não pode ser desfeita.</div>
+    <div style="display:flex;gap:10px;justify-content:center">
+      <button class="btn btn-ghost" onclick="closeModal('confirm-overlay')">Cancelar</button>
+      <button class="btn btn-danger" id="confirm-ok-btn" style="background:var(--red);color:#fff">Excluir</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: EDITAR RISCO -->
+<div class="overlay" id="m-risco">
+  <div class="modal">
+    <div class="modal-hd">
+      <div>
+        <div class="modal-title" id="m-risco-title">Editar Risco</div>
+        <div class="modal-sub">Ficha de Risco Corporativo — Rumo Logística</div>
+      </div>
+      <button class="close-btn" onclick="closeModal('m-risco')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="m-risco-id">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Título do Risco *</label><input class="form-input" id="m-r-titulo" placeholder="Descreva o risco..."></div>
+        <div class="form-group"><label class="form-label">Categoria *</label>
+          <select class="form-input" id="m-r-cat"><option>Cyber</option><option>Operacional</option><option>Compliance</option><option>Infraestrutura</option><option>Processos</option><option>Continuidade</option></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Área Responsável *</label>
+          <select class="form-input" id="m-r-area"><option>TI/CyberSec</option><option>Operações Ferroviárias</option><option>Logística</option><option>Jurídico</option><option>RH</option><option>Financeiro</option></select>
+        </div>
+        <div class="form-group"><label class="form-label">Sistema / Processo</label><input class="form-input" id="m-r-sistema" placeholder="Ex: ERP SAP, SCADA..."></div>
+      </div>
+      <div class="form-group"><label class="form-label">Descrição *</label><textarea class="form-input" id="m-r-desc" rows="3" placeholder="Contexto, origem e possível impacto..."></textarea></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Responsável</label><input class="form-input" id="m-r-resp" placeholder="Nome completo"></div>
+        <div class="form-group"><label class="form-label">Status</label>
+          <select class="form-input" id="m-r-status"><option>Crítico</option><option>Alto</option><option>Médio</option><option>Baixo</option></select>
+        </div>
+      </div>
+      <div style="height:1px;background:var(--border);margin:14px 0"></div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button class="btn btn-ghost" onclick="closeModal('m-risco')">Cancelar</button>
+        <button class="btn btn-primary" onclick="saveRiscoModal()">💾 Salvar Alterações</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- LOADING -->
+<div id="loading-overlay" style="display:none;position:fixed;inset:0;background:rgba(5,8,16,.7);z-index:99998;align-items:center;justify-content:center;flex-direction:column;gap:16px">
+  <div style="width:40px;height:40px;border:3px solid #283050;border-top-color:#3b82f6;border-radius:50%;animation:spin .8s linear infinite"></div>
+  <div id="loading-txt" style="font-size:13px;color:#96a4be;font-family:'DM Sans',system-ui">Carregando...</div>
+</div>
 </body>
 </html>
