@@ -1,0 +1,2953 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rumo Logística — Sistema de Gestão IER</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#090c12;--bg2:#0e1118;--bg3:#141923;--bg4:#1a2130;
+  --surface:#1d2538;--surface2:#242e47;--surface3:#2c3856;
+  --border:#283050;--border2:#384268;
+  --text:#e4eaf6;--text2:#96a4be;--text3:#627090;
+  --accent:#3b82f6;--accent2:#2563eb;--accent3:#60a5fa;
+  --green:#22c55e;--green2:#16a34a;
+  --amber:#f59e0b;--red:#ef4444;--purple:#a855f7;--teal:#14b8a6;
+  --rumo:#e8322a;
+  --r:8px;--r2:12px;--r3:16px;--r4:20px;
+  font-family:'DM Sans',system-ui,sans-serif;
+}
+body{background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+.app{display:flex;height:100vh;overflow:hidden}
+
+/* SIDEBAR */
+.sidebar{width:224px;min-width:224px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100;transition:width .25s}
+.sidebar.col{width:58px;min-width:58px}
+.sidebar.col .hide-col{display:none!important}
+.sidebar.col .logo{justify-content:center;padding:16px 8px}
+.sidebar.col .nav-item{justify-content:center;padding:10px}
+.sidebar.col .user-pill{justify-content:center}
+.logo{padding:16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
+.logo-icon{width:34px;height:34px;background:var(--rumo);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0;box-shadow:0 2px 12px rgba(232,50,42,.4)}
+.logo-text{font-size:13px;font-weight:700;color:var(--text)}
+.logo-sub{font-size:9px;color:var(--text3);letter-spacing:.8px;text-transform:uppercase}
+.nav{flex:1;padding:10px 8px;overflow-y:auto}
+.nav-sec{margin-bottom:20px}
+.nav-lbl{font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1.2px;padding:0 8px;margin-bottom:5px}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--r);cursor:pointer;font-size:13px;color:var(--text2);transition:all .15s;margin-bottom:1px;white-space:nowrap}
+.nav-item:hover{background:var(--surface);color:var(--text)}
+.nav-item.active{background:linear-gradient(135deg,rgba(59,130,246,.2),rgba(59,130,246,.08));color:#93c5fd;font-weight:500;border:1px solid rgba(59,130,246,.18)}
+.nav-icon{font-size:16px;width:18px;text-align:center;flex-shrink:0}
+.nav-badge{margin-left:auto;font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px;min-width:18px;text-align:center;background:var(--red);color:#fff}
+.nav-badge.am{background:var(--amber);color:#000}
+.sidebar-footer{padding:10px 8px;border-top:1px solid var(--border)}
+.user-pill{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--r);background:var(--surface);cursor:pointer}
+.user-pill:hover{background:var(--surface2)}
+.user-av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--purple));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+
+/* MAIN */
+.main{flex:1;overflow:hidden;display:flex;flex-direction:column}
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 22px;height:54px;display:flex;align-items:center;gap:10px;flex-shrink:0;z-index:50}
+.pg-title{font-size:16px;font-weight:700;color:var(--text)}
+.pg-sub{font-size:12px;color:var(--text3);margin-left:6px}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--r);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;border:none;font-family:inherit;white-space:nowrap}
+.btn-primary{background:var(--accent);color:#fff;box-shadow:0 1px 8px rgba(59,130,246,.25)}
+.btn-primary:hover{background:var(--accent2);transform:translateY(-1px)}
+.btn-ghost{background:var(--surface);color:var(--text2);border:1px solid var(--border)}
+.btn-ghost:hover{background:var(--surface2);color:var(--text)}
+.btn-danger{background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.2)}
+.btn-danger:hover{background:rgba(239,68,68,.2)}
+.btn-green{background:rgba(34,197,94,.12);color:#4ade80;border:1px solid rgba(34,197,94,.2)}
+.btn-green:hover{background:rgba(34,197,94,.2)}
+.btn-sm{padding:5px 10px;font-size:11px}
+.btn-xs{padding:3px 8px;font-size:10px;font-weight:700}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:600;gap:4px}
+.bg-green{background:rgba(34,197,94,.12);color:#4ade80;border:1px solid rgba(34,197,94,.18)}
+.bg-red{background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.18)}
+.bg-amber{background:rgba(245,158,11,.12);color:#fbbf24;border:1px solid rgba(245,158,11,.18)}
+.bg-blue{background:rgba(59,130,246,.12);color:#93c5fd;border:1px solid rgba(59,130,246,.18)}
+.bg-purple{background:rgba(168,85,247,.12);color:#c084fc;border:1px solid rgba(168,85,247,.18)}
+.bg-teal{background:rgba(20,184,166,.12);color:#2dd4bf;border:1px solid rgba(20,184,166,.18)}
+.bg-gray{background:rgba(98,112,144,.12);color:#96a4be;border:1px solid rgba(98,112,144,.18)}
+
+/* VIEWS */
+.view{display:none;flex:1;flex-direction:column;overflow:hidden}
+.view.active{display:flex}
+.content{padding:20px 22px;overflow-y:auto;flex:1}
+
+/* CARDS */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden}
+.card-hd{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.card-title{font-size:13px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:7px}
+.card-body{padding:16px}
+
+/* FORM */
+.form-group{margin-bottom:12px}
+.form-label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px;display:block}
+.form-input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-size:13px;padding:8px 11px;font-family:'DM Sans',system-ui;outline:none;transition:border-color .15s}
+.form-input:focus{border-color:var(--accent)}
+.form-input::placeholder{color:var(--text3)}
+select.form-input option{background:var(--bg2)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+
+/* GRIDS */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.grid31{display:grid;grid-template-columns:3fr 1.3fr;gap:14px;margin-bottom:14px}
+
+/* RISK TABLE */
+.rtable{width:100%;border-collapse:collapse}
+.rtable th{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.7px;padding:9px 12px;text-align:left;border-bottom:1px solid var(--border);background:var(--bg3)}
+.rtable td{padding:10px 12px;border-bottom:1px solid rgba(40,48,80,.4);font-size:12px;vertical-align:middle}
+.rtable tr:last-child td{border-bottom:none}
+.rtable tbody tr{cursor:pointer;transition:background .1s}
+.rtable tbody tr:hover td{background:rgba(29,37,56,.7)}
+
+/* IER CHIPS */
+.ier-chip{font-family:'DM Mono',monospace;font-weight:800;font-size:13px;padding:3px 8px;border-radius:6px;display:inline-block}
+.ic-c{background:rgba(239,68,68,.15);color:#f87171}
+.ic-h{background:rgba(245,158,11,.15);color:#fbbf24}
+.ic-m{background:rgba(59,130,246,.15);color:#93c5fd}
+.ic-l{background:rgba(34,197,94,.15);color:#4ade80}
+
+/* CAT TAGS */
+.cat{display:inline-flex;align-items:center;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700}
+.cat-cyber{background:rgba(59,130,246,.15);color:#93c5fd}
+.cat-op{background:rgba(168,85,247,.15);color:#c084fc}
+.cat-comp{background:rgba(20,184,166,.15);color:#2dd4bf}
+.cat-infra{background:rgba(245,158,11,.15);color:#fbbf24}
+.cat-cont{background:rgba(6,182,212,.15);color:#67e8f9}
+.cat-proc{background:rgba(239,68,68,.15);color:#f87171}
+
+/* KPI GRID */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.kpi-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:15px;cursor:pointer;transition:all .2s}
+.kpi-card:hover{border-color:var(--border2);transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,0,0,.3)}
+.kpi-hd{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.kpi-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px}
+.kpi-trend{font-size:11px;font-weight:700;padding:2px 6px;border-radius:20px}
+.kpi-trend.up{background:rgba(239,68,68,.1);color:#f87171}
+.kpi-trend.dn{background:rgba(34,197,94,.1);color:#4ade80}
+.kpi-val{font-size:26px;font-weight:800;font-family:'DM Mono',monospace;line-height:1;letter-spacing:-1px}
+.kpi-lbl{font-size:10px;color:var(--text3);margin-top:3px;text-transform:uppercase;letter-spacing:.5px}
+.kpi-sub{font-size:11px;color:var(--text2);margin-top:7px;display:flex;gap:5px;flex-wrap:wrap}
+
+/* META BAR */
+.meta-bar{background:linear-gradient(135deg,var(--surface),rgba(59,130,246,.06));border:1px solid var(--border);border-radius:var(--r3);padding:17px 22px;margin-bottom:18px;position:relative;overflow:hidden}
+.meta-bar::after{content:'';position:absolute;top:-20px;right:-20px;width:140px;height:140px;background:radial-gradient(circle,rgba(59,130,246,.06),transparent 70%);pointer-events:none}
+.meta-eye{font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.meta-eye::before{content:'';width:14px;height:2px;background:var(--rumo);border-radius:1px}
+.meta-grid{display:grid;grid-template-columns:2.2fr 1fr 1fr 1fr 1fr;gap:18px;align-items:center}
+.prog-lbl{display:flex;justify-content:space-between;margin-bottom:6px}
+.prog-lbl span{font-size:12px;color:var(--text2)}
+.prog-lbl strong{font-size:12px;color:#4ade80;font-weight:700}
+.prog-bar{height:9px;background:var(--bg3);border-radius:5px;overflow:hidden}
+.prog-fill{height:100%;border-radius:5px;background:linear-gradient(90deg,var(--green2),var(--green),#86efac);transition:width 1.2s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden}
+.prog-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 60%,rgba(255,255,255,.25));animation:shim 2.5s infinite}
+@keyframes shim{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.prog-sub{display:flex;justify-content:space-between;margin-top:4px}
+.prog-sub span{font-size:10px;color:var(--text3)}
+.m-stat{text-align:center}
+.m-val{font-size:23px;font-weight:800;font-family:'DM Mono',monospace;line-height:1}
+.m-lbl{font-size:9px;color:var(--text3);margin-top:3px;text-transform:uppercase;letter-spacing:.5px}
+
+/* MINI BARS */
+.mb-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.mb-lbl{font-size:11px;color:var(--text2);min-width:130px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mb-track{flex:1;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden}
+.mb-fill{height:100%;border-radius:3px;transition:width 1s}
+.mb-val{font-size:11px;color:var(--text);min-width:28px;text-align:right;font-family:'DM Mono',monospace;font-weight:600}
+
+/* HEATMAP */
+.hm-cell{border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;cursor:pointer;transition:transform .1s;height:24px}
+.hm-cell:hover{transform:scale(1.12);z-index:2;position:relative}
+.hm-0{background:rgba(34,197,94,.08);color:rgba(74,222,128,.6)}
+.hm-1{background:rgba(34,197,94,.2);color:#4ade80}
+.hm-2{background:rgba(245,158,11,.18);color:#fbbf24}
+.hm-3{background:rgba(245,158,11,.38);color:#f59e0b}
+.hm-4{background:rgba(239,68,68,.22);color:#f87171}
+.hm-5{background:rgba(239,68,68,.5);color:#fca5a5}
+
+/* SCORE SLIDER */
+.score-slider{width:100%;-webkit-appearance:none;height:4px;border-radius:2px;background:var(--bg3);outline:none;margin:6px 0;cursor:pointer}
+.score-slider::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid var(--bg);box-shadow:0 0 6px rgba(59,130,246,.5);transition:transform .1s}
+.score-slider::-webkit-slider-thumb:hover{transform:scale(1.2)}
+.scale-dots{display:flex;gap:2px}
+.sd{flex:1;max-width:26px;height:6px;border-radius:3px;background:var(--surface3);cursor:pointer;transition:all .1s}
+.sd.anc{background:var(--bg4);border:1px solid var(--border2)}
+.sd.sel{background:var(--accent);box-shadow:0 0 5px rgba(59,130,246,.5);transform:scaleY(1.4)}
+
+/* MODAL */
+.overlay{display:none;position:fixed;inset:0;background:rgba(5,8,16,.85);backdrop-filter:blur(4px);z-index:9999;align-items:center;justify-content:center;padding:20px}
+.overlay.show{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r4);width:760px;max-width:100%;max-height:92vh;overflow-y:auto;animation:mIn .2s ease}
+@keyframes mIn{from{opacity:0;transform:scale(.96) translateY(-8px)}}
+.modal-hd{padding:17px 22px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:var(--bg2);z-index:1}
+.modal-title{font-size:14px;font-weight:700;color:var(--text)}
+.modal-sub{font-size:11px;color:var(--text3);margin-top:1px}
+.modal-body{padding:22px}
+.close-btn{width:29px;height:29px;background:var(--surface);border:1px solid var(--border);border-radius:7px;cursor:pointer;color:var(--text2);font-size:15px;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+.close-btn:hover{background:var(--surface2);color:var(--text)}
+
+/* RISK DETAIL PAGE */
+.risk-detail{display:flex;flex-direction:column;gap:16px}
+
+/* IER CRITERIA DISPLAY (read-only) */
+.crit-display-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.crit-display-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px;transition:border-color .2s}
+.crit-display-card:hover{border-color:var(--border2)}
+.crit-d-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.crit-d-id{font-family:'DM Mono',monospace;font-size:9px;font-weight:700;background:var(--accent);color:#fff;padding:2px 6px;border-radius:4px}
+.crit-d-peso{font-size:10px;color:var(--text3)}
+.crit-d-name{font-size:11px;color:var(--text2);margin-bottom:8px}
+.crit-d-score{font-size:24px;font-weight:800;font-family:'DM Mono',monospace;line-height:1}
+.crit-d-bar{height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-top:6px}
+.crit-d-fill{height:100%;border-radius:3px;transition:width .8s}
+.crit-d-anchor{font-size:10px;color:var(--text3);margin-top:5px;font-style:italic;line-height:1.3}
+.crit-d-reduction{font-size:10px;margin-top:6px;display:flex;align-items:center;gap:4px}
+
+/* IER SUMMARY BOX */
+.ier-summary{background:linear-gradient(135deg,var(--surface),var(--surface2));border:1px solid rgba(59,130,246,.25);border-radius:var(--r2);padding:18px;text-align:center;position:relative;overflow:hidden}
+.ier-summary::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(59,130,246,.07),transparent 70%)}
+.ier-eye{font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.ier-num{font-size:48px;font-weight:900;font-family:'DM Mono',monospace;line-height:1;background:linear-gradient(135deg,#60a5fa,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.ier-pts{font-size:13px;color:var(--text2);margin-top:4px}
+.ier-pts strong{color:var(--text);font-size:16px;font-weight:800;font-family:'DM Mono',monospace}
+
+/* REDUCTION TRACK */
+.reduction-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.red-stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px;text-align:center}
+.red-stat-val{font-size:22px;font-weight:800;font-family:'DM Mono',monospace;line-height:1}
+.red-stat-lbl{font-size:10px;color:var(--text3);margin-top:3px;text-transform:uppercase;letter-spacing:.4px}
+
+/* PLAN CARD */
+.plan-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;margin-bottom:14px}
+.plan-card-hd{padding:11px 15px;background:var(--bg4);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.plan-card-body{padding:14px 15px}
+.plan-5w{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.w2h-mini{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:10px}
+.w2h-mini-tag{font-size:9px;font-weight:800;background:var(--accent);color:#fff;padding:2px 6px;border-radius:4px;font-family:'DM Mono',monospace;display:inline-block;margin-bottom:4px}
+.w2h-mini-lbl{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;font-weight:600;display:block;margin-bottom:3px}
+.w2h-mini-val{font-size:12px;color:var(--text2);line-height:1.4}
+
+/* CRITERION REDUCTION TABLE */
+.crit-red-table{width:100%;border-collapse:collapse}
+.crit-red-table th{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;padding:8px 10px;text-align:left;border-bottom:1px solid var(--border);background:var(--surface)}
+.crit-red-table td{padding:9px 10px;border-bottom:1px solid rgba(40,48,80,.4);font-size:12px;vertical-align:middle}
+.crit-red-table tr:last-child td{border-bottom:none}
+.crit-red-table .num{font-family:'DM Mono',monospace;font-weight:700}
+.delta-chip{display:inline-flex;align-items:center;gap:3px;font-family:'DM Mono',monospace;font-weight:700;font-size:11px;padding:2px 7px;border-radius:5px}
+.delta-plan{background:rgba(59,130,246,.12);color:#93c5fd}
+.delta-real{background:rgba(34,197,94,.12);color:#4ade80}
+.delta-none{background:rgba(98,112,144,.1);color:var(--text3)}
+
+/* PROGRESS BAR */
+.prog-bar2{height:7px;background:var(--bg3);border-radius:4px;overflow:hidden}
+.prog-fill2{height:100%;border-radius:4px;transition:width .8s}
+
+/* ALERT */
+.alert-strip{background:rgba(239,68,68,.05);border:1px solid rgba(239,68,68,.16);border-radius:var(--r);padding:10px 14px;display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.alert-pulse{width:8px;height:8px;border-radius:50%;background:var(--red);flex-shrink:0;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(239,68,68,.4)}50%{opacity:.8;box-shadow:0 0 0 5px rgba(239,68,68,0)}}
+
+/* DIVIDER */
+.divider{height:1px;background:var(--border);margin:14px 0}
+
+/* TAB BAR */
+.tab-bar{display:flex;gap:3px;padding:3px;background:var(--surface);border-radius:var(--r);margin-bottom:16px;width:fit-content}
+.tab{padding:6px 14px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;color:var(--text2);transition:all .15s;white-space:nowrap}
+.tab.active{background:var(--bg2);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.3)}
+
+/* INSIGHT */
+.insight-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;border-left-width:3px;border-left-style:solid}
+.insight-lbl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
+.insight-txt{font-size:12px;color:var(--text2);line-height:1.6}
+
+/* IER CALC FORM */
+.crit-calc-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:14px;margin-bottom:10px;transition:all .2s}
+.crit-calc-card:hover{border-color:var(--border2)}
+.crit-calc-card.active-c{border-color:rgba(59,130,246,.45);box-shadow:0 0 0 1px rgba(59,130,246,.15)}
+.crit-c-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.crit-c-info{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.crit-c-tag{background:var(--accent);color:#fff;font-size:9px;font-weight:800;padding:2px 7px;border-radius:4px;font-family:'DM Mono',monospace}
+.crit-c-name{font-size:12px;font-weight:600;color:var(--text)}
+.crit-c-peso{font-size:10px;color:var(--text3);background:var(--surface2);padding:2px 7px;border-radius:4px}
+.crit-c-score{font-size:22px;font-weight:800;font-family:'DM Mono',monospace;color:var(--accent);min-width:28px;text-align:center}
+.anchor-desc{font-size:10px;color:var(--text3);font-style:italic;margin-top:5px;min-height:14px;line-height:1.4}
+
+/* IER RESULT */
+.ier-result-box{background:linear-gradient(135deg,var(--surface),var(--surface2));border:1px solid rgba(59,130,246,.28);border-radius:var(--r2);padding:18px;text-align:center;margin-bottom:12px;position:relative;overflow:hidden}
+.ier-result-box::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(59,130,246,.07),transparent 70%)}
+.ier-big{font-size:50px;font-weight:900;font-family:'DM Mono',monospace;line-height:1;background:linear-gradient(135deg,#60a5fa,#a78bfa,#60a5fa);background-size:200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:gm 4s ease infinite}
+@keyframes gm{0%,100%{background-position:0%}50%{background-position:100%}}
+.ier-pts-row{font-size:13px;color:var(--text2);margin-top:5px}
+.ier-pts-row strong{color:var(--text);font-size:16px;font-weight:800;font-family:'DM Mono',monospace}
+
+/* BREAKDOWN TABLE */
+.bkd-table{width:100%;border-collapse:collapse;font-size:12px}
+.bkd-table th{color:var(--text3);font-weight:700;text-transform:uppercase;font-size:9px;letter-spacing:.5px;padding:6px 8px;text-align:center;border-bottom:1px solid var(--border);background:var(--bg3)}
+.bkd-table td{padding:7px 8px;border-bottom:1px solid rgba(40,48,80,.4);text-align:center}
+.bkd-table tr:last-child td{border-bottom:none;font-weight:800;background:var(--surface);color:var(--text)}
+
+/* SCROLLBAR */
+
+/* PERFIS WORKFLOW */
+.wf-profile-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:14px;transition:all .2s}
+.wf-profile-card:hover{border-color:var(--border2)}
+.wf-profile-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.wf-profile-step{display:flex;align-items:center;gap:8px}
+.wf-step-badge{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0}
+.wf-profile-name{font-size:13px;font-weight:700;color:var(--text)}
+.wf-profile-role{font-size:11px;color:var(--text3);margin-top:1px}
+.member-chip{display:inline-flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:4px 10px;font-size:11px;color:var(--text2);margin:3px}
+.member-chip .av{width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--purple));display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff;flex-shrink:0}
+.member-chip .rm{cursor:pointer;color:var(--text3);font-size:12px;margin-left:2px;line-height:1}
+.member-chip .rm:hover{color:var(--red)}
+.members-wrap{min-height:36px;display:flex;flex-wrap:wrap;align-items:center;gap:2px;padding:6px;background:var(--bg3);border-radius:var(--r);border:1px solid var(--border);margin-top:6px;cursor:text}
+.members-wrap input{border:none;background:transparent;color:var(--text);font-size:11px;outline:none;font-family:inherit;min-width:120px;flex:1;padding:2px 4px}
+.members-wrap input::placeholder{color:var(--text3)}
+.wf-steps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
+.wf-flow-visual{display:flex;align-items:stretch;gap:0;margin-bottom:20px;background:var(--bg3);border-radius:var(--r2);overflow:hidden;border:1px solid var(--border)}
+.wf-flow-step{flex:1;padding:14px 12px;text-align:center;position:relative;transition:background .15s}
+.wf-flow-step:hover{background:var(--surface)}
+.wf-flow-step:not(:last-child)::after{content:'→';position:absolute;right:-10px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:14px;z-index:1}
+.wf-flow-step.active-step{background:rgba(59,130,246,.08);border-bottom:2px solid var(--accent)}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+::-webkit-scrollbar-thumb:hover{background:var(--border2)}
+
+canvas{display:block}
+
+/* W2H FORM */
+.w2h-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.w2h-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px}
+.w2h-item:focus-within{border-color:rgba(59,130,246,.35)}
+.w2h-tag{font-size:9px;font-weight:800;background:var(--accent);color:#fff;padding:2px 7px;border-radius:4px;font-family:'DM Mono',monospace}
+.w2h-lbl{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin:5px 0 4px;display:flex;align-items:center;gap:5px}
+.w2h-inp{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;padding:7px 10px;font-family:'DM Sans',system-ui;resize:none;outline:none;transition:border-color .15s;line-height:1.5}
+.w2h-inp:focus{border-color:var(--accent)}
+.w2h-inp::placeholder{color:var(--text3)}
+
+/* REDUCTION INPUT */
+.red-inp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.red-inp-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:10px;transition:border-color .2s}
+.red-inp-card.active-r{border-color:rgba(59,130,246,.4)}
+.red-inp-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.red-inp-id{font-family:'DM Mono',monospace;font-size:10px;font-weight:700;color:var(--accent3);background:rgba(59,130,246,.1);padding:2px 6px;border-radius:4px}
+.red-inp-name{font-size:10px;color:var(--text3);margin-bottom:8px}
+.red-inp-row{display:flex;gap:6px;margin-bottom:5px}
+.red-inp-num{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:13px;font-family:'DM Mono',monospace;padding:5px 8px;outline:none;transition:border-color .15s;text-align:center;font-weight:700}
+.red-inp-num:focus{border-color:var(--accent)}
+.red-inp-lbl{font-size:9px;color:var(--text3);text-align:center;margin-top:1px}
+.ier-delta{font-size:11px;font-family:'DM Mono',monospace;font-weight:700;text-align:center;margin-top:5px;padding:3px 6px;border-radius:5px}
+.ier-delta.pos{background:rgba(34,197,94,.1);color:#4ade80}
+.ier-delta.neg{background:rgba(239,68,68,.1);color:#f87171}
+.ier-delta.zero{background:var(--surface2);color:var(--text3)}
+
+/* CHECKBOX TOGGLE */
+.toggle-wrap{display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;margin-bottom:10px}
+.toggle-box{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--border2);background:var(--surface2);display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+.toggle-box.checked{background:var(--accent);border-color:var(--accent)}
+.toggle-lbl{font-size:12px;color:var(--text2)}
+
+/* WFLOW */
+.wf-step{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:13px 15px;text-align:center;flex:1;min-width:0;transition:all .2s}
+.wf-step:hover{border-color:var(--border2);transform:translateY(-2px)}
+
+@media(max-width:1100px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.grid31{grid-template-columns:1fr}.crit-display-grid{grid-template-columns:repeat(2,1fr)}.red-inp-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:700px){.sidebar{width:56px;min-width:56px}.sidebar .hide-col{display:none!important}.sidebar .logo{justify-content:center;padding:14px 8px}.sidebar .nav-item{justify-content:center;padding:10px}.sidebar .user-pill{justify-content:center}.kpi-grid{grid-template-columns:1fr 1fr}.grid2,.form-row,.form-row-3,.w2h-grid{grid-template-columns:1fr}.meta-grid{grid-template-columns:1fr 1fr;gap:10px}.content{padding:14px}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ═══════════════ SIDEBAR ═══════════════ -->
+<div class="sidebar" id="sidebar">
+  <div class="logo" onclick="document.getElementById('sidebar').classList.toggle('col')">
+    <div class="logo-icon">RL</div>
+    <div class="hide-col">
+      <div class="logo-text">Rumo IER</div>
+      <div class="logo-sub">CyberSec &amp; Governança</div>
+    </div>
+  </div>
+  <nav class="nav">
+    <div class="nav-sec">
+      <div class="nav-lbl hide-col">Principal</div>
+      <div class="nav-item active" onclick="goTo('dashboard',this)"><span class="nav-icon">⬛</span><span class="hide-col">Dashboard</span></div>
+      <div class="nav-item" onclick="goTo('riscos',this)"><span class="nav-icon">⚠</span><span class="hide-col">Gestão de Riscos</span><span class="nav-badge hide-col">14</span></div>
+      <div class="nav-item" onclick="goTo('avaliar',this)"><span class="nav-icon">📊</span><span class="hide-col">Avaliar IER</span></div>
+      <div class="nav-item" onclick="goTo('planos',this)"><span class="nav-icon">📋</span><span class="hide-col">Planos 5W2H</span><span class="nav-badge am hide-col">7</span></div>
+    </div>
+    <div class="nav-sec">
+      <div class="nav-lbl hide-col">Analytics</div>
+      <div class="nav-item" onclick="goTo('analytics',this)"><span class="nav-icon">📈</span><span class="hide-col">Analytics &amp; IA</span></div>
+      <div class="nav-item" onclick="goTo('relatorios',this)"><span class="nav-icon">📄</span><span class="hide-col">Relatórios</span></div>
+    </div>
+    <div class="nav-sec">
+      <div class="nav-lbl hide-col">Governança</div>
+      <div class="nav-item" onclick="goTo('workflow',this)"><span class="nav-icon">🔄</span><span class="hide-col">Workflow</span></div>
+      <div class="nav-item" onclick="goTo('auditoria',this)"><span class="nav-icon">🔍</span><span class="hide-col">Auditoria</span></div>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-pill">
+      <div class="user-av">GC</div>
+      <div class="hide-col" style="min-width:0">
+        <div style="font-size:12px;font-weight:600;color:var(--text);white-space:nowrap">Ger. CyberSec</div>
+        <div style="font-size:10px;color:var(--text3)">Administrador</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ MAIN ═══════════════ -->
+<div class="main">
+
+<!-- ════════ DASHBOARD ════════ -->
+<div id="v-dashboard" class="view active">
+  <div class="topbar">
+    <span class="pg-title">Dashboard Executivo</span><span class="pg-sub">IER Corporativo — Rumo Logística</span>
+    <div class="tb-right">
+      <span class="badge bg-amber" id="sp-status">● Conectando...</span>
+      <button class="btn btn-ghost btn-sm" onclick="goTo('avaliar',navItem('avaliar'))">+ Novo Risco</button>
+      <button class="btn btn-primary btn-sm">⬇ Exportar PDF</button>
+    </div>
+  </div>
+  <div class="content">
+    <div class="alert-strip">
+      <div class="alert-pulse"></div>
+      <span style="font-size:12px;color:var(--text2)"><strong style="color:#f87171">3 riscos críticos</strong> sem plano de ação aprovado — IER ≥ 8,5</span>
+      <button class="btn btn-danger btn-sm" style="margin-left:auto" onclick="goTo('riscos',navItem('riscos'))">Ver riscos →</button>
+    </div>
+    <div class="meta-bar">
+      <div class="meta-eye">🎯 Meta Corporativa 2026 — Redução de 1.000 pontos de IER</div>
+      <div class="meta-grid">
+        <div>
+          <div class="prog-lbl"><span>Progresso anual</span><strong>423 / 1.000 pts</strong></div>
+          <div class="prog-bar"><div class="prog-fill" id="meta-fill" style="width:0%"></div></div>
+          <div class="prog-sub"><span>Jan 2026</span><span style="color:var(--amber)">⚡ Forecast: 780 pts</span><span>Dez 2026</span></div>
+        </div>
+        <div class="m-stat"><div class="m-val" style="color:var(--accent3)">42,3%</div><div class="m-lbl">Atingido</div></div>
+        <div class="m-stat"><div class="m-val" style="color:#4ade80">423</div><div class="m-lbl">Pts realizados</div></div>
+        <div class="m-stat"><div class="m-val" style="color:var(--amber)">357</div><div class="m-lbl">Pts planejados</div></div>
+        <div class="m-stat"><div class="m-val" style="color:#f87171">220</div><div class="m-lbl">Déficit forecast</div></div>
+      </div>
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi-card" onclick="goTo('riscos',navItem('riscos'))">
+        <div class="kpi-hd"><div class="kpi-icon" style="background:rgba(239,68,68,.1)">⚠️</div><div class="kpi-trend up">↑ +3</div></div>
+        <div class="kpi-val">47</div><div class="kpi-lbl">Total de Riscos</div>
+        <div class="kpi-sub"><span class="badge bg-red" style="font-size:10px">14 críticos</span><span class="badge bg-amber" style="font-size:10px">21 altos</span></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-hd"><div class="kpi-icon" style="background:rgba(59,130,246,.1)">📊</div><div class="kpi-trend up">↑ +0,3</div></div>
+        <div class="kpi-val" style="color:#f87171">6,82</div><div class="kpi-lbl">IER Médio Corporativo</div>
+        <div class="kpi-sub"><span style="font-size:11px;color:var(--text3)">682 pts — Nível: <strong style="color:var(--amber)">ALTO</strong></span></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-hd"><div class="kpi-icon" style="background:rgba(34,197,94,.1)">✅</div><div class="kpi-trend dn">↓ −180 pts</div></div>
+        <div class="kpi-val" style="color:#4ade80">423</div><div class="kpi-lbl">Pontos IER Reduzidos</div>
+        <div class="kpi-sub"><span style="font-size:11px;color:var(--text3)">+66 pts acima do planejado</span></div>
+      </div>
+      <div class="kpi-card" onclick="goTo('planos',navItem('planos'))">
+        <div class="kpi-hd"><div class="kpi-icon" style="background:rgba(168,85,247,.1)">📋</div><div class="kpi-trend dn">↓ −5</div></div>
+        <div class="kpi-val" style="color:#c084fc">89</div><div class="kpi-lbl">Planos de Ação</div>
+        <div class="kpi-sub"><span class="badge bg-green" style="font-size:10px">52 concluídos</span><span class="badge bg-amber" style="font-size:10px">37 ativos</span></div>
+      </div>
+    </div>
+    <div class="grid31">
+      <div class="card">
+        <div class="card-hd"><span class="card-title">📈 Evolução IER — Planejado vs Realizado (2026)</span>
+          <div style="display:flex;gap:10px;font-size:10px">
+            <span style="color:var(--text3);display:flex;align-items:center;gap:3px"><span style="width:10px;height:2px;background:#4ade80;display:inline-block;border-radius:1px"></span>Realizado</span>
+            <span style="color:var(--text3);display:flex;align-items:center;gap:3px"><span style="width:10px;height:2px;background:#3b82f6;display:inline-block;border-radius:1px;opacity:.6"></span>Planejado</span>
+            <span style="color:var(--text3);display:flex;align-items:center;gap:3px"><span style="width:10px;height:2px;background:#ef4444;display:inline-block;border-radius:1px;opacity:.4"></span>Meta</span>
+          </div>
+        </div>
+        <div class="card-body" style="padding:12px"><div style="position:relative;height:190px"><canvas id="evolChart"></canvas></div></div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><span class="card-title">🥧 Categorias</span></div>
+        <div class="card-body">
+          <div style="position:relative;height:130px;margin-bottom:10px"><canvas id="catChart"></canvas></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px">
+            <div style="font-size:10px;color:var(--text2);display:flex;align-items:center;gap:4px"><span style="width:7px;height:7px;background:#3b82f6;border-radius:2px"></span>Cyber 28%</div>
+            <div style="font-size:10px;color:var(--text2);display:flex;align-items:center;gap:4px"><span style="width:7px;height:7px;background:#a855f7;border-radius:2px"></span>Operacional 22%</div>
+            <div style="font-size:10px;color:var(--text2);display:flex;align-items:center;gap:4px"><span style="width:7px;height:7px;background:#14b8a6;border-radius:2px"></span>Compliance 17%</div>
+            <div style="font-size:10px;color:var(--text2);display:flex;align-items:center;gap:4px"><span style="width:7px;height:7px;background:#f59e0b;border-radius:2px"></span>Infra 15%</div>
+            <div style="font-size:10px;color:var(--text2);display:flex;align-items:center;gap:4px"><span style="width:7px;height:7px;background:#ef4444;border-radius:2px"></span>Processo 11%</div>
+            <div style="font-size:10px;color:var(--text2);display:flex;align-items:center;gap:4px"><span style="width:7px;height:7px;background:#627090;border-radius:2px"></span>Outros 7%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <div class="card-hd"><span class="card-title">🔴 Top Riscos Críticos</span><button class="btn btn-ghost btn-sm" onclick="goTo('riscos',navItem('riscos'))">Ver todos →</button></div>
+        <div style="overflow-x:auto">
+          <table class="rtable"><thead><tr><th>ID</th><th>Risco</th><th>Cat.</th><th style="text-align:center">IER</th><th style="text-align:center">Pts</th><th>Status</th></tr></thead>
+          <tbody id="top-risks-body"></tbody></table>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div class="card">
+          <div class="card-hd"><span class="card-title">🏢 Exposição por Área</span></div>
+          <div class="card-body" style="padding:10px 14px"><div id="area-rank"></div></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><span class="card-title">🌡 Heatmap IMP × PROB</span>
+            <div style="display:flex;gap:6px;font-size:9px"><span style="color:#4ade80">■ Baixo</span><span style="color:#fbbf24">■ Médio</span><span style="color:#f87171">■ Alto</span></div>
+          </div>
+          <div class="card-body" style="padding:10px 14px"><div id="heatmap-container"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ RISCOS ════════ -->
+<div id="v-riscos" class="view">
+  <div class="topbar">
+    <span class="pg-title">Gestão de Riscos</span>
+    <div class="tb-right">
+      <select class="form-input" style="width:auto;padding:5px 10px;font-size:12px;background:var(--surface)"><option>Todas as categorias</option><option>Cyber</option><option>Operacional</option><option>Compliance</option></select>
+      <button class="btn btn-primary btn-sm" onclick="openModal('m-novo-risco')">+ Novo Risco</button>
+    </div>
+  </div>
+  <div class="content">
+    <div class="kpi-grid" style="grid-template-columns:repeat(5,1fr)">
+      <div class="kpi-card"><div class="kpi-val" style="color:#f87171;font-size:22px">14</div><div class="kpi-lbl">Críticos ≥ 8</div></div>
+      <div class="kpi-card"><div class="kpi-val" style="color:#fbbf24;font-size:22px">21</div><div class="kpi-lbl">Altos 6–7,9</div></div>
+      <div class="kpi-card"><div class="kpi-val" style="color:#93c5fd;font-size:22px">8</div><div class="kpi-lbl">Médios 4–5,9</div></div>
+      <div class="kpi-card"><div class="kpi-val" style="color:#4ade80;font-size:22px">4</div><div class="kpi-lbl">Baixos &lt; 4</div></div>
+      <div class="kpi-card"><div class="kpi-val" style="color:var(--text3);font-size:22px">0</div><div class="kpi-lbl">Residuais</div></div>
+    </div>
+    <div class="card">
+      <div class="card-hd"><span class="card-title">Todos os Riscos (47)</span><input class="form-input" placeholder="🔍 Buscar..." style="width:200px;padding:5px 10px;font-size:12px;background:var(--surface)"></div>
+      <div style="overflow-x:auto">
+        <table class="rtable" style="min-width:760px">
+          <thead><tr><th>ID</th><th>Título</th><th>Categoria</th><th>Área</th><th style="text-align:center">IER</th><th style="text-align:center">Pts</th><th>Responsável</th><th>Status</th><th>Ações</th></tr></thead>
+          <tbody id="all-risks-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ DETALHE DO RISCO ════════ -->
+<div id="v-risco-detalhe" class="view">
+  <div class="topbar">
+    <button class="btn btn-ghost btn-sm" onclick="goTo('riscos',navItem('riscos'))">← Voltar</button>
+    <span class="pg-title" id="detalhe-title">Detalhe do Risco</span>
+    <div class="tb-right">
+      <button class="btn btn-ghost btn-sm" onclick="openModal('m-editar-risco')">✏ Editar Risco</button>
+      <button class="btn btn-primary btn-sm" onclick="abrirNovoPlano(currentRiscoId)">+ Novo Plano de Ação</button>
+    </div>
+  </div>
+  <div class="content">
+    <div id="risco-detalhe-content"></div>
+  </div>
+</div>
+
+<!-- ════════ AVALIAR IER ════════ -->
+<div id="v-avaliar" class="view">
+  <div class="topbar">
+    <span class="pg-title">Avaliação de IER</span><span class="pg-sub">Índice de Exposição ao Risco</span>
+    <div class="tb-right">
+      <button class="btn btn-ghost btn-sm" onclick="resetIER()">↺ Resetar</button>
+      <button class="btn btn-primary btn-sm" onclick="saveIER()">💾 Salvar Avaliação</button>
+    </div>
+  </div>
+  <div class="content">
+    <div class="form-row" style="margin-bottom:14px">
+      <div class="form-group" style="margin:0"><label class="form-label">Título do Risco</label><input class="form-input" id="risk-title" placeholder="Ex: Exposição a ransomware em endpoints críticos"></div>
+      <div class="form-row-3" style="gap:8px">
+        <div class="form-group" style="margin:0"><label class="form-label">Categoria</label><select class="form-input" id="risk-cat"><option>Cyber</option><option>Operacional</option><option>Compliance</option><option>Infraestrutura</option><option>Processos</option><option>Continuidade</option></select></div>
+        <div class="form-group" style="margin:0"><label class="form-label">Área</label><select class="form-input"><option>TI/CyberSec</option><option>Operações</option><option>Jurídico</option><option>RH</option></select></div>
+        <div class="form-group" style="margin:0"><label class="form-label">Responsável</label><input class="form-input" placeholder="Nome..."></div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 370px;gap:18px;align-items:start">
+      <div id="criterios-container"></div>
+      <div style="position:sticky;top:0">
+        <div class="ier-result-box">
+          <div style="font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">IER Calculado</div>
+          <div class="ier-big" id="ier-big">0,00</div>
+          <div class="ier-pts-row">Pontuação: <strong id="ier-pts">0</strong> pts</div>
+          <div style="margin-top:10px"><span id="ier-nivel-badge" class="badge bg-blue">INDEFINIDO</span></div>
+        </div>
+        <div class="card" style="margin-bottom:10px">
+          <div class="card-hd"><span class="card-title">Breakdown por Critério</span></div>
+          <div class="card-body" style="padding:6px"><table class="bkd-table"><thead><tr><th style="text-align:left;padding-left:10px">Critério</th><th>Peso</th><th>Nota</th><th>Contrib.</th></tr></thead><tbody id="breakdown-body"><tr><td colspan="4" style="color:var(--text3);font-size:11px;padding:14px;text-align:center">Ajuste os critérios</td></tr></tbody></table></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><span class="card-title">Radar de Critérios</span></div>
+          <div class="card-body" style="padding:8px"><div style="position:relative;height:200px"><canvas id="radarChart"></canvas></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ PLANOS (visão geral) ════════ -->
+<div id="v-planos" class="view">
+  <div class="topbar"><span class="pg-title">Planos de Ação — 5W2H</span><div class="tb-right"><button class="btn btn-primary btn-sm" onclick="openModal('m-plano')">+ Novo Plano</button></div></div>
+  <div class="content">
+    <div class="kpi-grid">
+      <div class="kpi-card"><div class="kpi-val" style="color:#4ade80;font-size:22px">52</div><div class="kpi-lbl">Concluídos</div></div>
+      <div class="kpi-card"><div class="kpi-val" style="color:#93c5fd;font-size:22px">24</div><div class="kpi-lbl">Em andamento</div></div>
+      <div class="kpi-card"><div class="kpi-val" style="color:#fbbf24;font-size:22px">13</div><div class="kpi-lbl">Atrasados</div></div>
+      <div class="kpi-card"><div class="kpi-val" style="color:var(--text3);font-size:22px">7</div><div class="kpi-lbl">Aguard. aprovação</div></div>
+    </div>
+    <div id="planos-list"></div>
+  </div>
+</div>
+
+<!-- ════════ ANALYTICS ════════ -->
+<div id="v-analytics" class="view">
+  <div class="topbar"><span class="pg-title">Analytics &amp; Inteligência</span><div class="tb-right"><span class="badge bg-purple">🤖 IA Ativa</span></div></div>
+  <div class="content">
+    <div class="grid2">
+      <div class="card"><div class="card-hd"><span class="card-title">📉 Forecast de Redução IER</span></div><div class="card-body" style="padding:12px"><div style="position:relative;height:190px"><canvas id="forecastChart"></canvas></div></div></div>
+      <div class="card"><div class="card-hd"><span class="card-title">🏆 Efetividade dos Controles</span></div><div class="card-body" style="padding:12px"><div style="position:relative;height:190px"><canvas id="efectChart"></canvas></div></div></div>
+    </div>
+    <div class="card">
+      <div class="card-hd"><span class="card-title">🤖 Insights de IA — Resumo Executivo</span><span class="badge bg-purple">Claude AI</span></div>
+      <div class="card-body">
+        <div class="grid2">
+          <div class="insight-card" style="border-left-color:var(--red)"><div class="insight-lbl" style="color:#f87171">🚨 Alerta</div><div class="insight-txt">3 riscos críticos (IER ≥ 8,5) sem plano aprovado. Déficit projetado de <strong style="color:#f87171">220–340 pts</strong> na meta.</div></div>
+          <div class="insight-card" style="border-left-color:var(--amber)"><div class="insight-lbl" style="color:#fbbf24">⚡ Ação Prioritária</div><div class="insight-txt"><strong style="color:var(--text)">TI/CyberSec</strong> concentra 45% da exposição. Priorizar PA-001 (EDR/SCADA) urgentemente.</div></div>
+          <div class="insight-card" style="border-left-color:var(--green)"><div class="insight-lbl" style="color:#4ade80">✅ Positivo</div><div class="insight-txt">Redução realizada (+423) supera planejado (+357) em <strong style="color:#4ade80">66 pts</strong>. MFA e treinamentos são destaques.</div></div>
+          <div class="insight-card" style="border-left-color:var(--purple)"><div class="insight-lbl" style="color:#c084fc">🔮 Forecast IA</div><div class="insight-txt">Projeção: <strong style="color:#fbbf24">660–780 pts</strong> até Dez/2026. Necessário acelerar execução em <strong style="color:var(--text)">+48%</strong>.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ OUTRAS VIEWS ════════ -->
+<div id="v-relatorios" class="view">
+  <div class="topbar"><span class="pg-title">Relatórios</span><span class="pg-sub">Exportação de dados e relatórios executivos</span></div>
+  <div class="content">
+    <div class="grid2">
+      <!-- PDF -->
+      <div class="card" style="cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor=''">
+        <div class="card-body" style="text-align:center;padding:32px">
+          <div style="font-size:40px;margin-bottom:12px">📊</div>
+          <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px">Dashboard Executivo PDF</div>
+          <div style="font-size:12px;color:var(--text3);margin-bottom:18px;line-height:1.5">Relatório completo com todos os indicadores para apresentação ao comitê executivo</div>
+          <button class="btn btn-primary" onclick="gerarPDF()">⬇ Gerar PDF</button>
+        </div>
+      </div>
+      <!-- Excel -->
+      <div class="card" style="cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='var(--green)'" onmouseout="this.style.borderColor=''">
+        <div class="card-body" style="text-align:center;padding:32px">
+          <div style="font-size:40px;margin-bottom:12px">📋</div>
+          <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px">Planilha de Riscos Excel</div>
+          <div style="font-size:12px;color:var(--text3);margin-bottom:18px;line-height:1.5">Exportação completa de todos os riscos, IER calculado e planos de ação em formato .xlsx</div>
+          <button class="btn btn-ghost" onclick="exportarExcel()">⬇ Exportar Excel</button>
+        </div>
+      </div>
+    </div>
+    <!-- Preview da tabela de riscos -->
+    <div class="card" style="margin-top:4px">
+      <div class="card-hd"><span class="card-title">👁 Preview — Dados que serão exportados</span><span class="badge bg-blue" id="export-count">0 riscos</span></div>
+      <div style="overflow-x:auto">
+        <table class="rtable" id="export-preview-table">
+          <thead><tr><th>ID</th><th>Título</th><th>Categoria</th><th>Área</th><th>IER</th><th>Pts</th><th>Status</th><th>Responsável</th><th>Nº Planos</th></tr></thead>
+          <tbody id="export-preview-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="v-workflow" class="view">
+  <div class="topbar"><span class="pg-title">Workflow de Aprovação</span>
+    <div class="tb-right"><button class="btn btn-primary btn-sm" onclick="goTo('perfis',navItem('perfis'))">👥 Gerenciar Perfis</button></div>
+  </div>
+  <div class="content">
+    <!-- FLUXO VISUAL -->
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-hd"><span class="card-title">🔄 Fluxo de Aprovação de Riscos</span></div>
+      <div class="card-body">
+        <div class="wf-flow-visual">
+          <div class="wf-flow-step active-step">
+            <div style="font-size:22px;margin-bottom:6px">📝</div>
+            <div style="font-size:12px;font-weight:700;color:var(--text)">1. Cadastro</div>
+            <div style="font-size:10px;color:var(--text3);margin-top:3px">Área responsável</div>
+            <div style="margin-top:8px" id="wf-members-cadastro"></div>
+          </div>
+          <div class="wf-flow-step">
+            <div style="font-size:22px;margin-bottom:6px">🔍</div>
+            <div style="font-size:12px;font-weight:700;color:var(--text)">2. Análise IER</div>
+            <div style="font-size:10px;color:var(--text3);margin-top:3px">Especialista CyberSec</div>
+            <div style="margin-top:8px" id="wf-members-analise"></div>
+          </div>
+          <div class="wf-flow-step">
+            <div style="font-size:22px;margin-bottom:6px">✅</div>
+            <div style="font-size:12px;font-weight:700;color:var(--text)">3. Aprovação</div>
+            <div style="font-size:10px;color:var(--text3);margin-top:3px">Gerência CyberSec</div>
+            <div style="margin-top:8px" id="wf-members-aprovacao"></div>
+          </div>
+          <div class="wf-flow-step">
+            <div style="font-size:22px;margin-bottom:6px">📊</div>
+            <div style="font-size:12px;font-weight:700;color:var(--text)">4. Monitoramento</div>
+            <div style="font-size:10px;color:var(--text3);margin-top:3px">Contínuo</div>
+            <div style="margin-top:8px" id="wf-members-monitoramento"></div>
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:4px">
+          <button class="btn btn-ghost btn-sm" onclick="goTo('perfis',navItem('perfis'))">✏ Editar membros de cada etapa →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PENDÊNCIAS -->
+    <div class="card">
+      <div class="card-hd"><span class="card-title">⏳ Pendências de Aprovação</span><span class="badge bg-amber" id="wf-pend-count">0 pendentes</span></div>
+      <div class="card-body" id="workflow-pendencias"><div style="text-align:center;padding:20px;color:var(--text3)">Carregando...</div></div>
+    </div>
+  </div>
+</div>
+<div id="v-auditoria" class="view">
+  <div class="topbar"><span class="pg-title">Auditoria</span></div>
+  <div class="content"><div class="card"><div class="card-body"><div id="audit-log"></div></div></div></div>
+</div>
+
+
+<!-- PERFIS DE ACESSO -->
+<div id="v-perfis" class="view">
+  <div class="topbar">
+    <span class="pg-title">Perfis de Acesso</span><span class="pg-sub">Gestão de membros por etapa do workflow</span>
+    <div class="tb-right">
+      <button class="btn btn-primary btn-sm" onclick="salvarPerfis()">💾 Salvar Perfis</button>
+    </div>
+  </div>
+  <div class="content">
+    <!-- INFO -->
+    <div style="background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.2);border-radius:var(--r);padding:12px 16px;margin-bottom:18px;display:flex;align-items:center;gap:10px">
+      <span style="font-size:16px">💡</span>
+      <span style="font-size:12px;color:var(--text2)">Vincule as pessoas responsáveis por cada etapa do workflow. Digite o nome e pressione <strong style="color:var(--text)">Enter</strong> para adicionar.</span>
+    </div>
+
+    <div class="wf-steps-grid">
+      <!-- CADASTRO -->
+      <div class="wf-profile-card">
+        <div class="wf-profile-hd">
+          <div class="wf-profile-step">
+            <div class="wf-step-badge" style="background:#3b82f6">1</div>
+            <div>
+              <div class="wf-profile-name">📝 Cadastro</div>
+              <div class="wf-profile-role">Responsáveis pelo cadastro de riscos</div>
+            </div>
+          </div>
+          <span class="badge bg-blue" id="cnt-cadastro">0 membros</span>
+        </div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:6px">Áreas que podem cadastrar novos riscos no sistema:</div>
+        <div class="members-wrap" id="wrap-cadastro" onclick="focusInput('inp-cadastro')">
+          <input id="inp-cadastro" placeholder="Nome ou e-mail... pressione Enter" onkeydown="addMember(event,'cadastro')">
+        </div>
+        <div style="font-size:10px;color:var(--text3);margin-top:6px">💬 Permissões: Criar e editar riscos próprios</div>
+      </div>
+
+      <!-- ANÁLISE IER -->
+      <div class="wf-profile-card">
+        <div class="wf-profile-hd">
+          <div class="wf-profile-step">
+            <div class="wf-step-badge" style="background:#f59e0b">2</div>
+            <div>
+              <div class="wf-profile-name">🔍 Análise IER</div>
+              <div class="wf-profile-role">Especialistas em avaliação de risco</div>
+            </div>
+          </div>
+          <span class="badge bg-amber" id="cnt-analise">0 membros</span>
+        </div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:6px">Responsáveis por analisar e pontuar o IER dos riscos:</div>
+        <div class="members-wrap" id="wrap-analise" onclick="focusInput('inp-analise')">
+          <input id="inp-analise" placeholder="Nome ou e-mail... pressione Enter" onkeydown="addMember(event,'analise')">
+        </div>
+        <div style="font-size:10px;color:var(--text3);margin-top:6px">💬 Permissões: Avaliar IER, ajustar critérios</div>
+      </div>
+
+      <!-- APROVAÇÃO -->
+      <div class="wf-profile-card">
+        <div class="wf-profile-hd">
+          <div class="wf-profile-step">
+            <div class="wf-step-badge" style="background:#22c55e">3</div>
+            <div>
+              <div class="wf-profile-name">✅ Aprovação</div>
+              <div class="wf-profile-role">Gerência de CyberSec</div>
+            </div>
+          </div>
+          <span class="badge bg-green" id="cnt-aprovacao">0 membros</span>
+        </div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:6px">Gerentes com poder de aprovação final de riscos e planos:</div>
+        <div class="members-wrap" id="wrap-aprovacao" onclick="focusInput('inp-aprovacao')">
+          <input id="inp-aprovacao" placeholder="Nome ou e-mail... pressione Enter" onkeydown="addMember(event,'aprovacao')">
+        </div>
+        <div style="font-size:10px;color:var(--text3);margin-top:6px">💬 Permissões: Aprovar/rejeitar riscos e planos</div>
+      </div>
+    </div>
+
+    <!-- MONITORAMENTO — full width -->
+    <div class="wf-profile-card" style="margin-bottom:16px">
+      <div class="wf-profile-hd">
+        <div class="wf-profile-step">
+          <div class="wf-step-badge" style="background:#a855f7">4</div>
+          <div>
+            <div class="wf-profile-name">📊 Monitoramento</div>
+            <div class="wf-profile-role">Acompanhamento contínuo da evolução dos riscos</div>
+          </div>
+        </div>
+        <span class="badge bg-purple" id="cnt-monitoramento">0 membros</span>
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:6px">Todos os que devem acompanhar o dashboard e receber alertas de evolução:</div>
+      <div class="members-wrap" id="wrap-monitoramento" onclick="focusInput('inp-monitoramento')">
+        <input id="inp-monitoramento" placeholder="Nome ou e-mail... pressione Enter" onkeydown="addMember(event,'monitoramento')">
+      </div>
+      <div style="font-size:10px;color:var(--text3);margin-top:6px">💬 Permissões: Visualizar dashboards, exportar relatórios</div>
+    </div>
+
+    <!-- TABELA RESUMO -->
+    <div class="card">
+      <div class="card-hd"><span class="card-title">👥 Resumo de Membros por Etapa</span></div>
+      <div class="card-body" style="padding:0">
+        <table class="rtable">
+          <thead><tr><th>Membro</th><th>Etapa</th><th>Permissões</th><th>Ações</th></tr></thead>
+          <tbody id="perfis-tabela"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+</div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ═══════════════ MODAIS ═══════════════ -->
+
+<!-- NOVO RISCO -->
+<div class="overlay" id="m-novo-risco">
+  <div class="modal">
+    <div class="modal-hd"><div><div class="modal-title">Cadastrar Novo Risco</div><div class="modal-sub">Ficha de Risco Corporativo</div></div><button class="close-btn" onclick="closeModal('m-novo-risco')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-row"><div class="form-group"><label class="form-label">Título do Risco *</label><input class="form-input" placeholder="Descreva o risco..."></div><div class="form-group"><label class="form-label">Categoria *</label><select class="form-input"><option>Cyber</option><option>Operacional</option><option>Compliance</option><option>Infraestrutura</option><option>Processos</option><option>Continuidade</option></select></div></div>
+      <div class="form-row"><div class="form-group"><label class="form-label">Área Responsável *</label><select class="form-input"><option>TI / CyberSec</option><option>Operações Ferroviárias</option><option>Logística</option><option>Jurídico</option><option>RH</option></select></div><div class="form-group"><label class="form-label">Sistema / Processo</label><input class="form-input" placeholder="Ex: ERP SAP, SCADA..."></div></div>
+      <div class="form-group"><label class="form-label">Descrição Detalhada *</label><textarea class="form-input" rows="3" placeholder="Contexto, origem e possível impacto..."></textarea></div>
+      <div class="form-row"><div class="form-group"><label class="form-label">Responsável</label><input class="form-input" placeholder="Nome completo"></div><div class="form-group"><label class="form-label">Data de Identificação</label><input class="form-input" type="date"></div></div>
+      <div class="divider"></div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button class="btn btn-ghost" onclick="closeModal('m-novo-risco')">Cancelar</button>
+        <button class="btn btn-primary" onclick="closeModal('m-novo-risco');goTo('avaliar',navItem('avaliar'))">Salvar e Avaliar IER →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PLANO 5W2H -->
+<div class="overlay" id="m-plano">
+  <div class="modal">
+    <div class="modal-hd">
+      <div>
+        <div class="modal-title" id="m-plano-title">Novo Plano de Ação — 5W2H</div>
+        <div class="modal-sub">Metodologia estruturada de gestão de ações</div>
+      </div>
+      <button class="close-btn" onclick="closeModal('m-plano')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="m-plano-id">
+      <div class="form-row" style="margin-bottom:14px">
+        <div class="form-group" style="margin:0">
+          <label class="form-label">Risco vinculado *</label>
+          <select class="form-input" id="m-plano-risco" onchange="updateRiscoScoresInModal()"></select>
+        </div>
+        <div class="form-group" style="margin:0">
+          <label class="form-label">Prioridade</label>
+          <select class="form-input" id="m-plano-prior">
+            <option>🔴 Crítica</option><option>🟠 Alta</option><option selected>🟡 Média</option><option>🟢 Baixa</option>
+          </select>
+        </div>
+      </div>
+      <div class="w2h-grid">
+        <div class="w2h-item"><span class="w2h-tag">WHAT</span><div class="w2h-lbl">O que será feito?</div><textarea class="w2h-inp" id="m-p-what" rows="2" placeholder="Ação a ser executada..."></textarea></div>
+        <div class="w2h-item"><span class="w2h-tag">WHY</span><div class="w2h-lbl">Por que é necessário?</div><textarea class="w2h-inp" id="m-p-why" rows="2" placeholder="Justificativa e objetivo..."></textarea></div>
+        <div class="w2h-item"><span class="w2h-tag">WHERE</span><div class="w2h-lbl">Onde será executado?</div><textarea class="w2h-inp" id="m-p-where" rows="2" placeholder="Local, sistema ou área..."></textarea></div>
+        <div class="w2h-item"><span class="w2h-tag">WHEN</span><div class="w2h-lbl">Início e conclusão</div><input class="w2h-inp" id="m-p-inicio" type="date" style="margin-bottom:6px"><input class="w2h-inp" id="m-p-fim" type="date"></div>
+        <div class="w2h-item"><span class="w2h-tag">WHO</span><div class="w2h-lbl">Quem é o responsável?</div><input class="w2h-inp" id="m-p-who" placeholder="Nome / equipe..."></div>
+        <div class="w2h-item"><span class="w2h-tag">HOW</span><div class="w2h-lbl">Como será feito?</div><textarea class="w2h-inp" id="m-p-how" rows="2" placeholder="Metodologia e passos..."></textarea></div>
+      </div>
+      <div class="w2h-item" style="margin-top:8px">
+        <span class="w2h-tag">HOW MUCH</span><div class="w2h-lbl">Custo estimado</div>
+        <input class="w2h-inp" id="m-p-custo" placeholder="R$ — Estimativa...">
+      </div>
+      <div class="form-row" style="margin-top:12px">
+        <div class="form-group" style="margin:0">
+          <label class="form-label">Status</label>
+          <select class="form-input" id="m-p-status">
+            <option>Iniciado</option><option>Em andamento</option><option>Concluindo</option><option>Concluído</option><option>Atrasado</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin:0">
+          <label class="form-label">% de Avanço</label>
+          <input class="form-input" id="m-p-pct" type="number" min="0" max="100" placeholder="0 a 100" value="0">
+        </div>
+      </div>
+      <div style="height:1px;background:var(--border);margin:14px 0"></div>
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px">📉 Redução de IER por Critério — <span style="font-weight:400;color:var(--text3);font-size:11px">informe a nota alvo após execução</span></div>
+      <div class="red-inp-grid" id="reduction-inputs"></div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px">
+        <div style="text-align:center"><div style="font-size:10px;color:var(--text3);margin-bottom:3px;text-transform:uppercase">Redução Planejada</div><div style="font-size:22px;font-weight:800;font-family:'DM Mono',monospace;color:var(--accent3)" id="plan-total-pts">0 pts</div></div>
+        <div style="text-align:center"><div style="font-size:10px;color:var(--text3);margin-bottom:3px;text-transform:uppercase">IER Atual</div><div style="font-size:22px;font-weight:800;font-family:'DM Mono',monospace;color:#f87171" id="plan-ier-atual">—</div></div>
+        <div style="text-align:center"><div style="font-size:10px;color:var(--text3);margin-bottom:3px;text-transform:uppercase">IER Residual</div><div style="font-size:22px;font-weight:800;font-family:'DM Mono',monospace;color:#4ade80" id="plan-ier-residual">—</div></div>
+      </div>
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px">✅ Atualização Realizado</div>
+      <div class="red-inp-grid" id="realized-inputs"></div>
+      <div style="height:1px;background:var(--border);margin:14px 0"></div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button class="btn btn-ghost" onclick="closeModal('m-plano')">Cancelar</button>
+        <button class="btn btn-primary" id="m-plano-save-btn" onclick="savePlanoModal()">💾 Salvar Plano de Ação</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+'use strict';
+
+// ── UTILIDADES ───────────────────────────────────────────────────────────────
+function showToast(msg, type='success'){
+  const el = document.createElement('div');
+  el.style.cssText = 'position:fixed;bottom:24px;right:24px;background:'+(type==='error'?'#1d2538':'#1d2538')+';border:1px solid '+(type==='error'?'rgba(239,68,68,.3)':'rgba(34,197,94,.3)')+';border-radius:12px;padding:12px 18px;font-size:13px;color:#e4eaf6;z-index:99999;display:flex;align-items:center;gap:10px;box-shadow:0 8px 32px rgba(0,0,0,.4);max-width:340px;font-family:DM Sans,system-ui,sans-serif;animation:toastIn .3s ease';
+  el.innerHTML = '<span>'+(type==='error'?'❌':'✅')+'</span><span style="flex:1">'+msg+'</span>';
+  document.body.appendChild(el);
+  setTimeout(()=>{ el.style.opacity='0'; el.style.transform='translateY(10px)'; el.style.transition='all .3s'; setTimeout(()=>el.remove(),300); }, 4000);
+}
+
+function showLoading(txt){
+  const el = document.getElementById('loading-overlay');
+  const tEl = document.getElementById('loading-txt');
+  if(tEl) tEl.textContent = txt||'Carregando...';
+  if(el) el.classList.add('show');
+}
+
+function hideLoading(){
+  const el = document.getElementById('loading-overlay');
+  if(el) el.classList.remove('show');
+}
+
+function updateBadges(){
+  const br = document.getElementById('badge-riscos');
+  if(br) br.textContent = RISCOS.length;
+  let ativos = 0;
+  RISCOS.forEach(r=>r.planos.forEach(p=>{ if(p.status!=='Concluído') ativos++; }));
+  const bp = document.getElementById('badge-planos');
+  if(bp) bp.textContent = ativos;
+}
+
+
+
+// ── DATA ──────────────────────────────────────────────────────────────────────
+const CRITERIOS = [
+  {id:'IMP',  name:'Potencial de Impacto',        peso:0.25, inv:false, color:'#ef4444',
+   anchors:{0:'Sem impacto relevante',2:'Impacto operacional local',4:'Impacto departamental',6:'Impacto multi-área',8:'Impacto corporativo severo',10:'Catastrófico — ameaça à continuidade'}},
+  {id:'FACIL',name:'Facilidade de Ocorrência',    peso:0.15, inv:false, color:'#f59e0b',
+   anchors:{0:'Extremamente difícil',2:'Muito difícil — expertise avançado',4:'Difícil — conhecimento técnico',6:'Moderado — ferramentas públicas',8:'Fácil — amplamente documentado',10:'Trivial — automatizado e massificado'}},
+  {id:'PROB', name:'Probabilidade Contextualizada',peso:0.15, inv:false, color:'#a855f7',
+   anchors:{0:'Improvável — nunca registrado',2:'Raro — < 5% anual',4:'Possível — setor já registrou',6:'Provável — tendência crescente',8:'Muito provável — ativo na região',10:'Certo — ataques em andamento'}},
+  {id:'CTRL', name:'Capacidade de Controle',       peso:0.20, inv:true,  color:'#3b82f6',
+   anchors:{0:'Controle total — automatizado',2:'Controles robustos e testados',4:'Controles adequados — periódicos',6:'Controles básicos — gaps identificados',8:'Controles insuficientes — falhas críticas',10:'Sem controles — totalmente exposto'}},
+  {id:'TEMPO',name:'Tempo de Contenção',           peso:0.15, inv:true,  color:'#14b8a6',
+   anchors:{0:'Contenção < 1 hora',2:'Contenção em até 4h',4:'Contenção em até 24h',6:'Contenção em até 1 semana',8:'Contenção em semanas',10:'Contenção em meses ou indefinida'}},
+  {id:'ORG',  name:'Relevância Organizacional',    peso:0.10, inv:false, color:'#22c55e',
+   anchors:{0:'Sem relevância estratégica',2:'Baixa — processo de suporte',4:'Relevância departamental',6:'Relevância operacional direta',8:'Estratégico — core business',10:'Missão crítica — regulatório'}},
+];
+
+const RISCOS = [
+  {id:'RSK-001',title:'Ransomware em infraestrutura ferroviária crítica',cat:'Cyber',area:'TI/CyberSec',ier:9.2,resp:'Ana Lima',status:'Crítico',desc:'Ameaça de ransomware direcionado a sistemas de controle ferroviário SCADA, com potencial de interrupção total das operações. Análise de TTPs de grupos APT especializados em OT/ICS.',sistema:'SCADA / OT Network',data:'10/03/2026',
+   scores:{IMP:9,FACIL:7,PROB:8,CTRL:8,TEMPO:9,ORG:10},
+   planos:[
+     {id:'PA-001',titulo:'Implantação de EDR em servidores SCADA',prior:'🔴 Crítica',status:'Em andamento',resp:'Ana Lima / TI',inicio:'01/04/2026',fim:'30/06/2026',pct:65,custo:'R$ 380.000',
+      what:'Deploy de solução EDR em 100% dos servidores críticos de controle ferroviário SCADA',why:'Detectar e bloquear ransomware antes da execução no ambiente OT',where:'Todos os servidores SCADA nas 12 bases operacionais',who:'Ana Lima — TI/CyberSec + parceiro CrowdStrike',how:'POC (semana 1-2) → Piloto 3 bases (semana 3-6) → Rollout nacional (semana 7-12) → Hardening',howmuch:'R$ 380.000',
+      reducao_plan:{IMP:0,FACIL:0,PROB:0,CTRL:3,TEMPO:2,ORG:0},
+      reducao_real:{IMP:0,FACIL:0,PROB:0,CTRL:1,TEMPO:1,ORG:0}},
+     {id:'PA-002',titulo:'Segmentação de rede OT/IT — air-gap lógico',prior:'🔴 Crítica',status:'Iniciado',resp:'Carlos Mota / TI',inicio:'15/04/2026',fim:'31/08/2026',pct:20,custo:'R$ 520.000',
+      what:'Implementar segmentação rígida entre redes IT e OT com firewall industrial e zonas DMZ',why:'Eliminar vetor de movimentação lateral do ambiente corporativo para o OT',where:'Infraestrutura de rede de todas as bases ferroviárias',who:'Carlos Mota — Infra + Cisco Systems',how:'Assessment (mês 1) → Projeto de arquitetura (mês 2) → Implementação faseada (mês 3-5)',howmuch:'R$ 520.000',
+      reducao_plan:{IMP:2,FACIL:1,PROB:1,CTRL:2,TEMPO:1,ORG:0},
+      reducao_real:{IMP:0,FACIL:0,PROB:0,CTRL:0,TEMPO:0,ORG:0}},
+   ]},
+  {id:'RSK-002',title:'Acesso privilegiado sem MFA em sistemas SCADA',cat:'Cyber',area:'TI/CyberSec',ier:8.8,resp:'Carlos Mota',status:'Crítico',desc:'Contas de administrador com acesso a sistemas críticos SCADA e ERP sem autenticação multifator, expondo a organização a ataques de credential stuffing e phishing direcionado.',sistema:'Active Directory / SCADA',data:'05/03/2026',
+   scores:{IMP:8,FACIL:8,PROB:7,CTRL:9,TEMPO:7,ORG:9},
+   planos:[
+     {id:'PA-003',titulo:'MFA obrigatório para todos os acessos privilegiados',prior:'🔴 Crítica',status:'Concluindo',resp:'Carlos Mota / TI',inicio:'01/03/2026',fim:'15/05/2026',pct:90,custo:'R$ 85.000',
+      what:'Configurar MFA para 100% dos acessos admin ao AD, SCADA, ERP e sistemas críticos',why:'Eliminar risco de comprometimento de conta privilegiada por credential stuffing',where:'Active Directory, Azure AD, sistemas SCADA e ERP SAP',who:'Carlos Mota — TI/CyberSec + Microsoft',how:'Inventário contas (sem. 1) → Rollout por grupo AD (sem. 2-6) → Enforcement total (sem. 7-8)',howmuch:'R$ 85.000',
+      reducao_plan:{IMP:0,FACIL:2,PROB:2,CTRL:3,TEMPO:0,ORG:0},
+      reducao_real:{IMP:0,FACIL:1,PROB:2,CTRL:2,TEMPO:0,ORG:0}},
+   ]},
+  {id:'RSK-003',title:'Vazamento de dados de clientes e embarques',cat:'Compliance',area:'Jurídico',ier:8.5,resp:'Maria Silva',status:'Crítico',desc:'Risco de exposição não autorizada de dados pessoais de clientes, incluindo CPF, dados de contato e histórico de embarques. Violação potencial da LGPD com multas de até 2% do faturamento.',sistema:'CRM / Portal do Cliente',data:'18/03/2026',
+   scores:{IMP:8,FACIL:6,PROB:7,CTRL:7,TEMPO:8,ORG:9},
+   planos:[
+     {id:'PA-004',titulo:'Programa de adequação LGPD — dados de clientes',prior:'🟠 Alta',status:'Em andamento',resp:'Maria Silva / Jurídico',inicio:'01/04/2026',fim:'31/08/2026',pct:40,custo:'R$ 220.000',
+      what:'Mapear, classificar e implementar controles de proteção para dados pessoais de clientes',why:'Adequação regulatória à LGPD e redução de risco de multas e reputacional',where:'CRM, Portal do Cliente, Data Warehouse, sistemas de BI',who:'Maria Silva — Jurídico + DPO + Consultoria Privacidade',how:'Mapeamento (mês 1-2) → Classificação (mês 2-3) → Implementação (mês 3-5) → Auditoria (mês 6)',howmuch:'R$ 220.000',
+      reducao_plan:{IMP:1,FACIL:0,PROB:1,CTRL:3,TEMPO:1,ORG:0},
+      reducao_real:{IMP:0,FACIL:0,PROB:0,CTRL:1,TEMPO:0,ORG:0}},
+   ]},
+  {id:'RSK-007',title:'Phishing avançado contra diretores (BEC)',cat:'Cyber',area:'TI/CyberSec',ier:8.1,resp:'Ana Lima',status:'Crítico',desc:'Ataques de Business Email Compromise direcionados a executivos C-Level da Rumo, com potencial de fraude financeira e comprometimento de informações estratégicas.',sistema:'Office 365 / Exchange',data:'22/03/2026',
+   scores:{IMP:8,FACIL:7,PROB:7,CTRL:7,TEMPO:6,ORG:9},
+   planos:[
+     {id:'PA-005',titulo:'Simulação anti-phishing e treinamento executivo BEC',prior:'🟠 Alta',status:'Concluído',resp:'Ana Lima / TI',inicio:'01/02/2026',fim:'30/04/2026',pct:100,custo:'R$ 45.000',
+      what:'Simulações mensais e capacitação anti-engenharia social para C-Level e diretores',why:'Reduzir taxa de clique em phishing e aumentar maturidade executiva em segurança',where:'Ambiente de e-mail corporativo Office 365 e treinamentos presenciais',who:'Ana Lima — TI/CyberSec + Knowbe4',how:'Campanha de simulação (mês 1) → Treinamento personalizado (mês 2) → Avaliação final (mês 3)',howmuch:'R$ 45.000',
+      reducao_plan:{IMP:0,FACIL:1,PROB:2,CTRL:1,TEMPO:0,ORG:0},
+      reducao_real:{IMP:0,FACIL:1,PROB:2,CTRL:1,TEMPO:0,ORG:0}},
+   ]},
+  {id:'RSK-008',title:'Ausência de DRP para sistemas logísticos críticos',cat:'Continuidade',area:'TI',ier:6.8,resp:'Carlos Mota',status:'Alto',desc:'Falta de Plano de Recuperação de Desastres documentado e testado para os principais sistemas de gestão logística, expondo a empresa a longas indisponibilidades em caso de incidente.',sistema:'TMS / WMS / ERP SAP',data:'28/02/2026',
+   scores:{IMP:7,FACIL:4,PROB:5,CTRL:6,TEMPO:8,ORG:8},
+   planos:[
+     {id:'PA-006',titulo:'Elaboração e teste de DRP para sistemas logísticos',prior:'🟡 Média',status:'Iniciado',resp:'Carlos Mota / TI',inicio:'01/05/2026',fim:'30/09/2026',pct:20,custo:'R$ 160.000',
+      what:'Documentar, aprovar e testar plano de recuperação de desastre para TMS, WMS e ERP SAP',why:'Reduzir RTO/RPO e garantir continuidade operacional em cenários de desastre',where:'Data Centers principal e DR, sistemas TMS, WMS e ERP SAP',who:'Carlos Mota — Infra + TI + parceiro IBM',how:'Assessment (mês 1) → Documentação (mês 2-3) → Testes de failover (mês 4) → Aprovação (mês 5)',howmuch:'R$ 160.000',
+      reducao_plan:{IMP:1,FACIL:0,PROB:0,CTRL:2,TEMPO:3,ORG:0},
+      reducao_real:{IMP:0,FACIL:0,PROB:0,CTRL:0,TEMPO:0,ORG:0}},
+   ]},
+];
+
+let ierScores = {IMP:5,FACIL:5,PROB:5,CTRL:5,TEMPO:5,ORG:5};
+let criteriosRendered = false;
+let charts = {};
+let currentRiscoId = null;
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function navItem(v){ return document.querySelector(`.nav-item[onclick*="'${v}'"]`); }
+
+function goTo(view, el){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const t = document.getElementById('v-'+view);
+  if(t) t.classList.add('active');
+  if(el) el.classList.add('active');
+  const h = {dashboard:initDashboard, riscos:renderAllRisks, avaliar:()=>renderCriterios(), planos:renderPlanosGeral, analytics:renderAnalytics, auditoria:renderAuditoria, workflow:renderWorkflow, perfis:renderPerfis, relatorios:renderExportPreview};
+  if(h[view]) setTimeout(h[view],60);
+}
+
+function openModal(id){
+  const _om=document.getElementById(id);
+  if(_om){ 
+    _om.classList.add('show');
+    // Always populate risco select when opening plano modal
+    if(id==='m-plano'){
+      setTimeout(()=>{
+        const sel=document.getElementById('m-plano-risco');
+        if(sel && sel.options.length===0){
+          sel.innerHTML=RISCOS.map(r=>`<option value="${r.id}">${r.id} — ${r.title.substring(0,50)}</option>`).join('');
+        }
+      },30);
+    }
+  }
+  else { console.warn('Modal not found: '+id); }
+}
+function closeModal(id){
+  const _cm=document.getElementById(id);
+  if(_cm) _cm.classList.remove('show');
+}
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('show')}));
+
+function catClass(c){ return {Cyber:'cyber',Operacional:'op',Compliance:'comp',Infra:'infra',Continuidade:'cont',Processos:'proc'}[c]||'op'; }
+function ierClass(v){ return v>=8?'ic-c':v>=6?'ic-h':v>=4?'ic-m':'ic-l'; }
+function statusBadge(s){ return {Crítico:'bg-red',Alto:'bg-amber',Médio:'bg-blue',Baixo:'bg-green'}[s]||'bg-blue'; }
+function calcIerFromScores(sc){ return CRITERIOS.reduce((s,c)=>s+sc[c.id]*c.peso,0); }
+function formatIER(v){ return v.toFixed(2).replace('.',','); }
+
+// ── RISCO DETALHE ─────────────────────────────────────────────────────────────
+function openRisco(id){
+  currentRiscoId = id;
+  const r = RISCOS.find(x=>x.id===id);
+  if(!r) return;
+
+  goTo('risco-detalhe', null);
+  const _z2001=document.getElementById('detalhe-title');if(_z2001)_z2001.textContent=r.id + ' — ' + r.title;
+
+  const ier = calcIerFromScores(r.scores);
+  const pts = Math.round(ier*100);
+  const nivel = ier>=8?'CRÍTICO':ier>=6?'ALTO':ier>=4?'MÉDIO':ier>=2?'BAIXO':'RESIDUAL';
+  const nClass = ier>=8?'bg-red':ier>=6?'bg-amber':ier>=4?'bg-blue':'bg-green';
+
+  // total redução planejada e realizada cross all planos
+  let totalPlanPts=0, totalRealPts=0;
+  r.planos.forEach(p=>{
+    let pp=0,rp=0;
+    CRITERIOS.forEach(c=>{
+      const planDelta=p.reducao_plan[c.id]||0;
+      const realDelta=p.reducao_real[c.id]||0;
+      if(planDelta>0){ const na=Math.max(0,r.scores[c.id]-planDelta); pp+=(r.scores[c.id]-na)*c.peso*100; }
+      if(realDelta>0){ const na=Math.max(0,r.scores[c.id]-realDelta); rp+=(r.scores[c.id]-na)*c.peso*100; }
+    });
+    totalPlanPts+=Math.round(pp); totalRealPts+=Math.round(rp);
+  });
+
+  // IER residual after all planned reductions
+  let residualScores={...r.scores};
+  r.planos.forEach(p=>CRITERIOS.forEach(c=>{ residualScores[c.id]=Math.max(0,residualScores[c.id]-(p.reducao_plan[c.id]||0)); }));
+  const ierResidual = calcIerFromScores(residualScores);
+
+  const critHTML = CRITERIOS.map(c=>{
+    const sc=r.scores[c.id];
+    const pct=(sc/10)*100;
+    const col=sc>=8?'#ef4444':sc>=6?'#f59e0b':sc>=4?'#3b82f6':'#22c55e';
+    // total planned/realized reduction for this criterion across all plans
+    let planR=0,realR=0;
+    r.planos.forEach(p=>{planR+=p.reducao_plan[c.id]||0; realR+=p.reducao_real[c.id]||0;});
+    const anchor=c.anchors[Math.min(10,Math.round(sc/2)*2)]||'';
+    return `<div class="crit-display-card">
+      <div class="crit-d-header">
+        <span class="crit-d-id">${c.id}</span>
+        <span class="crit-d-peso">peso ${Math.round(c.peso*100)}%${c.inv?' ▲inv':''}</span>
+      </div>
+      <div class="crit-d-name">${c.name}</div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end">
+        <div class="crit-d-score" style="color:${col}">${sc}</div>
+        <div style="font-size:10px;color:var(--text3);text-align:right">contrib.<br><span style="font-family:'DM Mono',monospace;font-weight:700;color:${col}">${(sc*c.peso).toFixed(3)}</span></div>
+      </div>
+      <div class="crit-d-bar"><div class="crit-d-fill" style="width:${pct}%;background:${col}"></div></div>
+      <div class="crit-d-anchor">${anchor.substring(0,55)}${anchor.length>55?'...':''}</div>
+      ${planR>0?`<div class="crit-d-reduction"><span class="delta-chip delta-plan">▼ ${planR} plan.</span>${realR>0?`<span class="delta-chip delta-real">▼ ${realR} realiz.</span>`:'<span class="delta-chip delta-none">— sem realizad.</span>'}</div>`:'<div class="crit-d-reduction" style="font-size:10px;color:var(--text3)">Sem redução vinculada</div>'}
+    </div>`;
+  }).join('');
+
+  const planosHTML = r.planos.map(p=>renderPlanoCard(r,p)).join('');
+
+  document.getElementById('risco-detalhe-content').innerHTML = `
+  <div class="risk-detail">
+
+    <!-- TOPO: INFO DO RISCO -->
+    <div class="card">
+      <div class="card-hd">
+        <span class="card-title">
+          <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text3)">${r.id}</span>
+          ${r.title}
+          <span class="cat cat-${catClass(r.cat)}">${r.cat}</span>
+          <span class="badge ${statusBadge(r.status)}">${r.status}</span>
+        </span>
+      </div>
+      <div class="card-body">
+        <div class="grid2" style="margin-bottom:12px">
+          <div>
+            <div style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Descrição</div>
+            <div style="font-size:13px;color:var(--text2);line-height:1.6">${r.desc}</div>
+            <div style="display:flex;gap:16px;margin-top:10px;flex-wrap:wrap">
+              <span style="font-size:11px;color:var(--text3)">🏢 Área: <strong style="color:var(--text2)">${r.area}</strong></span>
+              <span style="font-size:11px;color:var(--text3)">👤 Resp.: <strong style="color:var(--text2)">${r.resp}</strong></span>
+              <span style="font-size:11px;color:var(--text3)">💻 Sistema: <strong style="color:var(--text2)">${r.sistema}</strong></span>
+              <span style="font-size:11px;color:var(--text3)">📅 Identificado: <strong style="color:var(--text2)">${r.data}</strong></span>
+            </div>
+          </div>
+          <div>
+            <div class="ier-summary">
+              <div class="ier-eye">IER Atual</div>
+              <div class="ier-num">${formatIER(ier)}</div>
+              <div class="ier-pts">Pontuação: <strong>${pts} pts</strong></div>
+              <div style="margin-top:8px;display:flex;justify-content:center;gap:8px">
+                <span class="badge ${nClass}">${nivel}</span>
+                <span class="badge bg-teal" style="font-size:10px">IER Residual: ${formatIER(ierResidual)}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CRITÉRIOS -->
+    <div class="card">
+      <div class="card-hd">
+        <span class="card-title">📊 Avaliação dos 6 Critérios IER</span>
+        <button class="btn btn-ghost btn-sm" onclick="goTo('avaliar',navItem('avaliar'))">✏ Reavaliação</button>
+      </div>
+      <div class="card-body">
+        <div class="crit-display-grid" style="margin-bottom:16px">${critHTML}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div>
+            <div style="font-size:11px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Breakdown IER</div>
+            <table style="width:100%;border-collapse:collapse;font-size:12px">
+              <thead><tr style="border-bottom:1px solid var(--border)">
+                <th style="padding:6px 8px;text-align:left;font-size:10px;color:var(--text3);text-transform:uppercase">Critério</th>
+                <th style="padding:6px 8px;text-align:center;font-size:10px;color:var(--text3);text-transform:uppercase">Peso</th>
+                <th style="padding:6px 8px;text-align:center;font-size:10px;color:var(--text3);text-transform:uppercase">Nota</th>
+                <th style="padding:6px 8px;text-align:center;font-size:10px;color:var(--text3);text-transform:uppercase">Contrib.</th>
+                <th style="padding:6px 8px;text-align:center;font-size:10px;color:var(--text3);text-transform:uppercase">Redução Plan.</th>
+              </tr></thead>
+              <tbody>
+                ${CRITERIOS.map(c=>{
+                  let planR=0; r.planos.forEach(p=>planR+=p.reducao_plan[c.id]||0);
+                  const scAfter=Math.max(0,r.scores[c.id]-planR);
+                  return `<tr style="border-bottom:1px solid rgba(40,48,80,.3)">
+                    <td style="padding:7px 8px"><span style="font-family:'DM Mono',monospace;font-size:10px;font-weight:700;color:var(--accent3)">${c.id}</span></td>
+                    <td style="padding:7px 8px;text-align:center;color:var(--text2)">${Math.round(c.peso*100)}%</td>
+                    <td style="padding:7px 8px;text-align:center;font-family:'DM Mono',monospace;font-weight:700;color:var(--text)">${r.scores[c.id]}</td>
+                    <td style="padding:7px 8px;text-align:center;font-family:'DM Mono',monospace;font-weight:700;color:${c.color}">${(r.scores[c.id]*c.peso).toFixed(3)}</td>
+                    <td style="padding:7px 8px;text-align:center">${planR>0?`<span class="delta-chip delta-plan">▼ ${r.scores[c.id]} → ${scAfter}</span>`:'<span style="color:var(--text3);font-size:11px">—</span>'}</td>
+                  </tr>`;
+                }).join('')}
+                <tr style="background:var(--surface)">
+                  <td colspan="3" style="padding:7px 8px;font-weight:800;color:var(--text)">IER TOTAL</td>
+                  <td style="padding:7px 8px;text-align:center;font-family:'DM Mono',monospace;font-weight:800;color:${ier>=8?'#f87171':ier>=6?'#fbbf24':'#4ade80'}">${formatIER(ier)}</td>
+                  <td style="padding:7px 8px;text-align:center;font-family:'DM Mono',monospace;font-weight:800;color:#4ade80">${formatIER(ierResidual)}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div style="position:relative;height:220px"><canvas id="detalhe-radar"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESUMO DE REDUÇÃO -->
+    <div class="card">
+      <div class="card-hd"><span class="card-title">📉 Resumo de Redução de IER</span></div>
+      <div class="card-body">
+        <div class="reduction-summary">
+          <div class="red-stat">
+            <div class="red-stat-val" style="color:var(--accent3)">${totalPlanPts}</div>
+            <div class="red-stat-lbl">Pts redução planejada</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:4px">${r.planos.length} plano${r.planos.length>1?'s':''} de ação</div>
+          </div>
+          <div class="red-stat">
+            <div class="red-stat-val" style="color:${totalRealPts>0?'#4ade80':'var(--text3)'}">${totalRealPts}</div>
+            <div class="red-stat-lbl">Pts redução realizada</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:4px">${totalPlanPts>0?Math.round(totalRealPts/totalPlanPts*100):0}% do planejado</div>
+          </div>
+          <div class="red-stat">
+            <div class="red-stat-val" style="color:#4ade80">${formatIER(ierResidual)}</div>
+            <div class="red-stat-lbl">IER Residual Esperado</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:4px">−${formatIER(ier-ierResidual)} vs atual</div>
+          </div>
+        </div>
+        <div style="background:var(--surface);border-radius:var(--r);padding:12px">
+          <div style="font-size:11px;color:var(--text3);margin-bottom:6px;font-weight:700">Progresso de Redução (planejado vs realizado por critério)</div>
+          ${CRITERIOS.map(c=>{
+            let planR=0,realR=0;
+            r.planos.forEach(p=>{planR+=p.reducao_plan[c.id]||0; realR+=p.reducao_real[c.id]||0;});
+            if(planR===0) return '';
+            const pctReal=planR>0?Math.round(realR/planR*100):0;
+            return `<div style="margin-bottom:8px">
+              <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px">
+                <span style="color:var(--text2);display:flex;align-items:center;gap:5px"><span style="font-family:'DM Mono',monospace;font-size:10px;font-weight:700;color:var(--accent3)">${c.id}</span>${c.name}</span>
+                <span style="color:var(--text3);font-family:'DM Mono',monospace">nota ${r.scores[c.id]} → <span style="color:var(--accent3)">${Math.max(0,r.scores[c.id]-planR)}</span> &nbsp;|&nbsp; realiz. <span style="color:#4ade80">${Math.max(0,r.scores[c.id]-realR)}</span></span>
+              </div>
+              <div style="position:relative;height:6px;background:var(--bg3);border-radius:3px;overflow:visible">
+                <div style="position:absolute;height:100%;border-radius:3px;background:rgba(59,130,246,.3);width:${Math.min(100,planR/r.scores[c.id]*100)}%"></div>
+                <div style="position:absolute;height:100%;border-radius:3px;background:#4ade80;width:${Math.min(100,realR/r.scores[c.id]*100)}%"></div>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+    </div>
+
+    <!-- PLANOS DE AÇÃO -->
+    <div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <span style="font-size:14px;font-weight:700;color:var(--text)">📋 Planos de Ação (${r.planos.length})</span>
+        <button class="btn btn-primary btn-sm" onclick="abrirNovoPlano('${r.id}')">+ Novo Plano para este Risco</button>
+      </div>
+      ${planosHTML}
+    </div>
+
+  </div>`;
+
+  // Radar do detalhe
+  setTimeout(()=>renderDetalheRadar(r),100);
+}
+
+function renderPlanoCard(r, p){
+  // Calculate IER impact of this plan
+  let planPts=0, realPts=0;
+  const crit_rows = CRITERIOS.map(c=>{
+    const pd=p.reducao_plan[c.id]||0;
+    const rd=p.reducao_real[c.id]||0;
+    if(pd===0&&rd===0) return null;
+    const notaAtual=r.scores[c.id];
+    const notaPlanAlvo=Math.max(0,notaAtual-pd);
+    const notaRealAlvo=Math.max(0,notaAtual-rd);
+    const ppC=Math.round((notaAtual-notaPlanAlvo)*c.peso*100);
+    const rpC=Math.round((notaAtual-notaRealAlvo)*c.peso*100);
+    planPts+=ppC; realPts+=rpC;
+    return {c,notaAtual,notaPlanAlvo,notaRealAlvo,ppC,rpC,pd,rd};
+  }).filter(Boolean);
+
+  const sBadge={Concluído:'bg-green',Concluindo:'bg-teal','Em andamento':'bg-blue',Iniciado:'bg-purple',Atrasado:'bg-red'}[p.status]||'bg-blue';
+  const fillColor=p.pct===100?'linear-gradient(90deg,#16a34a,#22c55e)':p.pct>=70?'linear-gradient(90deg,#d97706,#f59e0b)':'linear-gradient(90deg,#2563eb,#3b82f6)';
+
+  return `<div class="plan-card">
+    <div class="plan-card-hd">
+      <div style="display:flex;align-items:center;gap:10px;min-width:0">
+        <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);flex-shrink:0">${p.id}</span>
+        <span style="font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.titulo}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+        <span class="badge ${sBadge}">${p.status}</span>
+        <span style="font-size:11px;color:var(--text3)">${p.prior}</span>
+        <button class="btn btn-ghost btn-xs">✏ Editar</button>
+      </div>
+    </div>
+    <div class="plan-card-body">
+      <!-- 5W2H resumido -->
+      <div class="plan-5w">
+        <div class="w2h-mini"><span class="w2h-mini-tag">WHAT</span><span class="w2h-mini-lbl">O que</span><span class="w2h-mini-val">${p.what}</span></div>
+        <div class="w2h-mini"><span class="w2h-mini-tag">WHY</span><span class="w2h-mini-lbl">Por que</span><span class="w2h-mini-val">${p.why}</span></div>
+        <div class="w2h-mini"><span class="w2h-mini-tag">WHO</span><span class="w2h-mini-lbl">Quem</span><span class="w2h-mini-val">${p.who}</span></div>
+        <div class="w2h-mini"><span class="w2h-mini-tag">WHEN</span><span class="w2h-mini-lbl">Quando</span><span class="w2h-mini-val">${p.inicio} → ${p.fim}</span></div>
+        <div class="w2h-mini"><span class="w2h-mini-tag">WHERE</span><span class="w2h-mini-lbl">Onde</span><span class="w2h-mini-val">${p.where}</span></div>
+        <div class="w2h-mini"><span class="w2h-mini-tag">HOW MUCH</span><span class="w2h-mini-lbl">Custo</span><span class="w2h-mini-val">${p.custo}</span></div>
+      </div>
+
+      <!-- Progresso geral -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1.5fr;gap:12px;margin-bottom:14px;align-items:center">
+        <div style="text-align:center;background:var(--surface);border-radius:var(--r);padding:10px">
+          <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">Pts IER Planeja.</div>
+          <div style="font-size:20px;font-weight:800;font-family:'DM Mono',monospace;color:var(--accent3)">${planPts}</div>
+        </div>
+        <div style="text-align:center;background:var(--surface);border-radius:var(--r);padding:10px">
+          <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">Pts IER Realiza.</div>
+          <div style="font-size:20px;font-weight:800;font-family:'DM Mono',monospace;color:${realPts>0?'#4ade80':'var(--text3)'}">${realPts}</div>
+        </div>
+        <div style="text-align:center;background:var(--surface);border-radius:var(--r);padding:10px">
+          <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">Efetividade</div>
+          <div style="font-size:20px;font-weight:800;font-family:'DM Mono',monospace;color:${planPts>0&&realPts/planPts>=0.7?'#4ade80':'var(--amber)'}">${planPts>0?Math.round(realPts/planPts*100):0}%</div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--text3);font-weight:700;margin-bottom:5px">Avanço da execução: ${p.pct}%</div>
+          <div class="prog-bar2"><div class="prog-fill2" style="width:${p.pct}%;background:${fillColor}"></div></div>
+        </div>
+      </div>
+
+      <!-- Tabela de redução por critério -->
+      ${crit_rows.length>0?`
+      <div style="font-size:11px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Redução de IER por Critério — Detalhe</div>
+      <div style="overflow-x:auto">
+        <table class="crit-red-table">
+          <thead><tr>
+            <th>Critério</th><th>Nome</th><th style="text-align:center">Peso</th>
+            <th style="text-align:center">Nota Atual</th>
+            <th style="text-align:center">Nota Alvo (Plan.)</th>
+            <th style="text-align:center">Nota Alvo (Real.)</th>
+            <th style="text-align:center">Pts Plan.</th>
+            <th style="text-align:center">Pts Real.</th>
+          </tr></thead>
+          <tbody>
+            ${crit_rows.map(row=>`<tr>
+              <td><span style="font-family:'DM Mono',monospace;font-size:10px;font-weight:700;color:var(--accent3)">${row.c.id}</span></td>
+              <td style="color:var(--text2)">${row.c.name}</td>
+              <td style="text-align:center;color:var(--text3)">${Math.round(row.c.peso*100)}%</td>
+              <td style="text-align:center"><span class="num" style="color:var(--text)">${row.notaAtual}</span></td>
+              <td style="text-align:center"><span class="delta-chip delta-plan">${row.notaAtual} → ${row.notaPlanAlvo}</span></td>
+              <td style="text-align:center"><span class="delta-chip ${row.rd>0?'delta-real':'delta-none'}">${row.rd>0?`${row.notaAtual} → ${row.notaRealAlvo}`:'—'}</span></td>
+              <td style="text-align:center"><span class="num" style="color:var(--accent3)">${row.ppC} pts</span></td>
+              <td style="text-align:center"><span class="num" style="color:${row.rpC>0?'#4ade80':'var(--text3)'}">${row.rpC>0?row.rpC+' pts':'—'}</span></td>
+            </tr>`).join('')}
+            <tr style="background:var(--surface);font-weight:800">
+              <td colspan="6" style="padding:8px 10px;color:var(--text)">Total deste Plano</td>
+              <td style="text-align:center;padding:8px 10px"><span style="font-family:'DM Mono',monospace;font-weight:800;color:var(--accent3)">${planPts} pts</span></td>
+              <td style="text-align:center;padding:8px 10px"><span style="font-family:'DM Mono',monospace;font-weight:800;color:${realPts>0?'#4ade80':'var(--text3)'}">${realPts>0?realPts+' pts':'—'}</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>`:'<div style="padding:12px;text-align:center;color:var(--text3);font-size:12px">Nenhuma redução de critério cadastrada para este plano. <button class="btn btn-ghost btn-xs" onclick="openModal(\'m-plano\')">+ Adicionar Redução</button></div>'}
+    </div>
+  </div>`;
+}
+
+function renderDetalheRadar(r){
+  const ctx=document.getElementById('detalhe-radar');
+  if(!ctx) return;
+  if(charts.detalheRadar){ charts.detalheRadar.destroy(); }
+
+  let residualScores={...r.scores};
+  r.planos.forEach(p=>CRITERIOS.forEach(c=>{ residualScores[c.id]=Math.max(0,residualScores[c.id]-(p.reducao_plan[c.id]||0)); }));
+
+  charts.detalheRadar=new Chart(ctx,{
+    type:'radar',
+    data:{
+      labels:CRITERIOS.map(c=>c.id),
+      datasets:[
+        {label:'Atual',data:CRITERIOS.map(c=>r.scores[c.id]),borderColor:'#ef4444',backgroundColor:'rgba(239,68,68,.08)',pointBackgroundColor:'#ef4444',pointRadius:4,borderWidth:1.5},
+        {label:'Residual (após planos)',data:CRITERIOS.map(c=>residualScores[c.id]),borderColor:'#4ade80',backgroundColor:'rgba(34,197,94,.1)',pointBackgroundColor:'#4ade80',pointRadius:4,borderWidth:1.5,borderDash:[4,2]},
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:true,position:'bottom',labels:{color:'#96a4be',font:{size:10},boxWidth:10,padding:10}}},
+      scales:{r:{min:0,max:10,ticks:{stepSize:2,color:'#627090',font:{size:9},backdropColor:'transparent'},grid:{color:'rgba(40,48,80,.5)'},pointLabels:{color:'#96a4be',font:{size:10,weight:'600',family:"'DM Mono',monospace"}}}}}
+  });
+}
+
+// ── DASHBOARD ────────────────────────────────────────────────────────────────
+function initDashboard(){
+  setTimeout(()=>{ const f=document.getElementById('meta-fill'); if(f) f.style.width='42.3%'; },150);
+  renderTopRisks(); renderAreaRank(); renderHeatmap(); renderEvolChart(); renderCatChart();
+}
+
+function renderTopRisks(){
+  const el=document.getElementById('top-risks-body'); if(!el) return;
+  el.innerHTML=[...RISCOS].sort((a,b)=>b.ier-a.ier).slice(0,6).map(r=>`
+    <tr onclick="openRisco('${r.id}')">
+      <td style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text3)">${r.id}</td>
+      <td style="font-size:12px;font-weight:500;color:var(--text);max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.title}</td>
+      <td><span class="cat cat-${catClass(r.cat)}">${r.cat}</span></td>
+      <td style="text-align:center"><span class="ier-chip ${ierClass(r.ier)}">${r.ier.toFixed(1)}</span></td>
+      <td style="text-align:center;font-family:'DM Mono',monospace;font-weight:700;font-size:12px">${Math.round(r.ier*100)}</td>
+      <td><span class="badge ${statusBadge(r.status)}">${r.status}</span></td>
+    </tr>`).join('');
+}
+
+function renderAllRisks(){
+  const el=document.getElementById('all-risks-body'); if(!el) return;
+  const fCat=document.getElementById('filter-cat')?.value||'';
+  const fSearch=document.getElementById('search-risco')?.value?.toLowerCase()||'';
+  let list=[...RISCOS].filter(r=>{
+    if(fCat&&r.cat!==fCat) return false;
+    if(fSearch&&!r.title.toLowerCase().includes(fSearch)&&!r.id.toLowerCase().includes(fSearch)) return false;
+    return true;
+  }).sort((a,b)=>b.ier-a.ier);
+  const _el1=document.getElementById('cnt-critico');if(_el1)_el1.textContent=RISCOS.filter(r=>r.ier>=8).length;
+  const _el2=document.getElementById('cnt-alto');if(_el2)_el2.textContent=RISCOS.filter(r=>r.ier>=6&&r.ier<8).length;
+  const _el3=document.getElementById('cnt-medio');if(_el3)_el3.textContent=RISCOS.filter(r=>r.ier>=4&&r.ier<6).length;
+  const _el4=document.getElementById('cnt-baixo');if(_el4)_el4.textContent=RISCOS.filter(r=>r.ier<4).length;
+  const _el5=document.getElementById('cnt-total');if(_el5)_el5.textContent=RISCOS.length;
+  const _el6=document.getElementById('riscos-count-label');if(_el6)_el6.textContent=`Riscos Cadastrados (${list.length})`;
+  el.innerHTML=list.length?list.map(r=>`
+    <tr onclick="openRisco('${r.id}')">
+      <td style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text3)">${r.id}</td>
+      <td style="font-size:12px;font-weight:500;color:var(--text);max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.title}</td>
+      <td><span class="cat cat-${catClass(r.cat)}">${r.cat}</span></td>
+      <td style="font-size:12px;color:var(--text2)">${r.area}</td>
+      <td style="text-align:center"><span class="ier-chip ${ierClass(r.ier)}">${formatIER(r.ier)}</span></td>
+      <td style="text-align:center;font-family:'DM Mono',monospace;font-weight:700;font-size:12px">${Math.round(r.ier*100)}</td>
+      <td style="font-size:12px;color:var(--text2)">${r.resp}</td>
+      <td><span class="badge ${statusBadge(r.status)}">${r.status}</span></td>
+      <td style="display:flex;gap:4px;flex-wrap:nowrap">
+        <button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();openRisco('${r.id}')" title="Ver detalhes">👁</button>
+        <button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();abrirEditRisco('${r.id}')" title="Editar risco">✏</button>
+        <button class="btn btn-danger btn-xs" onclick="event.stopPropagation();confirmarDeleteRisco('${r.id}')" title="Excluir risco">🗑</button>
+      </td>
+    </tr>`).join(''):'<tr><td colspan="9" style="text-align:center;padding:20px;color:var(--text3)">Nenhum risco encontrado</td></tr>';
+}
+
+function renderAreaRank(){
+  const el=document.getElementById('area-rank'); if(!el) return;
+  // Compute dynamically from RISCOS data
+  const am={};
+  RISCOS.forEach(r=>{ am[r.area]=(am[r.area]||0)+Math.round(r.ier*100); });
+  const colors=['#3b82f6','#a855f7','#14b8a6','#f59e0b','#22c55e'];
+  const areas=Object.entries(am).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const max=areas[0]?areas[0][1]:1;
+  el.innerHTML=areas.length?areas.map(([n,s],i)=>`<div class="mb-row"><span style="font-size:10px;color:var(--text3);min-width:12px;font-family:'DM Mono',monospace">${i+1}</span><span class="mb-lbl">${n}</span><div class="mb-track"><div class="mb-fill" style="width:${Math.round(s/max*100)}%;background:${colors[i]}"></div></div><span class="mb-val">${s}</span></div>`).join(''):'<div style="color:var(--text3);font-size:12px;text-align:center;padding:12px">Sem dados</div>';
+}
+
+function renderHeatmap(){
+  const el=document.getElementById('heatmap-container'); if(!el) return;
+  const data=[[0,0,1,2,3,4],[0,1,2,2,3,4],[1,1,2,3,4,4],[1,2,3,3,4,5],[2,3,3,4,5,5],[3,3,4,4,5,5]];
+  const rL=['10','8','6','4','2','0'];
+  let h=`<div style="display:grid;grid-template-columns:18px repeat(6,1fr);gap:2px;margin-bottom:2px"><div></div>${['0','2','4','6','8','10'].map(c=>`<div style="font-size:9px;color:var(--text3);text-align:center">${c}</div>`).join('')}</div>`;
+  data.forEach((row,ri)=>{h+=`<div style="display:grid;grid-template-columns:18px repeat(6,1fr);gap:2px;margin-bottom:2px"><div style="font-size:9px;color:var(--text3);display:flex;align-items:center;justify-content:center">${rL[ri]}</div>${row.map(v=>`<div class="hm-cell hm-${v}"></div>`).join('')}</div>`;});
+  el.innerHTML=h;
+}
+
+function destroyChart(id){ if(charts[id]){charts[id].destroy();delete charts[id];} }
+const GC={grid:'rgba(40,48,80,.5)',tick:{color:'#627090',font:{size:10,family:"'DM Mono',monospace"}},tip:{backgroundColor:'#1d2538',borderColor:'#283050',borderWidth:1,titleColor:'#e4eaf6',bodyColor:'#96a4be',padding:10,cornerRadius:8}};
+
+function renderEvolChart(){
+  const ctx=document.getElementById('evolChart'); if(!ctx) return;
+  destroyChart('evol');
+  charts.evol=new Chart(ctx,{type:'line',data:{labels:['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'],datasets:[
+    {label:'Realizado',data:[35,72,110,158,200,280,340,423,null,null,null,null],borderColor:'#4ade80',backgroundColor:'rgba(74,222,128,.06)',tension:.4,fill:true,pointBackgroundColor:'#4ade80',pointRadius:4,borderWidth:2},
+    {label:'Planejado',data:[60,90,130,180,220,280,330,390,450,520,600,700],borderColor:'#3b82f6',borderDash:[5,3],tension:.4,fill:false,pointRadius:3,pointBackgroundColor:'#3b82f6',borderWidth:1.5},
+    {label:'Meta',data:[83,167,250,333,417,500,583,667,750,833,917,1000],borderColor:'rgba(239,68,68,.4)',borderDash:[2,5],tension:.3,fill:false,pointRadius:2,borderWidth:1},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:GC.tip},scales:{x:{ticks:GC.tick,grid:{color:GC.grid}},y:{ticks:{...GC.tick,callback:v=>v+' pts'},grid:{color:GC.grid},beginAtZero:true}}}});
+}
+
+function renderCatChart(){
+  const ctx=document.getElementById('catChart'); if(!ctx) return;
+  destroyChart('cat');
+  charts.cat=new Chart(ctx,{type:'doughnut',data:{labels:['Cyber','Operacional','Compliance','Infra','Processo','Outros'],datasets:[{data:[28,22,17,15,11,7],backgroundColor:['#3b82f6','#a855f7','#14b8a6','#f59e0b','#ef4444','#627090'],borderWidth:0,hoverOffset:5,borderRadius:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},cutout:'70%'}});
+}
+
+// ── IER CALCULATOR ─────────────────────────────────────────────────────────
+function renderCriterios(){
+  const cont=document.getElementById('criterios-container'); if(!cont||criteriosRendered) return;
+  criteriosRendered=true;
+  cont.innerHTML=CRITERIOS.map(c=>`
+    <div class="crit-calc-card" id="cc-${c.id}">
+      <div class="crit-c-hd">
+        <div class="crit-c-info">
+          <span class="crit-c-tag">${c.id}</span>
+          <span class="crit-c-name">${c.name}</span>
+          <span class="crit-c-peso">peso ${Math.round(c.peso*100)}%</span>
+          ${c.inv?'<span style="font-size:9px;color:var(--amber);background:rgba(245,158,11,.1);padding:2px 6px;border-radius:4px">▲ invertido</span>':''}
+        </div>
+        <div class="crit-c-score" id="cd-${c.id}">${ierScores[c.id]}</div>
+      </div>
+      <input type="range" class="score-slider" min="0" max="10" step="1" value="${ierScores[c.id]}" oninput="updScore('${c.id}',+this.value)">
+      <div class="scale-dots" id="dots-${c.id}">${[0,1,2,3,4,5,6,7,8,9,10].map(n=>`<div class="sd${n===ierScores[c.id]?' sel':''}${n%2===0?' anc':''}" onclick="setScore('${c.id}',${n})" title="${n%2===0?c.anchors[n]:'Nota intermediária '+n}" style="flex:1;max-width:24px"></div>`).join('')}</div>
+      <div class="anchor-desc" id="ad-${c.id}">${getAnchor(c,ierScores[c.id])}</div>
+    </div>`).join('');
+  calcIER();
+}
+
+function getAnchor(c,v){ const e=Math.min(10,Math.round(v/2)*2); return v%2===0?c.anchors[e]:`Intermediário — ${c.anchors[e]}`; }
+
+function setScore(id,v){ ierScores[id]=v; const sl=document.querySelector(`#cc-${id} input[type=range]`); if(sl) sl.value=v; updScore(id,v); }
+
+function updScore(id,v){
+  ierScores[id]=v;
+  const d=document.getElementById('cd-'+id); if(d) d.textContent=v;
+  const dt=document.getElementById('dots-'+id); if(dt) dt.querySelectorAll('.sd').forEach((x,i)=>x.classList.toggle('sel',i===v));
+  const c=CRITERIOS.find(x=>x.id===id); const a=document.getElementById('ad-'+id); if(a&&c) a.textContent=getAnchor(c,v);
+  const card=document.getElementById('cc-'+id); if(card){ card.classList.add('active-c'); clearTimeout(card._t); card._t=setTimeout(()=>card.classList.remove('active-c'),700); }
+  calcIER();
+}
+
+function calcIER(){
+  const ier=CRITERIOS.reduce((s,c)=>s+ierScores[c.id]*c.peso,0);
+  const pts=Math.round(ier*100);
+  const nivel=ier>=8?'CRÍTICO':ier>=6?'ALTO':ier>=4?'MÉDIO':ier>=2?'BAIXO':'RESIDUAL';
+  const nc=ier>=8?'bg-red':ier>=6?'bg-amber':ier>=4?'bg-blue':'bg-green';
+  const b=document.getElementById('ier-big'); if(b) b.textContent=formatIER(ier);
+  const p=document.getElementById('ier-pts'); if(p) p.textContent=pts;
+  const nb=document.getElementById('ier-nivel-badge'); if(nb){nb.textContent=nivel;nb.className='badge '+nc;}
+  renderBreakdown(ier); renderRadar();
+}
+
+function renderBreakdown(ier){
+  const el=document.getElementById('breakdown-body'); if(!el) return;
+  el.innerHTML=CRITERIOS.map(c=>`<tr><td style="text-align:left;padding-left:10px"><span style="font-family:'DM Mono',monospace;font-size:10px;font-weight:700;color:var(--accent3)">${c.id}</span></td><td>${Math.round(c.peso*100)}%</td><td style="font-weight:700;color:var(--text);font-family:'DM Mono',monospace">${ierScores[c.id]}</td><td style="font-family:'DM Mono',monospace">${(ierScores[c.id]*c.peso).toFixed(3)}</td></tr>`).join('')+
+  `<tr><td colspan="3" style="text-align:left;padding-left:10px;font-weight:800;color:var(--text)">IER Total</td><td style="font-family:'DM Mono',monospace;color:${ier>=8?'#f87171':ier>=6?'#fbbf24':'#4ade80'};font-weight:900">${formatIER(ier)}</td></tr>`;
+}
+
+function renderRadar(){
+  const ctx=document.getElementById('radarChart'); if(!ctx) return;
+  destroyChart('radar');
+  charts.radar=new Chart(ctx,{type:'radar',data:{labels:CRITERIOS.map(c=>c.id),datasets:[{label:'IER',data:CRITERIOS.map(c=>ierScores[c.id]),borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,.1)',pointBackgroundColor:'#60a5fa',pointRadius:4,borderWidth:1.5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{r:{min:0,max:10,ticks:{stepSize:2,color:'#627090',font:{size:9},backdropColor:'transparent'},grid:{color:'rgba(40,48,80,.5)'},pointLabels:{color:'#96a4be',font:{size:10,weight:'600',family:"'DM Mono',monospace"}}}}}});
+}
+
+function resetIER(){ Object.keys(ierScores).forEach(k=>ierScores[k]=5); criteriosRendered=false; document.getElementById('criterios-container').innerHTML=''; renderCriterios(); }
+function saveIER(){
+  const titleEl = document.getElementById('risk-title');
+  const title = titleEl ? titleEl.value.trim() : '';
+  if(!title){ showToast('Informe o título do risco antes de salvar.','error'); if(titleEl) titleEl.focus(); return; }
+
+  const catEl   = document.getElementById('risk-cat');
+  const areaEl  = document.getElementById('risk-area');
+  const respEl  = document.getElementById('risk-resp');
+  const descEl  = document.getElementById('risk-desc');
+  const sistEl  = document.getElementById('risk-sistema');
+
+  const cat   = catEl  ? catEl.value  : 'Cyber';
+  const area  = areaEl ? areaEl.value : 'TI/CyberSec';
+  const resp  = respEl ? respEl.value : '';
+  const desc  = descEl ? descEl.value : '';
+  const sist  = sistEl ? sistEl.value : '';
+
+  const scores = {...ierScores};
+  const ier    = calcIerFromScores(scores);
+  const status = ier>=8?'Crítico':ier>=6?'Alto':ier>=4?'Médio':'Baixo';
+
+  // If editing existing risco
+  if(window._editRiscoId){
+    const r = RISCOS.find(x=>x.id===window._editRiscoId);
+    if(r){
+      r.title=title; r.cat=cat; r.area=area; r.resp=resp;
+      r.desc=desc; r.sistema=sist; r.scores=scores; r.ier=ier; r.status=status;
+      window._editRiscoId=null;
+      showToast('Risco atualizado com sucesso!');
+      // Reset button label
+      const btn = document.querySelector('#v-avaliar .btn-primary');
+      if(btn){ btn.textContent='💾 Salvar Avaliação'; btn.onclick=saveIER; }
+      const pg = document.querySelector('#v-avaliar .pg-title');
+      if(pg) pg.textContent='Avaliação de IER';
+    }
+  } else {
+    // Create new risco
+    const newNum  = RISCOS.length + 1;
+    const newId   = 'RSK-' + String(newNum).padStart(3,'0');
+    const novoRisco = {
+      id: newId, title, cat, area, resp, desc, sistema: sist,
+      ier, scores, status, planos: [], _wfEtapa: 'cadastro'
+    };
+    RISCOS.push(novoRisco);
+    showToast('✅ Risco ' + newId + ' salvo com sucesso! IER: ' + formatIER(ier) + ' (' + Math.round(ier*100) + ' pts)');
+  }
+
+  // Refresh other views
+  updateBadges();
+  initDashboard();
+
+  // Clear form and go to risks list
+  resetIER();
+  const tf=document.getElementById('risk-title'); if(tf) tf.value='';
+  const rf=document.getElementById('risk-resp');  if(rf) rf.value='';
+  const df=document.getElementById('risk-desc');  if(df) df.value='';
+  const sf=document.getElementById('risk-sistema'); if(sf) sf.value='';
+
+  if(window._spConnected){
+    // Save to SharePoint
+    showLoading('Salvando no SharePoint...');
+    const spFields = {
+      Title: title, Categoria: cat, Area: area, Responsavel: resp,
+      Descricao: desc, Sistema: sist, Status: status,
+      Scores_JSON: JSON.stringify(scores),
+    };
+    spPost(SP_LIST_RISCOS, spFields).then(novo=>{
+      return spPatch(SP_LIST_RISCOS, novo.Id, {RiscoID: 'RSK-'+String(novo.Id).padStart(3,'0')});
+    }).then(()=>{
+      hideLoading();
+      showToast('✅ Risco salvo no SharePoint!');
+      loadFromSharePoint();
+    }).catch(e=>{ hideLoading(); showToast('Erro SP: '+e.message,'error'); });
+  } else {
+    showToast('✅ Risco salvo localmente (SP desconectado)');
+  }
+  goTo('riscos', document.querySelector('.nav-item[onclick*="riscos"]'));
+  setTimeout(renderAllRisks, 100);
+}
+
+// ── PLANO MODAL ──────────────────────────────────────────────────────────────
+function initPlanoModal(){
+  // Reduction input for each criterion (planned)
+  const planEl=document.getElementById('reduction-inputs');
+  const realEl=document.getElementById('realized-inputs');
+  if(!planEl||!realEl) return;
+
+  planEl.innerHTML=CRITERIOS.map(c=>`
+    <div class="red-inp-card" id="ri-plan-${c.id}">
+      <div class="red-inp-hd">
+        <span class="red-inp-id">${c.id}</span>
+        <span style="font-size:10px;color:var(--text3)">×${Math.round(c.peso*100)}%</span>
+      </div>
+      <div class="red-inp-name">${c.name}</div>
+      <div style="display:flex;gap:5px;align-items:center;margin-bottom:3px">
+        <div style="flex:1">
+          <div class="red-inp-lbl">Nota atual</div>
+          <input type="number" class="red-inp-num" id="rp-atual-${c.id}" min="0" max="10" value="" placeholder="—" readonly style="background:var(--bg3);color:var(--text3)">
+        </div>
+        <div style="color:var(--text3);font-size:14px;align-self:flex-end;padding-bottom:4px">→</div>
+        <div style="flex:1">
+          <div class="red-inp-lbl">Nota alvo</div>
+          <input type="number" class="red-inp-num" id="rp-alvo-${c.id}" min="0" max="10" placeholder="—" oninput="calcPlanTotal()">
+        </div>
+      </div>
+      <div class="ier-delta zero" id="rp-delta-${c.id}">—</div>
+    </div>`).join('');
+
+  realEl.innerHTML=CRITERIOS.map(c=>`
+    <div class="red-inp-card" id="ri-real-${c.id}">
+      <div class="red-inp-hd">
+        <span class="red-inp-id">${c.id}</span>
+        <span style="font-size:10px;color:var(--text3)">×${Math.round(c.peso*100)}%</span>
+      </div>
+      <div class="red-inp-name">${c.name}</div>
+      <div style="display:flex;gap:5px;align-items:center;margin-bottom:3px">
+        <div style="flex:1">
+          <div class="red-inp-lbl">Nota atual</div>
+          <input type="number" class="red-inp-num" min="0" max="10" value="" placeholder="—" readonly style="background:var(--bg3);color:var(--text3)">
+        </div>
+        <div style="color:var(--text3);font-size:14px;align-self:flex-end;padding-bottom:4px">→</div>
+        <div style="flex:1">
+          <div class="red-inp-lbl">Nota realizada</div>
+          <input type="number" class="red-inp-num" id="rr-alvo-${c.id}" min="0" max="10" placeholder="—" oninput="calcPlanTotal()">
+        </div>
+      </div>
+      <div class="ier-delta zero" id="rr-delta-${c.id}">—</div>
+    </div>`).join('');
+
+  // when risk changes, fill in current scores
+  document.getElementById('m-plano-risco').onchange = updateRiscoScoresInModal;
+  updateRiscoScoresInModal();
+}
+
+function updateRiscoScoresInModal(){
+  const selId=document.getElementById('m-plano-risco')?.value;
+  const r=RISCOS.find(x=>x.id===selId);
+  if(!r) return;
+  const ier=calcIerFromScores(r.scores);
+  const _el7=document.getElementById('plan-ier-atual');if(_el7)_el7.textContent=formatIER(ier);
+  CRITERIOS.forEach(c=>{
+    const a1=document.getElementById(`rp-atual-${c.id}`); if(a1) a1.value=r.scores[c.id];
+    const alvo=document.getElementById(`rp-alvo-${c.id}`); if(alvo) alvo.value='';
+    const a2=document.querySelector(`#ri-real-${c.id} input:first-of-type`); if(a2) a2.value=r.scores[c.id];
+    const ar=document.getElementById(`rr-alvo-${c.id}`); if(ar) ar.value='';
+    const dp=document.getElementById(`rp-delta-${c.id}`); if(dp){dp.textContent='—';dp.className='ier-delta zero';}
+    const dr=document.getElementById(`rr-delta-${c.id}`); if(dr){dr.textContent='—';dr.className='ier-delta zero';}
+  });
+  const _el8=document.getElementById('plan-total-pts');if(_el8)_el8.textContent='0 pts';
+  const _el9=document.getElementById('plan-ier-residual');if(_el9)_el9.textContent='—';
+}
+
+function calcPlanTotal(){
+  const selId=document.getElementById('m-plano-risco')?.value;
+  const r=RISCOS.find(x=>x.id===selId);
+  if(!r) return;
+  let totalPlanPts=0;
+  let newScores={...r.scores};
+
+  CRITERIOS.forEach(c=>{
+    const atual=r.scores[c.id];
+    const alvoEl=document.getElementById(`rp-alvo-${c.id}`);
+    const deltaEl=document.getElementById(`rp-delta-${c.id}`);
+    const alvo=alvoEl&&alvoEl.value!==''?+alvoEl.value:null;
+    if(alvo!==null&&alvo<atual){
+      const delta=atual-alvo;
+      const pts=Math.round(delta*c.peso*100);
+      totalPlanPts+=pts;
+      newScores[c.id]=alvo;
+      if(deltaEl){deltaEl.textContent=`▼ −${delta} nota = −${pts} pts`;deltaEl.className='ier-delta pos';}
+      const card=document.getElementById(`ri-plan-${c.id}`); if(card) card.classList.add('active-r');
+    } else {
+      if(deltaEl){deltaEl.textContent='—';deltaEl.className='ier-delta zero';}
+      const card=document.getElementById(`ri-plan-${c.id}`); if(card) card.classList.remove('active-r');
+    }
+
+    // realized
+    const dalvoEl=document.getElementById(`rr-alvo-${c.id}`);
+    const dreltaEl=document.getElementById(`rr-delta-${c.id}`);
+    const dalvo=dalvoEl&&dalvoEl.value!==''?+dalvoEl.value:null;
+    if(dalvo!==null&&dalvo<atual){
+      const delta=atual-dalvo;
+      const pts=Math.round(delta*c.peso*100);
+      if(dreltaEl){dreltaEl.textContent=`▼ −${delta} nota = −${pts} pts`;dreltaEl.className='ier-delta pos';}
+    } else {
+      if(dreltaEl){dreltaEl.textContent='—';dreltaEl.className='ier-delta zero';}
+    }
+  });
+
+  const _el10=document.getElementById('plan-total-pts');if(_el10)_el10.textContent=totalPlanPts+' pts';
+  const ierResidual=calcIerFromScores(newScores);
+  const _el11=document.getElementById('plan-ier-residual');if(_el11)_el11.textContent=formatIER(ierResidual);
+}
+
+function savePlano(){ closeModal('m-plano'); alert('✅ Plano de Ação salvo com sucesso!\nEncaminhado para aprovação da Gerência de CyberSec.'); }
+
+// ── PLANOS GERAL ─────────────────────────────────────────────────────────────
+function renderPlanosGeral(){
+  const el=document.getElementById('planos-list'); if(!el) return;
+
+  // KPI counts — all planos across all riscos
+  const allPlanos=[];
+  RISCOS.forEach(r=>(r.planos||[]).forEach(p=>allPlanos.push({...p,risco:r})));
+  const concl=allPlanos.filter(p=>p.status==='Concluído').length;
+  const andm=allPlanos.filter(p=>p.status==='Em andamento').length;
+  const atr=allPlanos.filter(p=>p.status==='Atrasado').length;
+  const e1=document.getElementById('pl-concluido'); if(e1) e1.textContent=concl;
+  const e2=document.getElementById('pl-andamento'); if(e2) e2.textContent=andm;
+  const e3=document.getElementById('pl-atrasado');  if(e3) e3.textContent=atr;
+  const e4=document.getElementById('pl-total');     if(e4) e4.textContent=allPlanos.length;
+
+  // Filter only riscos that have planos OR show all riscos
+  const riscosComPlanos = RISCOS.filter(r=>(r.planos||[]).length>0);
+  const riscosSemPlanos = RISCOS.filter(r=>!(r.planos||[]).length);
+
+  if(!RISCOS.length){
+    el.innerHTML=`<div style="text-align:center;padding:40px;color:var(--text3)">Nenhum risco cadastrado. <button class="btn btn-primary btn-sm" style="margin-top:12px" onclick="goTo('avaliar',navItem('avaliar'))">+ Cadastrar Risco</button></div>`;
+    return;
+  }
+
+  el.innerHTML = `
+    ${riscosComPlanos.map(r=>{
+      const ierVal = r.ier||calcIerFromScores(r.scores||{IMP:5,FACIL:5,PROB:5,CTRL:5,TEMPO:5,ORG:5});
+      let tPlan=0,tReal=0;
+      (r.planos||[]).forEach(p=>{
+        CRITERIOS.forEach(c=>{
+          const pd=p.reducao_plan[c.id]||0, rd=p.reducao_real[c.id]||0;
+          if(pd>0) tPlan+=Math.round((r.scores[c.id]-Math.max(0,r.scores[c.id]-pd))*c.peso*100);
+          if(rd>0) tReal+=Math.round((r.scores[c.id]-Math.max(0,r.scores[c.id]-rd))*c.peso*100);
+        });
+      });
+      const nPlanos=(r.planos||[]).length;
+      const concluidos=(r.planos||[]).filter(p=>p.status==='Concluído').length;
+      const pctGeral=nPlanos>0?Math.round((r.planos||[]).reduce((s,p)=>s+(p.pct||0),0)/nPlanos):0;
+      const ierCl=ierVal>=8?'ic-c':ierVal>=6?'ic-h':ierVal>=4?'ic-m':'ic-l';
+      return `
+      <div class="card" style="margin-bottom:10px;overflow:visible">
+        <!-- RISCO HEADER — clicável -->
+        <div style="padding:13px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none;transition:background .15s;border-radius:var(--r2)"
+             onclick="togglePlanoRisco('pr-${r.id}')"
+             onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background=''">
+          <!-- Chevron -->
+          <div id="chev-${r.id}" style="font-size:12px;color:var(--text3);transition:transform .2s;flex-shrink:0">▶</div>
+          <!-- ID -->
+          <span style="font-family:'DM Mono',monospace;font-size:11px;font-weight:700;color:var(--text3);flex-shrink:0;min-width:58px">${r.id}</span>
+          <!-- Title -->
+          <span style="font-size:13px;font-weight:700;color:var(--text);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.title}</span>
+          <!-- IER chip -->
+          <span class="ier-chip ${ierCl}" style="font-size:12px;flex-shrink:0">${formatIER(ierVal)}</span>
+          <!-- Cat -->
+          <span class="cat cat-${catClass(r.cat)}" style="flex-shrink:0">${r.cat}</span>
+          <!-- Stats -->
+          <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
+            <span style="font-size:11px;color:var(--text3)">${concluidos}/${nPlanos} concluídos</span>
+            <div style="width:80px;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden">
+              <div style="height:100%;width:${pctGeral}%;background:${pctGeral===100?'#22c55e':'#3b82f6'};border-radius:3px"></div>
+            </div>
+            <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--accent3)">${tPlan} pts</span>
+            <span class="badge ${statusBadge(r.status)}" style="font-size:10px">${r.status}</span>
+            <button class="btn btn-primary btn-xs" onclick="event.stopPropagation();abrirNovoPlano('${r.id}')" title="Novo plano para este risco">+ Plano</button>
+            <button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();openRisco('${r.id}')" title="Ver detalhe do risco">👁</button>
+          </div>
+        </div>
+
+        <!-- PLANOS — colapsável -->
+        <div id="pr-${r.id}" style="display:none;border-top:1px solid var(--border)">
+          ${(r.planos||[]).map(p=>{
+            let pp=0,rp=0;
+            CRITERIOS.forEach(c=>{
+              const pd=p.reducao_plan[c.id]||0, rd=p.reducao_real[c.id]||0;
+              if(pd>0) pp+=Math.round((r.scores[c.id]-Math.max(0,r.scores[c.id]-pd))*c.peso*100);
+              if(rd>0) rp+=Math.round((r.scores[c.id]-Math.max(0,r.scores[c.id]-rd))*c.peso*100);
+            });
+            const sb={Concluído:'bg-green',Concluindo:'bg-teal','Em andamento':'bg-blue',Iniciado:'bg-purple',Atrasado:'bg-red'}[p.status]||'bg-blue';
+            const fc=p.pct===100?'linear-gradient(90deg,#16a34a,#22c55e)':p.pct>=70?'linear-gradient(90deg,#d97706,#f59e0b)':'linear-gradient(90deg,#2563eb,#3b82f6)';
+            return `
+            <div style="padding:12px 16px;border-bottom:1px solid rgba(40,48,80,.3);background:var(--bg3);transition:background .15s" onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background='var(--bg3)'">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+                <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);flex-shrink:0">${p.id}</span>
+                <span style="font-size:12px;font-weight:700;color:var(--text);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.titulo||p.what||'—'}</span>
+                <span class="badge ${sb}">${p.status}</span>
+                <span style="font-size:11px;color:var(--text3)">${p.prior||''}</span>
+                <button class="btn btn-ghost btn-xs" onclick="abrirEditPlanoGeral('${r.id}','${p.id}')">✏ Editar</button>
+                <button class="btn btn-danger btn-xs" onclick="confirmarDeletePlanoGeral('${r.id}','${p.id}',this.dataset.titulo)" data-titulo="${(p.titulo||p.what||'').substring(0,40)}">🗑</button>
+              </div>
+              <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1.4fr;gap:10px;align-items:center">
+                <div>
+                  ${p.what?`<div style="font-size:11px;color:var(--text2);margin-bottom:3px"><strong style="color:var(--text3);font-size:9px;text-transform:uppercase;letter-spacing:.5px">WHAT </strong>${p.what.substring(0,100)}${p.what.length>100?'...':''}</div>`:''}
+                  <div style="font-size:10px;color:var(--text3)">👤 ${p.who||p.resp||'—'} &nbsp;|&nbsp; 📅 ${p.inicio||'—'} → ${p.fim||'—'}</div>
+                </div>
+                <div style="text-align:center;background:var(--surface);border-radius:var(--r);padding:8px">
+                  <div style="font-size:9px;color:var(--text3);text-transform:uppercase;margin-bottom:2px">IER Plan.</div>
+                  <div style="font-size:16px;font-weight:800;font-family:'DM Mono',monospace;color:var(--accent3)">${pp} pts</div>
+                </div>
+                <div style="text-align:center;background:var(--surface);border-radius:var(--r);padding:8px">
+                  <div style="font-size:9px;color:var(--text3);text-transform:uppercase;margin-bottom:2px">IER Realiz.</div>
+                  <div style="font-size:16px;font-weight:800;font-family:'DM Mono',monospace;color:${rp>0?'#4ade80':'var(--text3)'}">${rp>0?rp+' pts':'—'}</div>
+                </div>
+                <div style="text-align:center;background:var(--surface);border-radius:var(--r);padding:8px">
+                  <div style="font-size:9px;color:var(--text3);text-transform:uppercase;margin-bottom:2px">Efetividade</div>
+                  <div style="font-size:16px;font-weight:800;font-family:'DM Mono',monospace;color:${pp>0&&rp/pp>=.7?'#4ade80':'var(--amber)'}">${pp>0?Math.round(rp/pp*100):0}%</div>
+                </div>
+                <div>
+                  <div style="font-size:10px;color:var(--text3);font-weight:700;margin-bottom:4px">Avanço: ${p.pct||0}%</div>
+                  <div class="prog-bar2"><div class="prog-fill2" style="width:${p.pct||0}%;background:${fc}"></div></div>
+                </div>
+              </div>
+            </div>`;
+          }).join('')}
+          <div style="padding:10px 16px;display:flex;justify-content:flex-end;gap:8px;background:var(--bg3)">
+            <button class="btn btn-primary btn-sm" onclick="abrirNovoPlano('${r.id}')">+ Novo Plano de Ação</button>
+            <button class="btn btn-ghost btn-sm" onclick="openRisco('${r.id}')">Ver Detalhe Completo →</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('')}
+
+    ${riscosSemPlanos.length ? `
+    <div style="margin-top:8px">
+      <div style="font-size:11px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;padding:0 4px">
+        ⚠ Riscos sem plano de ação (${riscosSemPlanos.length})
+      </div>
+      ${riscosSemPlanos.map(r=>{
+        const ierVal=r.ier||calcIerFromScores(r.scores||{IMP:5,FACIL:5,PROB:5,CTRL:5,TEMPO:5,ORG:5});
+        const ierCl=ierVal>=8?'ic-c':ierVal>=6?'ic-h':ierVal>=4?'ic-m':'ic-l';
+        return `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg2);border:1px dashed var(--border);border-radius:var(--r);margin-bottom:6px">
+          <span class="ier-chip ${ierCl}" style="font-size:11px;flex-shrink:0">${formatIER(ierVal)}</span>
+          <span class="cat cat-${catClass(r.cat)}" style="flex-shrink:0">${r.cat}</span>
+          <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);flex-shrink:0">${r.id}</span>
+          <span style="font-size:12px;color:var(--text2);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.title}</span>
+          <span class="badge bg-amber" style="font-size:10px;flex-shrink:0">⚠ Sem plano</span>
+          <button class="btn btn-primary btn-xs" onclick="abrirNovoPlano('${r.id}')">+ Criar Plano</button>
+        </div>`;
+      }).join('')}
+    </div>` : ''}
+  `;
+}
+
+function togglePlanoRisco(elId){
+  const el = document.getElementById(elId);
+  if(!el) return;
+  const isOpen = el.style.display !== 'none';
+  el.style.display = isOpen ? 'none' : 'block';
+  // Rotate chevron
+  const riscoId = elId.replace('pr-','');
+  const chev = document.getElementById('chev-'+riscoId);
+  if(chev) chev.style.transform = isOpen ? '' : 'rotate(90deg)';
+}
+
+
+function renderAnalytics(){
+  const fc=document.getElementById('forecastChart');
+  if(fc){destroyChart('forecast');charts.forecast=new Chart(fc,{type:'line',data:{labels:['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'],datasets:[{label:'Realizado',data:[35,72,110,158,200,280,340,423,null,null,null,null],borderColor:'#4ade80',tension:.4,pointRadius:4,fill:false,borderWidth:2,pointBackgroundColor:'#4ade80'},{label:'Forecast IA',data:[null,null,null,null,null,null,null,423,470,528,608,660],borderColor:'#fbbf24',borderDash:[5,3],tension:.4,pointRadius:3,fill:false,borderWidth:1.5},{label:'Meta',data:[null,null,null,null,null,null,null,null,null,null,null,1000],borderColor:'rgba(239,68,68,.4)',borderDash:[2,5],fill:false,pointRadius:0,borderWidth:1}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:GC.tip},scales:{x:{ticks:GC.tick,grid:{color:GC.grid}},y:{ticks:{...GC.tick,callback:v=>v+' pts'},grid:{color:GC.grid},beginAtZero:true}}}});}
+  const ef=document.getElementById('efectChart');
+  if(ef){destroyChart('efect');charts.efect=new Chart(ef,{type:'bar',data:{labels:['EDR/XDR','MFA/IAM','Treinamento','Firewall/WAF','SIEM/SOC','Backup/DR','LGPD'],datasets:[{data:[82,91,88,85,75,70,64],backgroundColor:['#3b82f6','#22c55e','#22c55e','#14b8a6','#3b82f6','#a855f7','#f59e0b'],borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{max:100,ticks:{...GC.tick,callback:v=>v+'%'},grid:{color:GC.grid}},y:{ticks:{color:'#96a4be',font:{size:10,family:"'DM Sans',system-ui"}},grid:{color:'rgba(40,48,80,.2)'}}}}});}
+}
+
+// ── AUDITORIA ────────────────────────────────────────────────────────────────
+function renderAuditoria(){
+  const el=document.getElementById('audit-log'); if(!el) return;
+  const logs=[
+    {dt:'19/05/2026 14:32',user:'Ana Lima',action:'Atualizou avaliação IER do RSK-001',detail:'IER alterado de 8,8 → 9,2 — novos IOCs detectados',col:'#ef4444'},
+    {dt:'19/05/2026 11:15',user:'Carlos Mota',action:'Aprovou plano de ação PA-003 (MFA)',detail:'Plano aprovado — encaminhado para execução',col:'#4ade80'},
+    {dt:'18/05/2026 16:45',user:'Maria Silva',action:'Cadastrou RSK-003 — Vazamento LGPD',detail:'Risco categoria Compliance criado',col:'#3b82f6'},
+    {dt:'17/05/2026 09:20',user:'Sistema',action:'Alerta: RSK-002 sem plano há 15 dias',detail:'Escalonado para gerência automaticamente',col:'#f59e0b'},
+    {dt:'15/05/2026 15:00',user:'Pedro Andrade',action:'PA-005 concluído — Treinamento anti-phishing',detail:'60 pts de IER reduzidos — evidências anexadas',col:'#4ade80'},
+  ];
+  el.innerHTML=logs.map((l,i)=>`<div style="display:flex;gap:12px;margin-bottom:${i<logs.length-1?'14px':'0'}">
+    <div style="display:flex;flex-direction:column;align-items:center"><div style="width:9px;height:9px;border-radius:50%;background:${l.col};box-shadow:0 0 8px ${l.col}55;flex-shrink:0;margin-top:2px"></div>${i<logs.length-1?`<div style="width:1px;background:var(--border);flex:1;margin-top:3px"></div>`:''}</div>
+    <div style="padding-bottom:${i<logs.length-1?'0':'0'}"><div style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:2px">${l.dt} — <strong style="color:var(--text2)">${l.user}</strong></div><div style="font-size:12px;font-weight:600;color:var(--text)">${l.action}</div><div style="font-size:11px;color:var(--text3);margin-top:2px">${l.detail}</div></div>
+  </div>`).join('');
+}
+
+
+// ── SHAREPOINT REST API (cookie auth — não precisa de App Registration) ─────
+// Detecta automaticamente se está rodando dentro do SharePoint
+const SP_SITE = (()=>{
+  const loc = window.location.href;
+  if(loc.includes('sharepoint.com')){
+    // Está no SharePoint — usa URL relativa ao site atual
+    const m = loc.match(/(https:\/\/[^/]+\/sites\/[^/]+)/);
+    return m ? m[1] : 'https://rumolog.sharepoint.com/sites/GRCGovernanaRiscoeConformidade';
+  }
+  // Fora do SharePoint (GitHub Pages, local) — usa URL fixa
+  return 'https://rumolog.sharepoint.com/sites/GRCGovernanaRiscoeConformidade';
+})();
+const SP_LIST_RISCOS = 'Riscos_IER';
+const SP_LIST_PLANOS = 'Planos_Acao';
+let _digest = null;
+console.log('SP_SITE:', SP_SITE);
+
+async function spDigest(){
+  if(_digest) return _digest;
+  const r = await fetch(SP_SITE+'/_api/contextinfo',{method:'POST',credentials:'include',headers:{'Accept':'application/json;odata=verbose','Content-Type':'application/json;odata=verbose'}});
+  if(!r.ok) throw new Error('Não foi possível conectar ao SharePoint. Acesse pelo link do Office 365.');
+  const d = await r.json();
+  _digest = d.d.GetContextWebInformation.FormDigestValue;
+  setTimeout(()=>_digest=null, 25*60*1000);
+  return _digest;
+}
+
+async function spGet(list){
+  const url = SP_SITE+`/_api/web/lists/getbytitle('${list}')/items?$top=500&$orderby=Id%20desc`;
+  const r = await fetch(url,{
+    credentials:'include',
+    headers:{
+      'Accept':'application/json;odata=verbose',
+      'X-RequestDigest': _digest||''
+    }
+  });
+  if(!r.ok){
+    const txt = await r.text().catch(()=>'');
+    throw new Error(`Erro ao ler '${list}': HTTP ${r.status}. ${txt.includes('Access denied')?'Verifique suas permissões no SharePoint.':''}`);
+  }
+  return (await r.json()).d.results;
+}
+
+async function spGetListItemType(list){
+  const url = SP_SITE+`/_api/web/lists/getbytitle('${list}')?$select=ListItemEntityTypeFullName`;
+  const r = await fetch(url,{credentials:'include',headers:{'Accept':'application/json;odata=verbose'}});
+  if(!r.ok) throw new Error('Erro ao obter tipo da lista: '+r.status);
+  const data = await r.json();
+  return data.d.ListItemEntityTypeFullName;
+}
+
+const _listTypeCache = {};
+async function spPost(list, fields){
+  const digest = await spDigest();
+  if(!_listTypeCache[list]){
+    _listTypeCache[list] = await spGetListItemType(list);
+  }
+  const type = _listTypeCache[list];
+  const r = await fetch(SP_SITE+`/_api/web/lists/getbytitle('${list}')/items`,{
+    method:'POST', credentials:'include',
+    headers:{
+      'Accept':'application/json;odata=verbose',
+      'Content-Type':'application/json;odata=verbose',
+      'X-RequestDigest':digest
+    },
+    body: JSON.stringify({'__metadata':{'type': type}, ...fields})
+  });
+  if(!r.ok){ const e=await r.text(); throw new Error('Erro ao criar item: HTTP '+r.status+' — '+e.substring(0,300)); }
+  return (await r.json()).d;
+}
+
+async function spPatch(list, id, fields){
+  const digest = await spDigest();
+  if(!_listTypeCache[list]){
+    _listTypeCache[list] = await spGetListItemType(list);
+  }
+  const type = _listTypeCache[list];
+  const r = await fetch(SP_SITE+`/_api/web/lists/getbytitle('${list}')/items(${id})`,{
+    method:'POST', credentials:'include',
+    headers:{
+      'Accept':'application/json;odata=verbose',
+      'Content-Type':'application/json;odata=verbose',
+      'X-RequestDigest':digest,
+      'X-HTTP-Method':'MERGE',
+      'IF-MATCH':'*'
+    },
+    body: JSON.stringify({'__metadata':{'type': type}, ...fields})
+  });
+  if(!r.ok && r.status !== 204){ const e=await r.text(); throw new Error('Erro ao atualizar: HTTP '+r.status+' — '+e.substring(0,200)); }
+}
+
+async function spDelete(list, id){
+  const digest = await spDigest();
+  const r = await fetch(SP_SITE+`/_api/web/lists/getbytitle('${list}')/items(${id})`,{
+    method:'POST', credentials:'include',
+    headers:{'Accept':'application/json;odata=verbose','X-RequestDigest':digest,'X-HTTP-Method':'DELETE','IF-MATCH':'*'}
+  });
+  if(!r.ok && r.status !== 200 && r.status !== 204){ throw new Error('Erro ao excluir: '+r.status); }
+}
+
+function parseRiscoSP(item){
+  let scores={IMP:5,FACIL:5,PROB:5,CTRL:5,TEMPO:5,ORG:5};
+  try{ if(item.Scores_JSON) scores=JSON.parse(item.Scores_JSON); }catch(e){}
+  const r={id:String(item.Id),rskId:item.RiscoID||('RSK-'+String(item.Id).padStart(3,'0')),title:item.Title||'',cat:item.Categoria||'Cyber',area:item.Area||'',resp:item.Responsavel||'',status:item.Status||'Alto',desc:item.Descricao||'',sistema:item.Sistema||'',scores};
+  Object.defineProperty(r,'ier',{get(){return CRITERIOS.reduce((s,c)=>s+this.scores[c.id]*c.peso,0)}});
+  Object.defineProperty(r,'pts',{get(){return Math.round(this.ier*100)}});
+  return r;
+}
+
+function parsePlanoSP(item){
+  let rP={IMP:0,FACIL:0,PROB:0,CTRL:0,TEMPO:0,ORG:0},rR={...rP};
+  try{ if(item.ReducaoPlan_JSON) rP=JSON.parse(item.ReducaoPlan_JSON); }catch(e){}
+  try{ if(item.ReducaoReal_JSON) rR=JSON.parse(item.ReducaoReal_JSON); }catch(e){}
+  return {id:String(item.Id),planoId:item.PlanoID||('PA-'+String(item.Id).padStart(3,'0')),riscoSpId:String(item.RiscoSpId||''),titulo:item.Title||'',prior:item.Prioridade||'🟡 Média',status:item.StatusPlano||'Iniciado',resp:item.Responsavel||'',inicio:item.DataInicio||'',fim:item.DataFim||'',pct:parseInt(item.Avanco)||0,custo:item.Custo||'',what:item.What||'',why:item.Why||'',where:item.Where||'',who:item.Who||'',how:item.How||'',reducao_plan:rP,reducao_real:rR};
+}
+
+async function loadFromSharePoint(){
+  showLoading('Conectando ao SharePoint GRC...');
+  try{
+    const [ri,pi] = await Promise.all([spGet(SP_LIST_RISCOS), spGet(SP_LIST_PLANOS)]);
+    // Merge SP data into RISCOS array (keep mock structure for planos)
+    if(ri.length > 0){
+      // Clear mock data and use SP data
+      RISCOS.length = 0;
+      ri.forEach(item=>{
+        const r = parseRiscoSP(item);
+        // Find planos for this risco
+        r.planos = pi.filter(p=>String(p.RiscoId)===String(item.Id)).map(parsePlanoSP);
+        RISCOS.push(r);
+      });
+    }
+    window._spConnected = true;
+    RISCOS.forEach(r=>{ if(!r._wfEtapa) r._wfEtapa='cadastro'; });
+    const badge = document.getElementById('sp-status');
+    if(badge){badge.textContent='● SharePoint Online';badge.className='badge bg-green';}
+    showToast('✅ Dados carregados do SharePoint ('+RISCOS.length+' riscos)');
+    updateBadges(); initDashboard(); hideLoading();
+  }catch(e){
+    hideLoading();
+    window._spConnected = false;
+    const badge=document.getElementById('sp-status');
+    if(badge){badge.textContent='⚠ Sem conexão SP';badge.className='badge bg-amber';}
+    console.warn('SharePoint:', e.message);
+    // Use mock data
+    RISCOS.forEach(r=>{ if(!r._wfEtapa) r._wfEtapa='cadastro'; });
+    updateBadges(); initDashboard();
+    showToast('Modo local — dados não serão salvos no SharePoint', 'error');
+  }
+}
+
+
+
+// ── HELPERS PLANO MODAL ───────────────────────────────────────────────────────
+function buildRiscoSelect(selectedId){
+  const sel=document.getElementById('m-plano-risco'); if(!sel) return;
+  sel.innerHTML=RISCOS.map(r=>`<option value="${r.id}" ${r.id===selectedId?'selected':''}>${r.id} — ${r.title.substring(0,50)}</option>`).join('');
+  updateRiscoScoresInModal();
+}
+
+function buildRedInputs(riscoId, planVals, realVals){
+  planVals=planVals||{}; realVals=realVals||{};
+  const r=RISCOS.find(x=>x.id===riscoId)||RISCOS[0];
+  const sc=r?r.scores:{IMP:5,FACIL:5,PROB:5,CTRL:5,TEMPO:5,ORG:5};
+  const pEl=document.getElementById('plan-ier-atual'); if(pEl&&r) pEl.textContent=formatIER(calcIerFromScores(sc));
+  const planEl=document.getElementById('reduction-inputs');
+  const realEl=document.getElementById('realized-inputs');
+  if(!planEl||!realEl) return;
+  planEl.innerHTML=CRITERIOS.map(c=>{
+    const alvo=planVals[c.id]>0?Math.max(0,sc[c.id]-planVals[c.id]):'';
+    return `<div class="red-inp-card" id="ri-plan-${c.id}">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span class="red-inp-id">${c.id}</span><span style="font-size:9px;color:var(--text3)">×${Math.round(c.peso*100)}%</span></div>
+      <div style="font-size:10px;color:var(--text3);margin-bottom:6px">${c.name}</div>
+      <div style="display:flex;gap:5px;align-items:center">
+        <div style="flex:1"><div style="font-size:9px;color:var(--text3);text-align:center;margin-bottom:2px">Atual</div><input type="number" class="red-inp-num" value="${sc[c.id]}" readonly style="background:var(--bg3);color:var(--text3)"></div>
+        <div style="color:var(--text3);font-size:12px">→</div>
+        <div style="flex:1"><div style="font-size:9px;color:var(--text3);text-align:center;margin-bottom:2px">Nota alvo</div><input type="number" class="red-inp-num" id="rp-alvo-${c.id}" min="0" max="10" value="${alvo}" placeholder="—" oninput="calcPlanTotal()"></div>
+      </div>
+      <div class="ier-delta zero" id="rp-delta-${c.id}">${planVals[c.id]>0?'▼ −'+planVals[c.id]+' nota':'—'}</div>
+    </div>`;
+  }).join('');
+  realEl.innerHTML=CRITERIOS.map(c=>{
+    const alvo=realVals[c.id]>0?Math.max(0,sc[c.id]-realVals[c.id]):'';
+    return `<div class="red-inp-card" id="ri-real-${c.id}">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span class="red-inp-id">${c.id}</span><span style="font-size:9px;color:var(--text3)">×${Math.round(c.peso*100)}%</span></div>
+      <div style="font-size:10px;color:var(--text3);margin-bottom:6px">${c.name}</div>
+      <div style="display:flex;gap:5px;align-items:center">
+        <div style="flex:1"><div style="font-size:9px;color:var(--text3);text-align:center;margin-bottom:2px">Atual</div><input type="number" class="red-inp-num" value="${sc[c.id]}" readonly style="background:var(--bg3);color:var(--text3)"></div>
+        <div style="color:var(--text3);font-size:12px">→</div>
+        <div style="flex:1"><div style="font-size:9px;color:var(--text3);text-align:center;margin-bottom:2px">Nota realizada</div><input type="number" class="red-inp-num" id="rr-alvo-${c.id}" min="0" max="10" value="${alvo}" placeholder="—" oninput="calcPlanTotal()"></div>
+      </div>
+      <div class="ier-delta zero" id="rr-delta-${c.id}">${realVals[c.id]>0?'▼ −'+realVals[c.id]+' nota':'—'}</div>
+    </div>`;
+  }).join('');
+  calcPlanTotal();
+}
+
+function updateRiscoScoresInModal(){
+  const id=document.getElementById('m-plano-risco')?.value; if(!id) return;
+  buildRedInputs(id,{},{});
+}
+
+function abrirNovoPlano(riscoId){
+  // Open modal first so elements exist in DOM
+  openModal('m-plano');
+  // Then populate after modal is visible
+  setTimeout(()=>{
+    const mt=document.getElementById('m-plano-title'); if(mt) mt.textContent='Novo Plano de Ação — 5W2H';
+    const mi=document.getElementById('m-plano-id'); if(mi) mi.value='';
+    ['m-p-what','m-p-why','m-p-where','m-p-who','m-p-how','m-p-custo','m-p-inicio','m-p-fim'].forEach(id=>{
+      const e=document.getElementById(id); if(e) e.value='';
+    });
+    const pct=document.getElementById('m-p-pct'); if(pct) pct.value='0';
+    const st=document.getElementById('m-p-status'); if(st) st.value='Iniciado';
+    const pr=document.getElementById('m-plano-prior'); if(pr) pr.value='🟡 Média';
+    const saveBtn=document.getElementById('m-plano-save-btn');
+    if(saveBtn){saveBtn.textContent='💾 Salvar Plano de Ação';saveBtn.onclick=savePlanoModal;}
+    // Populate risco select with all RISCOS
+    const sel=document.getElementById('m-plano-risco');
+    if(sel){
+      sel.innerHTML=RISCOS.map(r=>`<option value="${r.id}" ${r.id===riscoId?'selected':''}>${r.id} — ${r.title.substring(0,50)}</option>`).join('');
+    }
+    buildRedInputs(riscoId||RISCOS[0]?.id||'',{},{});
+  },80);
+}
+
+function savePlanoModal(){
+  const riscoId=document.getElementById('m-plano-risco')?.value;
+  const planoId=document.getElementById('m-plano-id')?.value;
+  const what=(document.getElementById('m-p-what')?.value||'').trim();
+  if(!what){showToast('Preencha o campo WHAT','error');return;}
+  if(!riscoId){showToast('Selecione um risco','error');return;}
+  const r=RISCOS.find(x=>x.id===riscoId); if(!r) return;
+  const planVals={},realVals={};
+  CRITERIOS.forEach(c=>{
+    const av=document.getElementById('rp-alvo-'+c.id);
+    const ar=document.getElementById('rr-alvo-'+c.id);
+    planVals[c.id]=av&&av.value!==''?Math.max(0,r.scores[c.id]-(+av.value)):0;
+    realVals[c.id]=ar&&ar.value!==''?Math.max(0,r.scores[c.id]-(+ar.value)):0;
+  });
+  const novoPlano={
+    id:'PA-'+(r.planos.length+1).toString().padStart(3,'0'),
+    titulo:what,
+    prior:document.getElementById('m-plano-prior')?.value||'🟡 Média',
+    status:document.getElementById('m-p-status')?.value||'Iniciado',
+    resp:document.getElementById('m-p-who')?.value||'',
+    inicio:document.getElementById('m-p-inicio')?.value||'',
+    fim:document.getElementById('m-p-fim')?.value||'',
+    pct:parseInt(document.getElementById('m-p-pct')?.value)||0,
+    custo:document.getElementById('m-p-custo')?.value||'',
+    what,
+    why:document.getElementById('m-p-why')?.value||'',
+    where:document.getElementById('m-p-where')?.value||'',
+    who:document.getElementById('m-p-who')?.value||'',
+    how:document.getElementById('m-p-how')?.value||'',
+    reducao_plan:planVals,
+    reducao_real:realVals,
+  };
+  if(planoId){
+    // editing existing
+    const idx=r.planos.findIndex(p=>p.id===planoId);
+    if(idx>-1){r.planos[idx]={...r.planos[idx],...novoPlano,id:planoId};}
+  } else {
+    r.planos.push(novoPlano);
+  }
+  closeModal('m-plano');
+  if(window._spConnected){
+    showLoading('Salvando plano no SharePoint...');
+    const spFields = {
+      Title: what, RiscoId: riscoId,
+      Prioridade: document.getElementById('m-plano-prior')?.value||'🟡 Média',
+      StatusPlano: document.getElementById('m-p-status')?.value||'Iniciado',
+      Avanco: String(document.getElementById('m-p-pct')?.value||'0'),
+      What: what,
+      Why: document.getElementById('m-p-why')?.value||'',
+      Where: document.getElementById('m-p-where')?.value||'',
+      Who: document.getElementById('m-p-who')?.value||'',
+      How: document.getElementById('m-p-how')?.value||'',
+      Custo: document.getElementById('m-p-custo')?.value||'',
+      DataInicio: document.getElementById('m-p-inicio')?.value||'',
+      DataFim: document.getElementById('m-p-fim')?.value||'',
+      Responsavel: document.getElementById('m-p-who')?.value||'',
+      ReducaoPlan_JSON: JSON.stringify(planVals),
+      ReducaoReal_JSON: JSON.stringify(realVals),
+    };
+    const saveOp = planoId
+      ? spPatch(SP_LIST_PLANOS, planoId, spFields)
+      : spPost(SP_LIST_PLANOS, spFields).then(novo=>
+          spPatch(SP_LIST_PLANOS, novo.Id, {PlanoID:'PA-'+String(novo.Id).padStart(3,'0')})
+        );
+    saveOp.then(()=>{
+      hideLoading();
+      showToast(planoId?'Plano atualizado no SharePoint!':'Plano criado no SharePoint!');
+      loadFromSharePoint();
+    }).catch(e=>{ hideLoading(); showToast('Erro SP: '+e.message,'error'); });
+  } else {
+    showToast(planoId?'Plano atualizado!':'Plano criado com sucesso!');
+    renderPlanosGeral();
+    if(currentRiscoId===riscoId) openRisco(riscoId);
+  }
+  const saveBtn=document.getElementById('m-plano-save-btn');
+  if(saveBtn){saveBtn.textContent='💾 Salvar Plano de Ação';saveBtn.onclick=savePlanoModal;}
+}
+
+
+function saveRiscoModal(){
+  const spId = document.getElementById('m-risco-id')?.value||'';
+  const titulo = (document.getElementById('m-r-titulo')?.value||'').trim();
+  if(!titulo){ showToast('Informe o título do risco','error'); return; }
+  if(spId){
+    // Edit existing
+    const r = RISCOS.find(x=>x.id===spId);
+    if(r){
+      r.title = titulo;
+      r.cat = document.getElementById('m-r-cat')?.value||r.cat;
+      r.area = document.getElementById('m-r-area')?.value||r.area;
+      r.sistema = document.getElementById('m-r-sistema')?.value||r.sistema;
+      r.desc = document.getElementById('m-r-desc')?.value||r.desc;
+      r.resp = document.getElementById('m-r-resp')?.value||r.resp;
+      r.status = document.getElementById('m-r-status')?.value||r.status;
+      r.ier = parseFloat(document.getElementById('m-r-ier')?.value)||r.ier;
+    }
+  } else {
+    // New risco
+    const newId = 'RSK-' + String(RISCOS.length+1).padStart(3,'0');
+    const cat = document.getElementById('m-r-cat')?.value||'Cyber';
+    const area = document.getElementById('m-r-area')?.value||'TI/CyberSec';
+    const scores = {IMP:5,FACIL:5,PROB:5,CTRL:5,TEMPO:5,ORG:5};
+    RISCOS.push({
+      id: newId, title: titulo, cat, area,
+      resp: document.getElementById('m-r-resp')?.value||'',
+      status: document.getElementById('m-r-status')?.value||'Alto',
+      desc: document.getElementById('m-r-desc')?.value||'',
+      sistema: document.getElementById('m-r-sistema')?.value||'',
+      ier: calcIerFromScores(scores), scores, planos:[],
+    });
+  }
+  closeModal('m-risco');
+  showToast(spId ? 'Risco atualizado com sucesso!' : 'Risco cadastrado com sucesso!');
+  updateBadges(); renderAllRisks(); initDashboard();
+}
+
+function abrirEditRiscoModal(riscoId){
+  const r = RISCOS.find(x=>x.id===riscoId); if(!r) return;
+  const mid = document.getElementById('m-risco-id'); if(mid) mid.value = riscoId;
+  const mt = document.getElementById('m-risco-title'); if(mt) mt.textContent = 'Editar Risco — '+riscoId;
+  const tf = document.getElementById('m-r-titulo'); if(tf) tf.value = r.title;
+  const cf = document.getElementById('m-r-cat'); if(cf) cf.value = r.cat;
+  const af = document.getElementById('m-r-area'); if(af) af.value = r.area;
+  const sf = document.getElementById('m-r-sistema'); if(sf) sf.value = r.sistema||'';
+  const df = document.getElementById('m-r-desc'); if(df) df.value = r.desc||'';
+  const rf = document.getElementById('m-r-resp'); if(rf) rf.value = r.resp||'';
+  const stf = document.getElementById('m-r-status'); if(stf) stf.value = r.status||'Alto';
+  openModal('m-risco');
+}
+// ── EDIT / DELETE RISCOS ─────────────────────────────────────────────────────
+function abrirEditRisco(riscoId){
+  const r = RISCOS.find(x=>x.id===riscoId); if(!r) return;
+  // Populate the avaliar form with existing data and set edit mode
+  const _et=document.getElementById('risk-title');if(_et)_et.value=r.title;
+  const _ec=document.getElementById('risk-cat');if(_ec)_ec.value=r.cat;
+  const _ea=document.getElementById('risk-area');if(_ea)_ea.value=r.area;
+  const _er=document.getElementById('risk-resp');if(_er)_er.value=r.resp;
+  const _ed=document.getElementById('risk-desc');if(_ed)_ed.value=r.desc||'';
+  const _es=document.getElementById('risk-sistema');if(_es)_es.value=r.sistema||'';
+  // Set scores
+  Object.keys(r.scores).forEach(k=>{ ierScores[k]=r.scores[k]; });
+  criteriosRendered = false;
+  goTo('avaliar', navItem('avaliar'));
+  // Mark as edit mode
+  window._editRiscoId = riscoId;
+  setTimeout(()=>{
+    const btn = document.querySelector('#v-avaliar .btn-primary');
+    if(btn){ btn.textContent = '💾 Atualizar Risco'; btn.onclick = atualizarRisco; }
+    const title = document.querySelector('#v-avaliar .pg-title');
+    if(title) title.textContent = 'Editar Risco — '+r.id;
+  }, 100);
+}
+
+function atualizarRisco(){
+  const id = window._editRiscoId; if(!id) return saveRisco();
+  const title = document.getElementById('risk-title').value.trim();
+  if(!title){ showToast('Informe o título do risco','error'); return; }
+  const r = RISCOS.find(x=>x.id===id); if(!r) return;
+  // Update in-memory
+  r.title = title;
+  r.cat = document.getElementById('risk-cat')?.value;
+  r.area = document.getElementById('risk-area')?.value;
+  r.resp = document.getElementById('risk-resp')?.value;
+  r.desc = document.getElementById('risk-desc')?.value;
+  r.sistema = document.getElementById('risk-sistema')?.value;
+  r.scores = {...ierScores};
+  window._editRiscoId = null;
+  showToast('Risco atualizado com sucesso!');
+  updateBadges();
+  goTo('riscos', navItem('riscos'));
+  renderAllRisks();
+}
+
+function confirmarDeleteRisco(riscoId){
+  const r = RISCOS.find(x=>x.id===riscoId); if(!r) return;
+  const _z2002=document.getElementById('confirm-title');if(_z2002)_z2002.textContent='Excluir ' + r.id + '?';
+  const _z2003=document.getElementById('confirm-sub');if(_z2003)_z2003.textContent='"'+r.title+'" — Todos os planos vinculados também serão excluídos. Esta ação não pode ser desfeita.';
+  const _cob1=document.getElementById('confirm-ok-btn');if(_cob1)_cob1.onclick=()=>deleteRisco(riscoId);
+  openModal('confirm-overlay');
+}
+
+function deleteRisco(riscoId){
+  closeModal('confirm-overlay');
+  if(window._spConnected){
+    showLoading('Excluindo do SharePoint...');
+    // Delete all planos first
+    const r = RISCOS.find(x=>x.id===riscoId);
+    const planoIds = (r?.planos||[]).map(p=>p.spId||p.id).filter(Boolean);
+    const deleteOps = planoIds.map(pid=>spDelete(SP_LIST_PLANOS, pid));
+    Promise.all(deleteOps)
+      .then(()=>spDelete(SP_LIST_RISCOS, riscoId))
+      .then(()=>{ hideLoading(); showToast('Risco excluído do SharePoint!'); loadFromSharePoint(); goTo('riscos',navItem('riscos')); })
+      .catch(e=>{ hideLoading(); showToast('Erro SP: '+e.message,'error'); });
+  } else {
+    const idx = RISCOS.findIndex(x=>x.id===riscoId);
+    if(idx > -1) RISCOS.splice(idx, 1);
+    showToast('Risco excluído!');
+    updateBadges(); initDashboard(); renderAllRisks();
+    if(document.getElementById('v-risco-detalhe').classList.contains('active')){
+      goTo('riscos', navItem('riscos'));
+    }
+  }
+}
+
+// ── EDIT / DELETE PLANOS (from planos list) ──────────────────────────────────
+function abrirEditPlanoGeral(riscoId, planoId){
+  const r = RISCOS.find(x=>x.id===riscoId); if(!r) return;
+  const p = r.planos.find(x=>x.id===planoId); if(!p) return;
+  currentRiscoId = riscoId;
+  window._editPlanoId = planoId;
+  openModal('m-plano');
+  setTimeout(()=>{
+    // populate risco select
+    const sel=document.getElementById('m-plano-risco');
+    if(sel) sel.innerHTML=RISCOS.map(rx=>`<option value="${rx.id}" ${rx.id===riscoId?'selected':''}>${rx.id} — ${rx.title.substring(0,50)}</option>`).join('');
+    const _pw=document.getElementById('m-p-what');if(_pw)_pw.value=p.what||'';
+    const _pwy=document.getElementById('m-p-why');if(_pwy)_pwy.value=p.why||'';
+    const _pwr=document.getElementById('m-p-where');if(_pwr)_pwr.value=p.where||'';
+    const _pwh=document.getElementById('m-p-who');if(_pwh)_pwh.value=p.who||'';
+    const _phw=document.getElementById('m-p-how');if(_phw)_phw.value=p.how||'';
+    const _pcu=document.getElementById('m-p-custo');if(_pcu)_pcu.value=p.custo||'';
+    const _pin=document.getElementById('m-p-inicio');if(_pin)_pin.value=p.inicio||'';
+    const _pfm=document.getElementById('m-p-fim');if(_pfm)_pfm.value=p.fim||'';
+    const _pst=document.getElementById('m-p-status');if(_pst)_pst.value=p.status||'Iniciado';
+    const _ppc=document.getElementById('m-p-pct');if(_ppc)_ppc.value=p.pct||0;
+    const _ppr=document.getElementById('m-plano-prior');if(_ppr)_ppr.value=p.prior||'🟡 Média';
+    buildRedInputs(riscoId, p.reducao_plan, p.reducao_real);
+    const _z2004=document.getElementById('m-plano-title');if(_z2004)_z2004.textContent='Editar Plano — '+p.id;
+    const saveBtn = document.getElementById('m-plano-save-btn');
+    if(saveBtn){ saveBtn.textContent = '💾 Atualizar Plano'; saveBtn.onclick = atualizarPlanoModal; }
+  }, 60);
+  openModal('m-plano');
+}
+
+function atualizarPlanoModal(){
+  const riscoId = document.getElementById('m-plano-risco')?.value;
+  const planoId = window._editPlanoId;
+  const r = RISCOS.find(x=>x.id===riscoId); if(!r) return;
+  const p = r.planos.find(x=>x.id===planoId); if(!p) return;
+  const planVals={}, realVals={};
+  CRITERIOS.forEach(c=>{
+    const av=document.getElementById('rp-alvo-'+c.id);
+    const ar=document.getElementById('rr-alvo-'+c.id);
+    planVals[c.id]=av&&av.value!==''?Math.max(0,r.scores[c.id]-(+av.value)):0;
+    realVals[c.id]=ar&&ar.value!==''?Math.max(0,r.scores[c.id]-(+ar.value)):0;
+  });
+  p.what = document.getElementById('m-p-what')?.value;
+  p.why = document.getElementById('m-p-why')?.value;
+  p.where = document.getElementById('m-p-where')?.value;
+  p.who = document.getElementById('m-p-who')?.value;
+  p.how = document.getElementById('m-p-how')?.value;
+  p.custo = document.getElementById('m-p-custo')?.value;
+  p.inicio = document.getElementById('m-p-inicio')?.value;
+  p.fim = document.getElementById('m-p-fim')?.value;
+  p.status = document.getElementById('m-p-status')?.value;
+  p.pct = parseInt(document.getElementById('m-p-pct')?.value)||0;
+  p.prior = document.getElementById('m-plano-prior')?.value;
+  p.titulo = p.what;
+  p.reducao_plan = planVals;
+  p.reducao_real = realVals;
+  window._editPlanoId = null;
+  closeModal('m-plano');
+  showToast('Plano atualizado com sucesso!');
+  renderPlanosGeral();
+  // reset save button
+  const saveBtn = document.getElementById('m-plano-save-btn');
+  if(saveBtn){ saveBtn.textContent = '💾 Salvar Plano'; saveBtn.onclick = savePlanoModal; }
+}
+
+function confirmarDeletePlanoGeral(riscoId, planoId, titulo){
+  const _z2005=document.getElementById('confirm-title');if(_z2005)_z2005.textContent='Excluir plano?';
+  const _z2006=document.getElementById('confirm-sub');if(_z2006)_z2006.textContent='"'+(titulo||planoId)+'" — Esta ação não pode ser desfeita.';
+  const _cob2=document.getElementById('confirm-ok-btn');if(_cob2)_cob2.onclick=()=>deletePlanoGeral(riscoId,planoId);
+  openModal('confirm-overlay');
+}
+
+function deletePlanoGeral(riscoId, planoId){
+  closeModal('confirm-overlay');
+  if(window._spConnected){
+    showLoading('Excluindo plano do SharePoint...');
+    spDelete(SP_LIST_PLANOS, planoId)
+      .then(()=>{ hideLoading(); showToast('Plano excluído do SharePoint!'); loadFromSharePoint(); })
+      .catch(e=>{ hideLoading(); showToast('Erro SP: '+e.message,'error'); });
+  } else {
+    const r = RISCOS.find(x=>x.id===riscoId); if(!r) return;
+    const idx = r.planos.findIndex(x=>x.id===planoId);
+    if(idx > -1) r.planos.splice(idx, 1);
+    showToast('Plano excluído!');
+    renderPlanosGeral();
+  }
+}
+
+// ── PERFIS DE ACESSO ─────────────────────────────────────────────────────────
+const PERFIS = {
+  cadastro: ['Equipe TI/CyberSec', 'Gestores de Área'],
+  analise: ['Ana Lima — CyberSec', 'Carlos Mota — CyberSec'],
+  aprovacao: ['Gerência CyberSec'],
+  monitoramento: ['Gerência CyberSec', 'Diretoria TI'],
+};
+
+const PERFIL_LABELS = {
+  cadastro: { label: 'Cadastro', cor: '#3b82f6', badge: 'bg-blue' },
+  analise:  { label: 'Análise IER', cor: '#f59e0b', badge: 'bg-amber' },
+  aprovacao:{ label: 'Aprovação', cor: '#22c55e', badge: 'bg-green' },
+  monitoramento:{ label: 'Monitoramento', cor: '#a855f7', badge: 'bg-purple' },
+};
+
+function renderPerfis(){
+  Object.keys(PERFIS).forEach(etapa => {
+    renderMembersWrap(etapa);
+    atualizarContador(etapa);
+  });
+  renderPerfisTabela();
+  renderWorkflowMembers();
+}
+
+function renderMembersWrap(etapa){
+  const wrap = document.getElementById('wrap-'+etapa); if(!wrap) return;
+  // Remove existing chips (keep input)
+  const input = document.getElementById('inp-'+etapa);
+  wrap.innerHTML = '';
+  PERFIS[etapa].forEach(name=>{
+    const chip = document.createElement('span');
+    chip.className = 'member-chip';
+    chip.innerHTML = `<span class="av">${name.charAt(0).toUpperCase()}</span>${name}<span class="rm" onclick="removeMember('${etapa}','${name.replace(/'/g,"\\'")}')">×</span>`;
+    wrap.appendChild(chip);
+  });
+  wrap.appendChild(input||createInput(etapa));
+}
+
+function createInput(etapa){
+  const inp = document.createElement('input');
+  inp.id = 'inp-'+etapa;
+  inp.placeholder = 'Nome ou e-mail... pressione Enter';
+  inp.onkeydown = (e)=>addMember(e, etapa);
+  return inp;
+}
+
+function focusInput(id){ const el=document.getElementById(id); if(el) el.focus(); }
+
+function addMember(event, etapa){
+  if(event.key !== 'Enter' && event.keyCode !== 13) return;
+  event.preventDefault();
+  const input = document.getElementById('inp-'+etapa);
+  const val = input ? input.value.trim() : '';
+  if(!val) return;
+  if(!PERFIS[etapa].includes(val)) PERFIS[etapa].push(val);
+  if(input) input.value = '';
+  renderMembersWrap(etapa);
+  atualizarContador(etapa);
+  renderPerfisTabela();
+  renderWorkflowMembers();
+}
+
+function removeMember(etapa, name){
+  PERFIS[etapa] = PERFIS[etapa].filter(x=>x!==name);
+  renderMembersWrap(etapa);
+  atualizarContador(etapa);
+  renderPerfisTabela();
+  renderWorkflowMembers();
+}
+
+function atualizarContador(etapa){
+  const el = document.getElementById('cnt-'+etapa);
+  if(el) el.textContent = PERFIS[etapa].length + ' membro'+(PERFIS[etapa].length!==1?'s':'');
+}
+
+function renderPerfisTabela(){
+  const tbody = document.getElementById('perfis-tabela'); if(!tbody) return;
+  const rows = [];
+  Object.entries(PERFIS).forEach(([etapa, members])=>{
+    const info = PERFIL_LABELS[etapa];
+    members.forEach(name=>{
+      rows.push(`<tr>
+        <td style="font-size:12px;font-weight:500;color:var(--text);display:flex;align-items:center;gap:8px">
+          <div style="width:26px;height:26px;border-radius:50%;background:${info.cor};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0">${name.charAt(0).toUpperCase()}</div>
+          ${name}
+        </td>
+        <td><span class="badge ${info.badge}">${info.label}</span></td>
+        <td style="font-size:11px;color:var(--text3)">${etapa==='cadastro'?'Criar e editar riscos próprios':etapa==='analise'?'Avaliar IER, ajustar critérios':etapa==='aprovacao'?'Aprovar/rejeitar riscos e planos':'Visualizar dashboards, exportar'}</td>
+        <td><button class="btn btn-danger btn-xs" onclick="removeMember('${etapa}','${name.replace(/'/g,"\\'")}')">🗑 Remover</button></td>
+      </tr>`);
+    });
+  });
+  tbody.innerHTML = rows.length ? rows.join('') : '<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text3)">Nenhum membro cadastrado</td></tr>';
+}
+
+function renderWorkflowMembers(){
+  Object.keys(PERFIS).forEach(etapa=>{
+    const el = document.getElementById('wf-members-'+etapa); if(!el) return;
+    const info = PERFIL_LABELS[etapa];
+    if(!PERFIS[etapa].length){ el.innerHTML=''; return; }
+    el.innerHTML = PERFIS[etapa].map(name=>`
+      <div style="display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.07);border-radius:12px;padding:2px 8px;margin:2px;font-size:10px;color:var(--text2)">
+        <div style="width:14px;height:14px;border-radius:50%;background:${info.cor};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff">${name.charAt(0).toUpperCase()}</div>
+        ${name.split(' ')[0]}
+      </div>`).join('');
+  });
+  // Update pending count
+  const pend = RISCOS.filter(r=>r.ier>=6).length;
+  const cntEl = document.getElementById('wf-pend-count');
+  if(cntEl) cntEl.textContent = pend + ' pendente'+(pend!==1?'s':'');
+}
+
+function salvarPerfis(){
+  showToast('Perfis salvos com sucesso! ✅');
+  renderWorkflowMembers();
+}
+
+// ── WORKFLOW PENDENCIAS ───────────────────────────────────────────────────────
+function getEtapaRisco(r){
+  const planos = r.planos||[];
+  if(!r._wfEtapa) r._wfEtapa = 'cadastro';
+  return r._wfEtapa;
+}
+
+function avancarEtapa(riscoId){
+  const r = RISCOS.find(x=>x.id===riscoId); if(!r) return;
+  const ordem = ['cadastro','analise','aprovacao','monitoramento'];
+  const idx = ordem.indexOf(r._wfEtapa||'cadastro');
+  if(idx < ordem.length-1){
+    r._wfEtapa = ordem[idx+1];
+    showToast('✅ Risco '+riscoId+' avançado para: '+PERFIL_LABELS[r._wfEtapa].label);
+    renderWorkflow();
+  } else {
+    showToast('Este risco já está na etapa final: Monitoramento');
+  }
+}
+
+function voltarEtapa(riscoId){
+  const r = RISCOS.find(x=>x.id===riscoId); if(!r) return;
+  const ordem = ['cadastro','analise','aprovacao','monitoramento'];
+  const idx = ordem.indexOf(r._wfEtapa||'cadastro');
+  if(idx > 0){
+    r._wfEtapa = ordem[idx-1];
+    showToast('↩ Risco '+riscoId+' retornado para: '+PERFIL_LABELS[r._wfEtapa].label);
+    renderWorkflow();
+  }
+}
+
+function renderWorkflow(){
+  try {
+  renderWorkflowMembers();
+  const el = document.getElementById('workflow-pendencias'); if(!el) return;
+
+  // Todos os riscos com IER >= 4 entram no workflow
+  const todos = RISCOS.filter(r=>r.ier>=4);
+  const pend = todos.filter(r=>(r._wfEtapa||'cadastro')!=='monitoramento').length;
+  const cntEl = document.getElementById('wf-pend-count');
+  if(cntEl) cntEl.textContent = pend + ' pendente'+(pend!==1?'s':'');
+
+  const ordem = ['cadastro','analise','aprovacao','monitoramento'];
+  const etapaInfo = {
+    cadastro:     {label:'1. Cadastro',      badge:'bg-blue',   cor:'#3b82f6', icon:'📝'},
+    analise:      {label:'2. Análise IER',   badge:'bg-amber',  cor:'#f59e0b', icon:'🔍'},
+    aprovacao:    {label:'3. Aprovação',     badge:'bg-green',  cor:'#22c55e', icon:'✅'},
+    monitoramento:{label:'4. Monitoramento', badge:'bg-purple', cor:'#a855f7', icon:'📊'},
+  };
+
+  if(!todos.length){
+    el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text3)"><div style="font-size:32px;margin-bottom:10px">✅</div><div>Nenhum risco no workflow ainda. Cadastre riscos na Gestão de Riscos.</div></div>';
+    return;
+  }
+
+  // Group by etapa
+  const grupos = {};
+  ordem.forEach(e=>grupos[e]=[]);
+  todos.forEach(r=>{ const e=r._wfEtapa||'cadastro'; grupos[e]=grupos[e]||[]; grupos[e].push(r); });
+
+  el.innerHTML = ordem.map(etapa=>{
+    const info = etapaInfo[etapa];
+    const riscos = grupos[etapa]||[];
+    if(!riscos.length) return `
+      <div style="margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <div style="width:28px;height:28px;border-radius:50%;background:${info.cor}22;border:1px solid ${info.cor}44;display:flex;align-items:center;justify-content:center;font-size:13px">${info.icon}</div>
+          <span style="font-size:12px;font-weight:700;color:var(--text2)">${info.label}</span>
+          <span class="badge ${info.badge}" style="font-size:10px">0 riscos</span>
+        </div>
+        <div style="padding:10px 14px;background:var(--bg3);border-radius:var(--r);border:1px dashed var(--border);font-size:12px;color:var(--text3)">Nenhum risco nesta etapa</div>
+      </div>`;
+
+    return `
+      <div style="margin-bottom:16px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <div style="width:28px;height:28px;border-radius:50%;background:${info.cor};display:flex;align-items:center;justify-content:center;font-size:13px">${info.icon}</div>
+          <span style="font-size:13px;font-weight:700;color:var(--text)">${info.label}</span>
+          <span class="badge ${info.badge}">${riscos.length} risco${riscos.length!==1?'s':''}</span>
+          ${etapa!=='monitoramento'?`<span style="font-size:10px;color:var(--text3);margin-left:4px">Responsáveis: ${(PERFIS[etapa]||[]).join(', ')||'—'}</span>`:''}
+        </div>
+        ${riscos.map(r=>{
+          const isLast = etapa==='monitoramento';
+          const isFirst = etapa==='cadastro';
+          const temPlano = (r.planos||[]).length > 0;
+          const ierVal = r.ier||calcIerFromScores(r.scores||{IMP:5,FACIL:5,PROB:5,CTRL:5,TEMPO:5,ORG:5});
+          return `<div style="display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--surface);border-radius:var(--r);margin-bottom:6px;border:1px solid ${info.cor}33;transition:all .2s" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='var(--surface)'">
+            <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);flex-shrink:0;min-width:60px">${r.id}</span>
+            <span style="font-size:12px;font-weight:500;color:var(--text);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.title}</span>
+            <span class="ier-chip ${ierClass(ierVal)}" style="font-size:11px;flex-shrink:0">${formatIER(ierVal)}</span>
+            <span style="font-size:11px;color:var(--text3);flex-shrink:0">${r.resp||'—'}</span>
+            ${!temPlano && etapa!=='monitoramento' ? `<span class="badge bg-amber" style="font-size:9px;flex-shrink:0">⚠ Sem plano</span>` : ''}
+            <button class="btn btn-ghost btn-xs" onclick="openRisco('${r.id}')" style="flex-shrink:0">👁 Ver</button>
+            ${!temPlano ? `<button class="btn btn-ghost btn-xs" onclick="abrirNovoPlano('${r.id}')" style="flex-shrink:0">+ Plano</button>` : ''}
+            ${!isFirst ? `<button class="btn btn-ghost btn-xs" onclick="voltarEtapa('${r.id}')" style="flex-shrink:0;color:var(--amber)" title="Retornar etapa">↩</button>` : ''}
+            ${!isLast ? `<button class="btn btn-primary btn-xs" onclick="avancarEtapa('${r.id}')" style="flex-shrink:0" title="Avançar para próxima etapa">Avançar →</button>` : `<span class="badge bg-purple" style="font-size:10px">✅ Concluído</span>`}
+          </div>`;
+        }).join('')}
+      </div>`;
+  }).join('');
+
+  } catch(err) {
+    console.error('renderWorkflow error:', err);
+    const el2 = document.getElementById('workflow-pendencias');
+    if(el2) el2.innerHTML = '<div style="padding:20px;color:#f87171;text-align:center">❌ Erro ao carregar workflow: '+err.message+'</div>';
+  }
+}
+
+
+// ── EXPORTAÇÃO ────────────────────────────────────────────────────────────────
+function renderExportPreview(){
+  const tbody = document.getElementById('export-preview-body');
+  const cnt = document.getElementById('export-count');
+  if(!tbody) return;
+  if(cnt) cnt.textContent = RISCOS.length + ' riscos';
+  tbody.innerHTML = RISCOS.map(r => {
+    const ierVal = typeof r.ier === 'number' ? r.ier : calcIerFromScores(r.scores||{IMP:5,FACIL:5,PROB:5,CTRL:5,TEMPO:5,ORG:5});
+    return `<tr>
+      <td style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text3)">${r.id}</td>
+      <td style="font-size:12px;color:var(--text);max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.title}</td>
+      <td><span class="cat cat-${catClass(r.cat)}">${r.cat}</span></td>
+      <td style="font-size:12px;color:var(--text2)">${r.area}</td>
+      <td style="text-align:center"><span class="ier-chip ${ierClass(ierVal)}">${formatIER(ierVal)}</span></td>
+      <td style="text-align:center;font-family:'DM Mono',monospace;font-weight:700;font-size:12px">${Math.round(ierVal*100)}</td>
+      <td><span class="badge ${statusBadge(r.status)}">${r.status}</span></td>
+      <td style="font-size:12px;color:var(--text2)">${r.resp||'—'}</td>
+      <td style="text-align:center;font-size:12px;color:var(--text2)">${(r.planos||[]).length}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="9" style="text-align:center;padding:20px;color:var(--text3)">Nenhum risco cadastrado</td></tr>';
+}
+
+function gerarPDF(){
+  const ierMedio = RISCOS.length ? (RISCOS.reduce((s,r)=>s+r.ier,0)/RISCOS.length).toFixed(2) : '0.00';
+  const criticos = RISCOS.filter(r=>r.ier>=8).length;
+  const totalPlanos = RISCOS.reduce((s,r)=>s+(r.planos||[]).length,0);
+  let totalPlan=0, totalReal=0;
+  RISCOS.forEach(r=>{
+    (r.planos||[]).forEach(p=>{
+      CRITERIOS.forEach(c=>{
+        const sc=r.scores||{IMP:5,FACIL:5,PROB:5,CTRL:5,TEMPO:5,ORG:5};
+        const pd=p.reducao_plan[c.id]||0, rd=p.reducao_real[c.id]||0;
+        if(pd>0) totalPlan+=Math.round((sc[c.id]-Math.max(0,sc[c.id]-pd))*c.peso*100);
+        if(rd>0) totalReal+=Math.round((sc[c.id]-Math.max(0,sc[c.id]-rd))*c.peso*100);
+      });
+    });
+  });
+
+  const riscoRows = RISCOS.map(r=>{
+    const iv=r.ier||calcIerFromScores(r.scores||{IMP:5,FACIL:5,PROB:5,CTRL:5,TEMPO:5,ORG:5});
+    const cor=iv>=8?'#dc2626':iv>=6?'#d97706':'#16a34a';
+    return `<tr><td>${r.id}</td><td>${r.title}</td><td>${r.cat}</td><td>${r.area}</td>
+      <td style="color:${cor};font-weight:800;text-align:center">${formatIER(iv)}</td>
+      <td style="text-align:center;font-weight:700">${Math.round(iv*100)}</td>
+      <td style="color:${cor};font-weight:700">${r.status}</td>
+      <td>${r.resp||'—'}</td></tr>`;
+  }).join('');
+
+  const planosRows = [];
+  RISCOS.forEach(r=>{
+    (r.planos||[]).forEach(p=>{
+      let pp=0,rp=0;
+      CRITERIOS.forEach(c=>{
+        const sc=r.scores||{}; const pd=p.reducao_plan[c.id]||0, rd=p.reducao_real[c.id]||0;
+        if(pd>0) pp+=Math.round(((sc[c.id]||5)-Math.max(0,(sc[c.id]||5)-pd))*c.peso*100);
+        if(rd>0) rp+=Math.round(((sc[c.id]||5)-Math.max(0,(sc[c.id]||5)-rd))*c.peso*100);
+      });
+      planosRows.push(`<tr><td>${p.id}</td><td>${r.id}</td><td>${p.titulo||p.what||'—'}</td>
+        <td>${p.status}</td><td>${p.resp||p.who||'—'}</td>
+        <td style="color:#2563eb;font-weight:700;text-align:center">${pp} pts</td>
+        <td style="color:#16a34a;font-weight:700;text-align:center">${rp>0?rp+' pts':'—'}</td>
+        <td style="text-align:center">${p.pct||0}%</td></tr>`);
+    });
+  });
+
+  const pct=Math.min(100,Math.round(totalReal/10));
+  const dataHoje=new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+
+  const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
+<title>Relatório IER — Rumo Logística</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',Arial,sans-serif;color:#1e293b;background:#fff;padding:32px}
+.header{background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 100%);color:#fff;padding:28px 32px;border-radius:12px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center}
+.header h1{font-size:20px;font-weight:800;letter-spacing:-0.5px}
+.header p{font-size:12px;opacity:.7;margin-top:4px}
+.logo{font-size:24px;font-weight:900;background:#e8322a;padding:8px 14px;border-radius:8px}
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px}
+.kpi{border:1px solid #e2e8f0;border-radius:10px;padding:14px;text-align:center;background:#f8fafc}
+.kpi-v{font-size:24px;font-weight:800;font-family:monospace;line-height:1}
+.kpi-l{font-size:9px;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
+.meta{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px 18px;margin-bottom:20px}
+.meta-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.meta-bar{height:10px;background:#dcfce7;border-radius:5px;overflow:hidden}
+.meta-fill{height:100%;background:linear-gradient(90deg,#16a34a,#22c55e);border-radius:5px}
+h2{font-size:13px;font-weight:700;color:#1e293b;margin:20px 0 8px;padding-bottom:5px;border-bottom:2px solid #e8322a}
+table{width:100%;border-collapse:collapse;margin-bottom:4px;font-size:11px}
+th{background:#f1f5f9;padding:7px 10px;text-align:left;font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid #e2e8f0}
+td{padding:7px 10px;border-bottom:1px solid #f1f5f9;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#f8fafc}
+.footer{text-align:center;font-size:10px;color:#94a3b8;margin-top:28px;padding-top:14px;border-top:1px solid #e2e8f0}
+@media print{@page{margin:15mm}body{padding:0}.header{border-radius:0}}
+</style></head><body>
+<div class="header">
+  <div><h1>📊 Relatório Executivo — Gestão de IER</h1><p>Rumo Logística · Gerência de CyberSegurança e Governança · ${dataHoje}</p></div>
+  <div class="logo">RL</div>
+</div>
+<div class="kpis">
+  <div class="kpi"><div class="kpi-v">${RISCOS.length}</div><div class="kpi-l">Total Riscos</div></div>
+  <div class="kpi"><div class="kpi-v" style="color:#dc2626">${criticos}</div><div class="kpi-l">Críticos ≥ 8</div></div>
+  <div class="kpi"><div class="kpi-v" style="color:#d97706">${ierMedio.replace('.',',')}</div><div class="kpi-l">IER Médio</div></div>
+  <div class="kpi"><div class="kpi-v" style="color:#2563eb">${totalPlanos}</div><div class="kpi-l">Planos de Ação</div></div>
+  <div class="kpi"><div class="kpi-v" style="color:#16a34a">${totalReal}</div><div class="kpi-l">Pts IER Reduzidos</div></div>
+</div>
+<div class="meta">
+  <div class="meta-row"><strong style="font-size:12px">🎯 Meta 2026 — Redução de 1.000 pontos de IER</strong><strong style="color:#16a34a">${totalReal} / 1.000 pts · ${pct}%</strong></div>
+  <div class="meta-bar"><div class="meta-fill" style="width:${pct}%"></div></div>
+</div>
+<h2>⚠ Riscos Cadastrados (${RISCOS.length})</h2>
+<table><thead><tr><th>ID</th><th>Título</th><th>Categoria</th><th>Área</th><th>IER</th><th>Pts</th><th>Status</th><th>Responsável</th></tr></thead>
+<tbody>${riscoRows||'<tr><td colspan="8" style="text-align:center;color:#94a3b8;padding:16px">Nenhum risco cadastrado</td></tr>'}</tbody></table>
+<h2>📋 Planos de Ação (${planosRows.length})</h2>
+<table><thead><tr><th>ID Plano</th><th>ID Risco</th><th>Título</th><th>Status</th><th>Responsável</th><th>IER Plan.</th><th>IER Real.</th><th>Avanço</th></tr></thead>
+<tbody>${planosRows.join('')||'<tr><td colspan="8" style="text-align:center;color:#94a3b8;padding:16px">Nenhum plano cadastrado</td></tr>'}</tbody></table>
+<div class="footer">Relatório gerado em ${new Date().toLocaleString('pt-BR')} · Sistema de Gestão IER · Rumo Logística · Confidencial</div>
+</body></html>`;
+
+  // Download as HTML file (opens in browser, printable as PDF)
+  // Show in modal for print
+  const existing = document.getElementById('pdf-preview-overlay');
+  if(existing) existing.remove();
+  const overlay = document.createElement('div');
+  overlay.id = 'pdf-preview-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(5,8,16,.92);backdrop-filter:blur(4px);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px';
+  overlay.innerHTML = `
+    <div style="background:#0e1118;border:1px solid #283050;border-radius:20px;width:900px;max-width:100%;max-height:92vh;overflow:hidden;display:flex;flex-direction:column;animation:mIn .2s ease">
+      <div style="padding:16px 22px;border-bottom:1px solid #283050;display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
+        <div>
+          <div style="font-size:14px;font-weight:700;color:#e4eaf6">📊 Relatório Executivo IER</div>
+          <div style="font-size:11px;color:#627090;margin-top:2px">Clique em Imprimir para salvar como PDF (Ctrl+P)</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button onclick="document.getElementById('pdf-iframe').contentWindow.print()" style="padding:7px 14px;background:#3b82f6;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">🖨 Imprimir / Salvar PDF</button>
+          <button onclick="document.getElementById('pdf-preview-overlay').remove()" style="width:29px;height:29px;background:#1d2538;border:1px solid #283050;border-radius:7px;cursor:pointer;color:#96a4be;font-size:15px;display:flex;align-items:center;justify-content:center">✕</button>
+        </div>
+      </div>
+      <div style="flex:1;overflow:hidden;padding:0">
+        <iframe id="pdf-iframe" style="width:100%;height:600px;border:none;background:#fff"></iframe>
+      </div>
+    </div>`;
+  overlay.addEventListener('click', e=>{ if(e.target===overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+  // Write HTML into iframe
+  const iframe = document.getElementById('pdf-iframe');
+  iframe.contentDocument.open();
+  iframe.contentDocument.write(html);
+  iframe.contentDocument.close();
+}
+
+
+
+function exportarExcel(){
+  // Build CSV text and show in a copyable textarea
+  const rows = [
+    ['ID','Título','Categoria','Área','IER','Pontos','Status','Responsável','Sistema','Nº Planos','IMP','FACIL','PROB','CTRL','TEMPO','ORG']
+  ];
+  RISCOS.forEach(r=>{
+    const iv=r.ier||calcIerFromScores(r.scores||{IMP:5,FACIL:5,PROB:5,CTRL:5,TEMPO:5,ORG:5});
+    const sc=r.scores||{IMP:5,FACIL:5,PROB:5,CTRL:5,TEMPO:5,ORG:5};
+    rows.push([r.id,r.title,r.cat,r.area,formatIER(iv),Math.round(iv*100),r.status,r.resp||'',r.sistema||'',(r.planos||[]).length,sc.IMP,sc.FACIL,sc.PROB,sc.CTRL,sc.TEMPO,sc.ORG]);
+  });
+  rows.push([]);
+  rows.push(['--- PLANOS DE AÇÃO ---']);
+  rows.push(['ID Plano','ID Risco','Título','Status','Responsável','Início','Fim','Avanço%','IER Plan(pts)','IER Real(pts)']);
+  RISCOS.forEach(r=>{
+    (r.planos||[]).forEach(p=>{
+      let pp=0,rp=0;
+      CRITERIOS.forEach(c=>{
+        const sc=r.scores||{}; const pd=p.reducao_plan[c.id]||0,rd=p.reducao_real[c.id]||0;
+        if(pd>0)pp+=Math.round(((sc[c.id]||5)-Math.max(0,(sc[c.id]||5)-pd))*c.peso*100);
+        if(rd>0)rp+=Math.round(((sc[c.id]||5)-Math.max(0,(sc[c.id]||5)-rd))*c.peso*100);
+      });
+      rows.push([p.id,r.id,(p.titulo||p.what||'').substring(0,80),p.status,(p.resp||p.who||''),p.inicio||'',p.fim||'',p.pct||0,pp,rp]);
+    });
+  });
+  const csv = rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(';')).join('\n');
+  mostrarExportModal('📋 Dados para Excel', csv, 'Copie o texto abaixo e cole numa planilha Excel em branco. Use separador ";" ao importar.', 'csv');
+}
+
+function mostrarExportModal(titulo, texto, instrucao, tipo){
+  // Remove existing if any
+  const existing = document.getElementById('export-modal-overlay');
+  if(existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'export-modal-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(5,8,16,.88);backdrop-filter:blur(4px);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px';
+  overlay.innerHTML = `
+    <div style="background:#0e1118;border:1px solid #283050;border-radius:20px;width:800px;max-width:100%;max-height:88vh;overflow:hidden;display:flex;flex-direction:column;animation:mIn .2s ease">
+      <div style="padding:18px 22px;border-bottom:1px solid #283050;display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
+        <div>
+          <div style="font-size:14px;font-weight:700;color:#e4eaf6">${titulo}</div>
+          <div style="font-size:11px;color:#627090;margin-top:2px">${instrucao}</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button onclick="copiarExport()" style="padding:7px 14px;background:#3b82f6;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">📋 Copiar tudo</button>
+          <button onclick="document.getElementById('export-modal-overlay').remove()" style="width:29px;height:29px;background:#1d2538;border:1px solid #283050;border-radius:7px;cursor:pointer;color:#96a4be;font-size:15px;display:flex;align-items:center;justify-content:center;font-family:inherit">✕</button>
+        </div>
+      </div>
+      <div style="padding:16px;flex:1;overflow:auto">
+        <textarea id="export-textarea" style="width:100%;height:400px;background:#141923;border:1px solid #283050;border-radius:8px;color:#e4eaf6;font-family:'DM Mono',monospace;font-size:11px;padding:12px;resize:none;outline:none;line-height:1.6">${texto.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</textarea>
+      </div>
+      <div style="padding:12px 22px;border-top:1px solid #283050;display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
+        <span style="font-size:11px;color:#627090">💡 Cole no Excel → Dados → Texto para Colunas → Delimitado → Ponto e vírgula</span>
+        <span id="copy-feedback" style="font-size:11px;color:#4ade80;display:none">✅ Copiado!</span>
+      </div>
+    </div>`;
+  overlay.addEventListener('click', e=>{ if(e.target===overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+}
+
+function copiarExport(){
+  const ta = document.getElementById('export-textarea');
+  if(!ta) return;
+  ta.select();
+  ta.setSelectionRange(0,999999);
+  try {
+    navigator.clipboard.writeText(ta.value).then(()=>{
+      const fb = document.getElementById('copy-feedback');
+      if(fb){ fb.style.display='block'; setTimeout(()=>fb.style.display='none',2500); }
+    }).catch(()=>{
+      document.execCommand('copy');
+      const fb = document.getElementById('copy-feedback');
+      if(fb){ fb.style.display='block'; setTimeout(()=>fb.style.display='none',2500); }
+    });
+  } catch(e){ document.execCommand('copy'); }
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+window._spConnected = false;
+
+window.addEventListener('DOMContentLoaded',()=>{
+  RISCOS.forEach(r=>{ if(!r._wfEtapa) r._wfEtapa = 'cadastro'; });
+  // Try to load from SharePoint first
+  loadFromSharePoint();
+});
+</script>
+
+<!-- MODAL: CONFIRMAÇÃO DE EXCLUSÃO -->
+<div class="overlay" id="confirm-overlay">
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r3);padding:28px;text-align:center;max-width:400px;width:100%;animation:mIn .2s ease">
+    <div style="font-size:36px;margin-bottom:12px" id="confirm-icon">🗑</div>
+    <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px" id="confirm-title">Confirmar exclusão</div>
+    <div style="font-size:12px;color:var(--text3);line-height:1.6;margin-bottom:22px" id="confirm-sub">Esta ação não pode ser desfeita.</div>
+    <div style="display:flex;gap:10px;justify-content:center">
+      <button class="btn btn-ghost" onclick="closeModal('confirm-overlay')">Cancelar</button>
+      <button class="btn btn-danger" id="confirm-ok-btn" style="background:var(--red);color:#fff">Excluir</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: EDITAR RISCO -->
+<div class="overlay" id="m-risco">
+  <div class="modal">
+    <div class="modal-hd">
+      <div>
+        <div class="modal-title" id="m-risco-title">Editar Risco</div>
+        <div class="modal-sub">Ficha de Risco Corporativo — Rumo Logística</div>
+      </div>
+      <button class="close-btn" onclick="closeModal('m-risco')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="m-risco-id">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Título do Risco *</label><input class="form-input" id="m-r-titulo" placeholder="Descreva o risco..."></div>
+        <div class="form-group"><label class="form-label">Categoria *</label>
+          <select class="form-input" id="m-r-cat"><option>Cyber</option><option>Operacional</option><option>Compliance</option><option>Infraestrutura</option><option>Processos</option><option>Continuidade</option></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Área Responsável *</label>
+          <select class="form-input" id="m-r-area"><option>TI/CyberSec</option><option>Operações Ferroviárias</option><option>Logística</option><option>Jurídico</option><option>RH</option><option>Financeiro</option></select>
+        </div>
+        <div class="form-group"><label class="form-label">Sistema / Processo</label><input class="form-input" id="m-r-sistema" placeholder="Ex: ERP SAP, SCADA..."></div>
+      </div>
+      <div class="form-group"><label class="form-label">Descrição *</label><textarea class="form-input" id="m-r-desc" rows="3" placeholder="Contexto, origem e possível impacto..."></textarea></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Responsável</label><input class="form-input" id="m-r-resp" placeholder="Nome completo"></div>
+        <div class="form-group"><label class="form-label">Status</label>
+          <select class="form-input" id="m-r-status"><option>Crítico</option><option>Alto</option><option>Médio</option><option>Baixo</option></select>
+        </div>
+      </div>
+      <div style="height:1px;background:var(--border);margin:14px 0"></div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button class="btn btn-ghost" onclick="closeModal('m-risco')">Cancelar</button>
+        <button class="btn btn-primary" onclick="saveRiscoModal()">💾 Salvar Alterações</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- LOADING -->
+<div id="loading-overlay" style="display:none;position:fixed;inset:0;background:rgba(5,8,16,.7);z-index:99998;align-items:center;justify-content:center;flex-direction:column;gap:16px">
+  <div style="width:40px;height:40px;border:3px solid #283050;border-top-color:#3b82f6;border-radius:50%;animation:spin .8s linear infinite"></div>
+  <div id="loading-txt" style="font-size:13px;color:#96a4be;font-family:'DM Sans',system-ui">Carregando...</div>
+</div>
+</body>
+</html>
